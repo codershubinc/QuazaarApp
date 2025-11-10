@@ -7,7 +7,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -148,19 +147,22 @@ fun ErrorCard(error: String?) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            colors = CardDefaults.cardColors(containerColor = Error)
+                .padding(horizontal = 8.dp, vertical = 8.dp),
+            colors = CardDefaults.cardColors(containerColor = Error),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
             Row(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "❌", fontSize = 24.sp)
+                Text(text = "⚠️", fontSize = 28.sp)
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
                     text = error,
-                    color = TextPrimary,
-                    fontWeight = FontWeight.Bold
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
                 )
             }
         }
@@ -197,43 +199,65 @@ fun ConnectionCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        colors = CardDefaults.cardColors(containerColor = dynamicColors.surface)
+            .padding(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Connection", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = dynamicColors.primary)
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(text = "🔌 Connection", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
             Spacer(modifier = Modifier.height(16.dp))
-            TextField(
+
+            OutlinedTextField(
                 value = ipAddress,
                 onValueChange = { ipAddress = it },
-                label = { Text("IP Address") }
+                label = { Text("IP Address") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            TextField(
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
                 value = port,
                 onValueChange = { port = it },
-                label = { Text("Port") }
+                label = { Text("Port") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            TextField(
+            Spacer(modifier = Modifier.height(12.dp))
+
+            OutlinedTextField(
                 value = path,
                 onValueChange = { path = it },
-                label = { Text("Path") }
+                label = { Text("Path") },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Button(
                     onClick = { onConnect(ipAddress, port, path) },
-                    colors = ButtonDefaults.buttonColors(containerColor = dynamicColors.primary)
+                    colors = ButtonDefaults.buttonColors(containerColor = PrimaryAccent),
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.height(48.dp)
                 ) {
-                    Text(text = "CONNECT")
+                    Text(text = "CONNECT", fontWeight = FontWeight.Bold)
                 }
                 Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = if (isConnected) "● CONNECTED" else "○ DISCONNECTED",
+
+                Surface(
                     color = if (isConnected) Success else Error,
-                    fontWeight = FontWeight.Bold
-                )
+                    shape = RoundedCornerShape(20.dp)
+                ) {
+                    Text(
+                        text = if (isConnected) "● CONNECTED" else "○ DISCONNECTED",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        fontSize = 12.sp
+                    )
+                }
             }
         }
     }
@@ -250,19 +274,11 @@ fun NowPlayingCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        colors = CardDefaults.cardColors(containerColor = dynamicColors.background)
+            .padding(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A1A)),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            // Calculate dynamic image size based on screen width
-            val screenWidth = maxWidth
-            val imageSize = when {
-                screenWidth < 360.dp -> screenWidth * 0.5f  // Small phones: 50% width
-                screenWidth < 600.dp -> screenWidth * 0.45f // Medium phones: 45% width
-                screenWidth < 840.dp -> 280.dp              // Tablets portrait: 280dp
-                else -> 320.dp                               // Large screens/landscape: 320dp
-            }
-
+        Box(modifier = Modifier.fillMaxWidth()) {
             // Blurred background artwork
             val artworkData = mediaInfo?.albumArt
 
@@ -287,7 +303,6 @@ fun NowPlayingCard(
                             modifier = Modifier
                                 .matchParentSize()
                                 .blur(50.dp)
-                                .background(Color.Black.copy(alpha = 0.3f))
                         )
                     }
                 } else {
@@ -299,7 +314,6 @@ fun NowPlayingCard(
                         modifier = Modifier
                             .matchParentSize()
                             .blur(50.dp)
-                            .background(Color.Black.copy(alpha = 0.3f))
                     )
                 }
 
@@ -307,7 +321,7 @@ fun NowPlayingCard(
                 Box(
                     modifier = Modifier
                         .matchParentSize()
-                        .background(Color.Black.copy(alpha = 0.5f))
+                        .background(Color.Black.copy(alpha = 0.6f))
                 )
             }
 
@@ -329,22 +343,19 @@ fun NowPlayingCard(
                     fontWeight = FontWeight.Bold
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                // Album artwork (sharp, not blurred) - Dynamic size
-                val placeholderSize = (imageSize.value * 0.5f).sp
+                // Album artwork (sharp, not blurred)
                 Box(
                     modifier = Modifier
-                        .size(imageSize)
+                        .size(200.dp)
                         .clip(RoundedCornerShape(16.dp))
                         .border(3.dp, accentColor, RoundedCornerShape(16.dp))
-                        .background(Color.Black) // Fallback background
+                        .background(Color.Black)
                 ) {
                     if (artworkData.isNullOrBlank()) {
-                        // Placeholder when no artwork is available
-                        Text("🖼", fontSize = placeholderSize, textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.Center))
+                        Text("🖼", fontSize = 80.sp, textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.Center))
                     } else if (artworkData.startsWith("data:")) {
-                        // Handle Base64 encoded image
                         val imageBitmap = remember(artworkData) {
                             try {
                                 val pureBase64 = artworkData.substringAfter(',')
@@ -371,12 +382,9 @@ fun NowPlayingCard(
                                 modifier = Modifier.fillMaxSize()
                             )
                         } else {
-                            // Placeholder if Base64 decoding fails
-                            Text("⚠️", fontSize = placeholderSize, textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.Center))
-                        }
+                            Text("⚠️", fontSize = 80.sp, textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.Center))
                         }
                     } else {
-                        // Handle URL (HTTPS CDN) or local file path using Coil
                         var imageLoaded by remember(artworkData) { mutableStateOf(false) }
 
                         AsyncImage(
@@ -389,22 +397,20 @@ fun NowPlayingCard(
                                     imageLoaded = true
                                     val drawable = state.result.drawable
 
-                                    // Try to get bitmap from drawable
                                     val bitmap = when (drawable) {
                                         is android.graphics.drawable.BitmapDrawable -> {
                                             drawable.bitmap
                                         }
                                         else -> {
-                                            // Convert other drawable types to bitmap
                                             try {
                                                 val width = drawable.intrinsicWidth.takeIf { it > 0 } ?: 100
                                                 val height = drawable.intrinsicHeight.takeIf { it > 0 } ?: 100
-                                                val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-                                                val canvas = android.graphics.Canvas(bitmap)
+                                                val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+                                                val canvas = android.graphics.Canvas(bmp)
                                                 drawable.setBounds(0, 0, canvas.width, canvas.height)
                                                 drawable.draw(canvas)
-                                                bitmap
-                                            } catch (e: Exception) {
+                                                bmp
+                                            } catch (_: Exception) {
                                                 null
                                             }
                                         }
@@ -416,9 +422,6 @@ fun NowPlayingCard(
                                         onColorsUpdate(colors)
                                     }
                                 }
-                            },
-                            onError = {
-                                // Log error or show placeholder
                             }
                         )
                     }
@@ -508,22 +511,59 @@ fun BluetoothDevicesCard(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            colors = CardDefaults.cardColors(containerColor = dynamicColors.surface)
+                .padding(8.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = "Bluetooth Devices", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = dynamicColors.primary)
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(text = "📱 Bluetooth Devices", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 Spacer(modifier = Modifier.height(16.dp))
-                devices.forEach { device ->
-                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Column {
-                            Text(text = device.name ?: "Unnamed Device", fontWeight = FontWeight.Bold, color = dynamicColors.text)
-                            Text(text = device.macAddress ?: "No Address", fontSize = 12.sp, color = dynamicColors.primary.copy(alpha = 0.6f))
+
+                devices.forEachIndexed { index, device ->
+                    Surface(
+                        color = Color(0xFF2A2A2A),
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = device.name ?: "Unnamed Device",
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White,
+                                    fontSize = 16.sp
+                                )
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = device.macAddress ?: "No Address",
+                                    fontSize = 12.sp,
+                                    color = Color.White.copy(alpha = 0.6f)
+                                )
+                            }
+
+                            device.battery?.let {
+                                Surface(
+                                    color = PrimaryAccent,
+                                    shape = RoundedCornerShape(8.dp)
+                                ) {
+                                    Text(
+                                        text = "$it%",
+                                        color = Color.Black,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                    )
+                                }
+                            }
                         }
-                        Spacer(modifier = Modifier.weight(1f))
-                        device.battery?.let {
-                            Text(text = "$it%", color = dynamicColors.primary, fontWeight = FontWeight.Bold)
-                        }
+                    }
+
+                    if (index < devices.size - 1) {
+                        Spacer(modifier = Modifier.height(8.dp))
                     }
                 }
             }
@@ -537,38 +577,53 @@ fun QuickActionsCard(
     dynamicColors: DynamicColors = DynamicColors()
 ) {
     val actions = listOf(
-        "player_toggle" to "Play/Pause",
-        "player_next" to "Next",
-        "player_prev" to "Previous",
-        "system_update" to "Update",
-        "list_home" to "List Home",
-        "git_status" to "Git Status",
-        "open_firefox" to "Firefox",
-        "open_vscode" to "VSCode",
-        "open_edge" to "Edge"
+        "player_toggle" to "▶️ Play/Pause",
+        "player_next" to "⏭️ Next",
+        "player_prev" to "⏮️ Previous",
+        "system_update" to "🔄 Update",
+        "list_home" to "📁 Home",
+        "git_status" to "💻 Git",
+        "open_firefox" to "🦊 Firefox",
+        "open_vscode" to "📝 VSCode",
+        "open_edge" to "🌐 Edge"
     )
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        colors = CardDefaults.cardColors(containerColor = dynamicColors.surface)
+            .padding(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = "Quick Actions", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = dynamicColors.primary)
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(text = "⚡ Quick Actions", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
             Spacer(modifier = Modifier.height(16.dp))
+
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+                columns = GridCells.Fixed(3),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.height(200.dp)
+                modifier = Modifier.height(240.dp)
             ) {
                 items(actions) { (command, label) ->
                     Button(
                         onClick = { onCommand(command) },
-                        colors = ButtonDefaults.buttonColors(containerColor = dynamicColors.primary)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF2A2A2A)
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(60.dp)
                     ) {
-                        Text(text = label, color = dynamicColors.background)
+                        Text(
+                            text = label,
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
                 }
             }
@@ -585,22 +640,29 @@ fun SystemOutputCard(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            colors = CardDefaults.cardColors(containerColor = dynamicColors.surface)
+                .padding(8.dp),
+            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+            shape = RoundedCornerShape(16.dp),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(text = "System Output", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = dynamicColors.primary)
+            Column(modifier = Modifier.padding(20.dp)) {
+                Text(text = "💻 System Output", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = output,
-                    color = dynamicColors.primary,
-                    fontFamily = FontFamily.Monospace,
-                    fontSize = 12.sp,
-                    modifier = Modifier
-                        .background(Color.Black, RoundedCornerShape(8.dp))
-                        .padding(8.dp)
-                        .fillMaxWidth()
-                )
+
+                Surface(
+                    color = Color.Black,
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text(
+                        text = output,
+                        color = Color(0xFF00FF00),
+                        fontFamily = FontFamily.Monospace,
+                        fontSize = 12.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    )
+                }
             }
         }
     }

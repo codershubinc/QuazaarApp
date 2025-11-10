@@ -5,11 +5,10 @@ import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
@@ -109,14 +108,53 @@ fun PortraitLayout(
     dynamicColors: DynamicColors,
     onColorsUpdate: (DynamicColors) -> Unit
 ) {
-    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-        Header(dynamicColors = dynamicColors)
-        ErrorCard(error = error)
-        ConnectionCard(isConnected = connectionStatus, onConnect = onConnect, dynamicColors = dynamicColors)
-        NowPlayingCard(mediaInfo = mediaInfo, onCommand = onCommand, onColorsUpdate = onColorsUpdate)
-        BluetoothDevicesCard(devices = bluetoothDevices, dynamicColors = dynamicColors)
-        QuickActionsCard(onCommand = onCommand, dynamicColors = dynamicColors)
-        SystemOutputCard(output = commandOutput, dynamicColors = dynamicColors)
+    LazyVerticalStaggeredGrid(
+        columns = StaggeredGridCells.Fixed(1),
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalItemSpacing = 8.dp
+    ) {
+        // Header - Full width
+        item(span = StaggeredGridItemSpan.FullLine) {
+            Header(dynamicColors = dynamicColors)
+        }
+
+        // Error Card - Full width
+        if (!error.isNullOrEmpty()) {
+            item(span = StaggeredGridItemSpan.FullLine) {
+                ErrorCard(error = error)
+            }
+        }
+
+        // Connection Card - Full width
+        item(span = StaggeredGridItemSpan.FullLine) {
+            ConnectionCard(isConnected = connectionStatus, onConnect = onConnect, dynamicColors = dynamicColors)
+        }
+
+        // Now Playing - Full width (main tile)
+        item(span = StaggeredGridItemSpan.FullLine) {
+            NowPlayingCard(mediaInfo = mediaInfo, onCommand = onCommand, onColorsUpdate = onColorsUpdate)
+        }
+
+        // Bluetooth Devices - Full width
+        if (bluetoothDevices.isNotEmpty()) {
+            item(span = StaggeredGridItemSpan.FullLine) {
+                BluetoothDevicesCard(devices = bluetoothDevices, dynamicColors = dynamicColors)
+            }
+        }
+
+        // Quick Actions - Full width
+        item(span = StaggeredGridItemSpan.FullLine) {
+            QuickActionsCard(onCommand = onCommand, dynamicColors = dynamicColors)
+        }
+
+        // System Output - Full width
+        if (!commandOutput.isNullOrEmpty()) {
+            item(span = StaggeredGridItemSpan.FullLine) {
+                SystemOutputCard(output = commandOutput, dynamicColors = dynamicColors)
+            }
+        }
     }
 }
 
