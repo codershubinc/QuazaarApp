@@ -118,6 +118,7 @@ fun MainScreen(
 }
 
 @Composable
+@Suppress("UNUSED_PARAMETER")
 fun PortraitLayout(
     mediaInfo: MediaInfo?,
     bluetoothDevices: List<BluetoothDevice>,
@@ -160,7 +161,7 @@ fun PortraitLayout(
 
         // Now Playing - Full width (main tile)
         item(span = StaggeredGridItemSpan.FullLine) {
-            NowPlayingCard(mediaInfo = mediaInfo, onCommand = onCommand, onColorsUpdate = onColorsUpdate)
+            NowPlayingCard(mediaInfo = mediaInfo, onCommand = onCommand, dynamicColors = dynamicColors, onColorsUpdate = onColorsUpdate)
         }
 
         // Bluetooth Devices - Full width
@@ -185,6 +186,7 @@ fun PortraitLayout(
 }
 
 @Composable
+@Suppress("UNUSED_PARAMETER")
 fun LandscapeLayout(
     mediaInfo: MediaInfo?,
     bluetoothDevices: List<BluetoothDevice>,
@@ -212,7 +214,7 @@ fun LandscapeLayout(
                 ConnectingCard()
             }
 
-            NowPlayingCard(mediaInfo = mediaInfo, onCommand = onCommand, onColorsUpdate = onColorsUpdate)
+            NowPlayingCard(mediaInfo = mediaInfo, onCommand = onCommand, dynamicColors = dynamicColors, onColorsUpdate = onColorsUpdate)
         }
         Column(
             modifier = Modifier

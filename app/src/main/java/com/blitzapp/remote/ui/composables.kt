@@ -7,7 +7,6 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -28,6 +27,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.blitzapp.remote.BluetoothDevice
@@ -35,7 +35,7 @@ import com.blitzapp.remote.MediaInfo
 import com.blitzapp.remote.MainViewModel
 import com.blitzapp.remote.WiFiInfo
 import com.blitzapp.remote.ui.theme.*
-import androidx.compose.ui.draw.clip 
+import androidx.compose.ui.draw.clip
 
 // Dynamic color data class
 data class DynamicColors(
@@ -448,13 +448,20 @@ fun NowPlayingCard(
                     },
                     label = "artwork_transition"
                 ) { currentArtwork ->
-                    Box(
+                    var imageSize by remember(currentArtwork) { mutableStateOf(DpSize(200.dp, 200.dp)) }
+                    Card(
                         modifier = Modifier
-                            .size(200.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .border(3.dp, accentColor, RoundedCornerShape(16.dp))
-                            .background(Color.Black)
+                            .size(imageSize.width + 8.dp, imageSize.height + 8.dp)
+                            .padding(4.dp),
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = CardDefaults.cardElevation(
+                            defaultElevation = 12.dp,
+                            pressedElevation = 16.dp
+                        ),
+                        colors = CardDefaults.cardColors(containerColor = Color.Black),
+                        border = androidx.compose.foundation.BorderStroke(3.dp, accentColor)
                     ) {
+                        Box(modifier = Modifier.fillMaxSize()) {
                         if (currentArtwork.isNullOrBlank()) {
                             Text("🖼", fontSize = 80.sp, textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.Center))
                         } else if (currentArtwork.startsWith("data:")) {
@@ -472,6 +479,13 @@ fun NowPlayingCard(
                                 if (imageBitmap != null) {
                                     val colors = extractColorsFromBitmap(imageBitmap)
                                     onColorsUpdate(colors)
+                                    val ratio = imageBitmap.width.toFloat() / imageBitmap.height
+                                    val maxSize = 200.dp
+                                    imageSize = if (ratio > 1) {
+                                        DpSize(maxSize, maxSize / ratio)
+                                    } else {
+                                        DpSize(maxSize * ratio, maxSize)
+                                    }
                                 }
                             }
 
@@ -486,30 +500,45 @@ fun NowPlayingCard(
                                 Text("⚠️", fontSize = 80.sp, textAlign = TextAlign.Center, modifier = Modifier.align(Alignment.Center))
                             }
                         } else {
-                            var imageLoaded by remember(currentArtwork) { mutableStateOf(false) }
+                            var painter by remember(currentArtwork) { mutableStateOf<Any?>(null) }
 
                             AsyncImage(
                                 model = currentArtwork,
                                 contentDescription = "Album Art",
-                                contentScale = ContentScale.Crop,
+                                contentScale = ContentScale.Fit,
                                 modifier = Modifier.fillMaxSize(),
                                 onSuccess = { state ->
-                                    if (!imageLoaded) {
-                                        imageLoaded = true
-                                        val drawable = state.result.drawable
+                                    painter = state.result
+                                    val drawable = state.result.drawable
 
-                                        val bitmap = when (drawable) {
-                                            is android.graphics.drawable.BitmapDrawable -> {
-                                                drawable.bitmap
-                                            }
+                                    val width = drawable.intrinsicWidth
+                                    val height = drawable.intrinsicHeight
+                                    if (width > 0 && height > 0) {
+                                        val ratio = width.toFloat() / height
+                                        val maxSize = 200.dp
+                                        imageSize = if (ratio > 1) {
+                                            DpSize(maxSize, maxSize / ratio)
+                                        } else {
+                                            DpSize(maxSize * ratio, maxSize)
+                                        }
+                                    }
+                                }
+                            )
+
+                            LaunchedEffect(painter) {
+                                painter?.let { result ->
+                                    val drawable = (result as? coil.compose.AsyncImagePainter.State.Success)?.result?.drawable
+                                    drawable?.let { d ->
+                                        val bitmap = when (d) {
+                                            is android.graphics.drawable.BitmapDrawable -> d.bitmap
                                             else -> {
                                                 try {
-                                                    val width = drawable.intrinsicWidth.takeIf { it > 0 } ?: 100
-                                                    val height = drawable.intrinsicHeight.takeIf { it > 0 } ?: 100
+                                                    val width = d.intrinsicWidth.takeIf { it > 0 } ?: 100
+                                                    val height = d.intrinsicHeight.takeIf { it > 0 } ?: 100
                                                     val bmp = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
                                                     val canvas = android.graphics.Canvas(bmp)
-                                                    drawable.setBounds(0, 0, canvas.width, canvas.height)
-                                                    drawable.draw(canvas)
+                                                    d.setBounds(0, 0, canvas.width, canvas.height)
+                                                    d.draw(canvas)
                                                     bmp
                                                 } catch (_: Exception) {
                                                     null
@@ -523,7 +552,8 @@ fun NowPlayingCard(
                                         }
                                     }
                                 }
-                            )
+                            }
+                        }
                         }
                     }
                 }
