@@ -35,11 +35,7 @@ import com.blitzapp.remote.MediaInfo
 import com.blitzapp.remote.MainViewModel
 import com.blitzapp.remote.WiFiInfo
 import com.blitzapp.remote.ui.theme.*
-import androidx.compose.ui.draw.clip
-
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.ui.draw.clip 
 
 // Dynamic color data class
 data class DynamicColors(
@@ -331,15 +327,14 @@ fun ConnectionCard(
     }
 }
 
+
 @Composable
 fun NowPlayingCard(
     mediaInfo: MediaInfo?,
     onCommand: (String) -> Unit,
-    onColorsUpdate: (DynamicColors) -> Unit = {}
+    dynamicColors: DynamicColors,
+    onColorsUpdate: (DynamicColors) -> Unit
 ) {
-    var dynamicColors by remember { mutableStateOf(DynamicColors()) }
-
-    // Animation states
     val scale by animateFloatAsState(
         targetValue = if (mediaInfo != null) 1f else 0.95f,
         animationSpec = spring(
@@ -423,7 +418,7 @@ fun NowPlayingCard(
                     .fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                val textColor = Color.White
+                val textColor = dynamicColors.text
                 val accentColor = getOppositeColor(dynamicColors.primary)
 
                 Text(
@@ -476,7 +471,6 @@ fun NowPlayingCard(
                             LaunchedEffect(imageBitmap) {
                                 if (imageBitmap != null) {
                                     val colors = extractColorsFromBitmap(imageBitmap)
-                                    dynamicColors = colors
                                     onColorsUpdate(colors)
                                 }
                             }
@@ -525,7 +519,6 @@ fun NowPlayingCard(
 
                                         bitmap?.let {
                                             val colors = extractColorsFromBitmap(it)
-                                            dynamicColors = colors
                                             onColorsUpdate(colors)
                                         }
                                     }
@@ -638,27 +631,33 @@ fun NowPlayingCard(
     }
 }
 
+
 @Composable
 fun BluetoothDevicesCard(
     devices: List<BluetoothDevice>,
-    dynamicColors: DynamicColors = DynamicColors()
+    dynamicColors: DynamicColors
 ) {
     if (devices.isNotEmpty()) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+            colors = CardDefaults.cardColors(containerColor = dynamicColors.surface),
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
-                Text(text = "📱 Bluetooth Devices", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text(
+                    text = "📱 Bluetooth Devices",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = dynamicColors.text
+                )
                 Spacer(modifier = Modifier.height(16.dp))
 
                 devices.forEachIndexed { index, device ->
                     Surface(
-                        color = Color(0xFF2A2A2A),
+                        color = dynamicColors.surface.copy(alpha = 0.5f),
                         shape = RoundedCornerShape(12.dp)
                     ) {
                         Row(
@@ -671,25 +670,25 @@ fun BluetoothDevicesCard(
                                 Text(
                                     text = device.name ?: "Unnamed Device",
                                     fontWeight = FontWeight.Bold,
-                                    color = Color.White,
+                                    color = dynamicColors.text,
                                     fontSize = 16.sp
                                 )
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Text(
                                     text = device.macAddress ?: "No Address",
                                     fontSize = 12.sp,
-                                    color = Color.White.copy(alpha = 0.6f)
+                                    color = dynamicColors.text.copy(alpha = 0.6f)
                                 )
                             }
 
                             device.battery?.let {
                                 Surface(
-                                    color = PrimaryAccent,
+                                    color = dynamicColors.primary,
                                     shape = RoundedCornerShape(8.dp)
                                 ) {
                                     Text(
                                         text = "$it%",
-                                        color = Color.Black,
+                                        color = getContrastingColor(dynamicColors.primary),
                                         fontWeight = FontWeight.Bold,
                                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
                                     )
@@ -710,7 +709,7 @@ fun BluetoothDevicesCard(
 @Composable
 fun QuickActionsCard(
     onCommand: (String) -> Unit,
-    dynamicColors: DynamicColors = DynamicColors()
+    dynamicColors: DynamicColors
 ) {
     val actions = listOf(
         "player_toggle" to "▶️ Play/Pause",
@@ -728,12 +727,17 @@ fun QuickActionsCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+        colors = CardDefaults.cardColors(containerColor = dynamicColors.surface),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            Text(text = "⚡ Quick Actions", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            Text(
+                text = "⚡ Quick Actions",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = dynamicColors.text
+            )
             Spacer(modifier = Modifier.height(16.dp))
 
             LazyVerticalGrid(
@@ -746,7 +750,7 @@ fun QuickActionsCard(
                     Button(
                         onClick = { onCommand(command) },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF2A2A2A)
+                            containerColor = dynamicColors.surface.copy(alpha = 0.5f)
                         ),
                         shape = RoundedCornerShape(12.dp),
                         modifier = Modifier
@@ -755,7 +759,7 @@ fun QuickActionsCard(
                     ) {
                         Text(
                             text = label,
-                            color = Color.White,
+                            color = dynamicColors.text,
                             fontSize = 12.sp,
                             textAlign = TextAlign.Center,
                             fontWeight = FontWeight.Medium
@@ -770,19 +774,24 @@ fun QuickActionsCard(
 @Composable
 fun SystemOutputCard(
     output: String?,
-    dynamicColors: DynamicColors = DynamicColors()
+    dynamicColors: DynamicColors
 ) {
     if (!output.isNullOrEmpty()) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+            colors = CardDefaults.cardColors(containerColor = dynamicColors.surface),
             shape = RoundedCornerShape(16.dp),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
-                Text(text = "💻 System Output", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                Text(
+                    text = "💻 System Output",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = dynamicColors.text
+                )
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Surface(
@@ -818,7 +827,7 @@ fun SettingsButton(onClick: () -> Unit, dynamicColors: DynamicColors = DynamicCo
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+        colors = CardDefaults.cardColors(containerColor = dynamicColors.surface),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
@@ -833,7 +842,7 @@ fun SettingsButton(onClick: () -> Unit, dynamicColors: DynamicColors = DynamicCo
                 text = "⚙️ Settings",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = dynamicColors.text,
                 modifier = Modifier.weight(1f)
             )
             Text(
