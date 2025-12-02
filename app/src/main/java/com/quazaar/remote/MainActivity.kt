@@ -117,6 +117,7 @@ fun MainScreen(
     val commandOutput by viewModel.commandOutput
     val error by viewModel.error
     val artWork by viewModel.artWork
+    val musicCardStyle by viewModel.musicCardStyle
 
     // State to hold dynamic colors
     val dynamicColors = remember { mutableStateOf(DynamicColors()) }
@@ -124,14 +125,14 @@ fun MainScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         when (widthSizeClass) {
             WindowWidthSizeClass.Compact -> {
-                PortraitLayout(mediaInfo, bluetoothDevices, commandOutput, error, connectionStatus, isConnecting, onConnect, onCommand, artWork, dynamicColors.value, onSettingsClick) { newColors ->
+                PortraitLayout(mediaInfo, bluetoothDevices, commandOutput, error, connectionStatus, isConnecting, onConnect, onCommand, artWork, dynamicColors.value, onSettingsClick, musicCardStyle, viewModel, { newColors ->
                     dynamicColors.value = newColors
-                }
+                })
             }
             else -> {
-                LandscapeLayout(mediaInfo, bluetoothDevices, commandOutput, error, connectionStatus, isConnecting, onConnect, onCommand, artWork, dynamicColors.value, onSettingsClick) { newColors ->
+                LandscapeLayout(mediaInfo, bluetoothDevices, commandOutput, error, connectionStatus, isConnecting, onConnect, onCommand, artWork, dynamicColors.value, onSettingsClick, musicCardStyle, viewModel, { newColors ->
                     dynamicColors.value = newColors
-                }
+                })
             }
         }
         WifiSpeedIndicator(wifiInfo = wifiInfo)
@@ -152,6 +153,8 @@ fun PortraitLayout(
     artWork: ArtWork?,
     dynamicColors: DynamicColors,
     onSettingsClick: () -> Unit,
+    musicCardStyle: MusicCardStyle,
+    viewModel: MainViewModel,
     onColorsUpdate: (DynamicColors) -> Unit
 ) {
     LazyColumn(
@@ -180,7 +183,7 @@ fun PortraitLayout(
 
         // Now Playing (main tile)
         item {
-            NowPlayingCard(mediaInfo = mediaInfo, onCommand = onCommand, dynamicColors = dynamicColors, onColorsUpdate = onColorsUpdate)
+            NowPlayingCard(mediaInfo = mediaInfo, onCommand = onCommand, dynamicColors = dynamicColors, onColorsUpdate = onColorsUpdate, musicCardStyle = musicCardStyle)
         }
 
         // Bluetooth Devices
@@ -192,7 +195,11 @@ fun PortraitLayout(
 
         // Quick Actions
         item {
-            QuickActionsCard(onCommand = onCommand, dynamicColors = dynamicColors)
+            QuickActionsCard(
+                onCommand = onCommand,
+                dynamicColors = dynamicColors,
+                onThemeChange = { style -> viewModel.setMusicCardStyle(style) }
+            )
         }
 
         // System Output
@@ -223,6 +230,8 @@ fun LandscapeLayout(
     artWork: ArtWork?,
     dynamicColors: DynamicColors,
     onSettingsClick: () -> Unit,
+    musicCardStyle: MusicCardStyle,
+    viewModel: MainViewModel,
     onColorsUpdate: (DynamicColors) -> Unit
 ) {
     Row(modifier = Modifier.fillMaxSize()) {
@@ -238,7 +247,7 @@ fun LandscapeLayout(
                 ConnectingCard()
             }
 
-            NowPlayingCard(mediaInfo = mediaInfo, onCommand = onCommand, dynamicColors = dynamicColors, onColorsUpdate = onColorsUpdate)
+            NowPlayingCard(mediaInfo = mediaInfo, onCommand = onCommand, dynamicColors = dynamicColors, onColorsUpdate = onColorsUpdate, musicCardStyle = musicCardStyle)
 
             // Banner Ad at bottom of left column
             BannerAdView()
@@ -255,7 +264,11 @@ fun LandscapeLayout(
             if (bluetoothDevices.isNotEmpty()) {
                 BluetoothDevicesCard(devices = bluetoothDevices, dynamicColors = dynamicColors)
             }
-            QuickActionsCard(onCommand = onCommand, dynamicColors = dynamicColors)
+            QuickActionsCard(
+                onCommand = onCommand,
+                dynamicColors = dynamicColors,
+                onThemeChange = { style -> viewModel.setMusicCardStyle(style) }
+            )
             if (!commandOutput.isNullOrEmpty()) {
                 SystemOutputCard(output = commandOutput, dynamicColors = dynamicColors)
             }

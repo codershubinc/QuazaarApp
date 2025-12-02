@@ -3,6 +3,10 @@ package com.quazaar.remote
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 
+enum class MusicCardStyle {
+    MODERN, NEON, MINIMAL, CLASSIC, VINYL, GRADIENT, NEUMORPHIC, RETRO
+}
+
 class MainViewModel : ViewModel() {
     val connectionStatus = mutableStateOf(false)
     val isConnecting = mutableStateOf(false)
@@ -12,6 +16,7 @@ class MainViewModel : ViewModel() {
     val wifiInfo = mutableStateOf<WiFiInfo?>(null)
     val commandOutput = mutableStateOf<String?>(null)
     val error = mutableStateOf<String?>(null)
+    val musicCardStyle = mutableStateOf(MusicCardStyle.MODERN)
 
     fun updateConnectionStatus(isConnected: Boolean) {
         connectionStatus.value = isConnected
@@ -43,5 +48,9 @@ class MainViewModel : ViewModel() {
 
     fun updateError(errorMessage: String?) {
         error.value = errorMessage
+    }
+
+    fun setMusicCardStyle(style: MusicCardStyle) {
+        musicCardStyle.value = style
     }
 }
