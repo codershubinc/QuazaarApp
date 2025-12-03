@@ -1,7 +1,8 @@
 # Quazaar Remote
 
 Quazaar is an Android application that acts as a remote control for your computer. It connects to a WebSocket server, allowing you to control media playback, view system information, and execute quick actions from your Android device.
-
+---
+`⚠️ Warning for  devs ::::  This is mostly vibecoded , coz im not into kt as of now , i will surelly recreate this app when i will learn full architecture of android app and kotlin, till stay tuned`
 ## ✨ Features
 
 *   **Media Control:** Play, pause, and skip tracks with ease.
