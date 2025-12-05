@@ -1,5 +1,6 @@
 package com.quazaar.remote
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.WindowManager
@@ -24,8 +25,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.ads.MobileAds
+import com.quazaar.remote.service.MusicService
 import com.quazaar.remote.ui.*
 import com.quazaar.remote.ui.theme.QuazaarTheme
+import com.quazaar.remote.widget.MusicWidgetProvider
 import kotlinx.coroutines.launch
 
 enum class Screen {
@@ -54,12 +57,22 @@ class MainActivity : ComponentActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         window.addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
 
-        webSocketManager = WebSocketManager(viewModel)
+        webSocketManager = WebSocketManager(viewModel, this)
         fileShareManager = FileShareManager(this)
 
         // Auto-connect on app load with default settings
-        val defaultUrl = "ws://192.168.1.110:8765/ws?deviceId=\$2a\$10\$jWT5DfCYez7vSyrR2NiBg.REJDNvP5dxy8Pr0uyuJXqGgg3XHpqv2"
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        val ip = prefs.getString("ip", "192.168.1.110") ?: "192.168.1.110"
+        val port = prefs.getString("port", "8765") ?: "8765"
+        val path = prefs.getString("path", "/ws?deviceId=\$2a\$10\$jWT5DfCYez7vSyrR2NiBg.REJDNvP5dxy8Pr0uyuJXqGgg3XHpqv2") ?: "/ws?deviceId=\$2a\$10\$jWT5DfCYez7vSyrR2NiBg.REJDNvP5dxy8Pr0uyuJXqGgg3XHpqv2"
+        val defaultUrl = "ws://$ip:$port$path"
         webSocketManager.connect(defaultUrl)
+
+        // Start background service to keep widget updated
+        MusicService.start(this)
+
+        // Handle widget button actions
+        handleWidgetActions(intent)
 
         setContent {
             QuazaarTheme {
@@ -98,6 +111,30 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        intent?.let { handleWidgetActions(it) }
+    }
+
+    private fun handleWidgetActions(intent: Intent?) {
+        when (intent?.action) {
+            MusicWidgetProvider.ACTION_PLAY_PAUSE -> {
+                webSocketManager.sendCommand("player_toggle")
+            }
+            MusicWidgetProvider.ACTION_NEXT -> {
+                webSocketManager.sendCommand("player_next")
+            }
+            MusicWidgetProvider.ACTION_PREVIOUS -> {
+                webSocketManager.sendCommand("player_prev")
+            }
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        webSocketManager.close()
     }
 }
 
@@ -167,6 +204,10 @@ fun PortraitLayout(
             Header(dynamicColors = dynamicColors, onSettingsClick = onSettingsClick, isConnected = connectionStatus)
         }
 
+        item {
+            DateTimeCard()
+        }
+
         // Connecting Card (shown when connecting, hidden when connected)
         if (isConnecting && !connectionStatus) {
             item {
@@ -198,7 +239,7 @@ fun PortraitLayout(
             QuickActionsCard(
                 onCommand = onCommand,
                 dynamicColors = dynamicColors,
-                onThemeChange = { style -> viewModel.setMusicCardStyle(style) }
+                onThemeChange = { style -> viewModel.saveCardStyle(style) }
             )
         }
 
@@ -241,7 +282,7 @@ fun LandscapeLayout(
                 .verticalScroll(rememberScrollState())
         ) {
             Header(dynamicColors = dynamicColors, onSettingsClick = onSettingsClick, isConnected = connectionStatus)
-
+            DateTimeCard()
             // Connecting Card (shown when connecting, hidden when connected)
             if (isConnecting && !connectionStatus) {
                 ConnectingCard()
@@ -267,7 +308,7 @@ fun LandscapeLayout(
             QuickActionsCard(
                 onCommand = onCommand,
                 dynamicColors = dynamicColors,
-                onThemeChange = { style -> viewModel.setMusicCardStyle(style) }
+                onThemeChange = { style -> viewModel.saveCardStyle(style) }
             )
             if (!commandOutput.isNullOrEmpty()) {
                 SystemOutputCard(output = commandOutput, dynamicColors = dynamicColors)

@@ -1,10 +1,12 @@
 package com.quazaar.remote
 
+import android.content.Context
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.quazaar.remote.widget.MusicWidgetProvider
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -12,7 +14,10 @@ import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import java.util.concurrent.TimeUnit
 
-class WebSocketManager(private val viewModel: MainViewModel) {
+class WebSocketManager(
+    private val viewModel: MainViewModel,
+    private val context: Context
+) {
     private var webSocket: WebSocket? = null
     private val client = OkHttpClient.Builder()
         .connectTimeout(5, TimeUnit.SECONDS)
@@ -111,6 +116,9 @@ class WebSocketManager(private val viewModel: MainViewModel) {
                         mediaInfo.albumArt?.let { artwork ->
                             viewModel.updateArtWork(ArtWork(artwork))
                         }
+
+                        // Update widget
+                        updateWidget(mediaInfo)
                     }
                 }
                 "bluetooth" -> {
@@ -144,5 +152,21 @@ class WebSocketManager(private val viewModel: MainViewModel) {
         webSocket?.close(1000, "Client closing connection")
         lastUrl = null
         retryCount = 0
+    }
+
+    private fun updateWidget(mediaInfo: MediaInfo) {
+        try {
+            MusicWidgetProvider.updateWidget(
+                context = context,
+                title = mediaInfo.title ?: "Unknown Track",
+                artist = mediaInfo.artist ?: "Unknown Artist",
+                isPlaying = mediaInfo.status == "Playing",
+                albumArt = mediaInfo.albumArt,
+                position = mediaInfo.position?.toLong() ?: 0L,
+                duration = mediaInfo.duration?.toLong() ?: 0L
+            )
+        } catch (e: Exception) {
+            // Silent fail - widget will show last known state
+        }
     }
 }

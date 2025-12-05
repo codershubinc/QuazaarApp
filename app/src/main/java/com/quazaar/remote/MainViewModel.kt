@@ -1,7 +1,10 @@
 package com.quazaar.remote
 
+import android.content.Context
+import android.content.SharedPreferences
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
+import java.time.LocalDateTime
 
 enum class MusicCardStyle {
     MODERN, NEON, MINIMAL, CLASSIC, VINYL, GRADIENT, NEUMORPHIC, RETRO
@@ -17,6 +20,15 @@ class MainViewModel : ViewModel() {
     val commandOutput = mutableStateOf<String?>(null)
     val error = mutableStateOf<String?>(null)
     val musicCardStyle = mutableStateOf(MusicCardStyle.MODERN)
+    val currentDateTime = mutableStateOf(LocalDateTime.now())
+
+    // Settings storage
+    private var sharedPreferences: SharedPreferences? = null
+
+    // User settings (persisted)
+    val savedIpAddress = mutableStateOf("192.168.1.109")
+    val savedPort = mutableStateOf("8765")
+    val savedPath = mutableStateOf("/ws")
 
     fun updateConnectionStatus(isConnected: Boolean) {
         connectionStatus.value = isConnected
@@ -50,7 +62,40 @@ class MainViewModel : ViewModel() {
         error.value = errorMessage
     }
 
-    fun setMusicCardStyle(style: MusicCardStyle) {
+
+    // ...existing code...
+
+    fun initializePreferences(context: Context) {
+        sharedPreferences = context.getSharedPreferences("quazaar_settings", Context.MODE_PRIVATE)
+        // Load saved settings
+        savedIpAddress.value = sharedPreferences?.getString("ip_address", "192.168.1.109") ?: "192.168.1.109"
+        savedPort.value = sharedPreferences?.getString("port", "8765") ?: "8765"
+        savedPath.value = sharedPreferences?.getString("path", "/ws") ?: "/ws"
+        val savedStyle = sharedPreferences?.getString("music_card_style", "MODERN") ?: "MODERN"
+        musicCardStyle.value = MusicCardStyle.valueOf(savedStyle)
+    }
+
+    fun saveConnectionSettings(ip: String, port: String, path: String) {
+        savedIpAddress.value = ip
+        savedPort.value = port
+        savedPath.value = path
+        sharedPreferences?.edit()?.apply {
+            putString("ip_address", ip)
+            putString("port", port)
+            putString("path", path)
+            apply()
+        }
+    }
+
+    fun saveCardStyle(style: MusicCardStyle) {
         musicCardStyle.value = style
+        sharedPreferences?.edit()?.apply {
+            putString("music_card_style", style.name)
+            apply()
+        }
+    }
+
+    fun updateDateTime() {
+        currentDateTime.value = LocalDateTime.now()
     }
 }
