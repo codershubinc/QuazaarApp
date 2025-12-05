@@ -1,4 +1,5 @@
 # Quazaar: Remote Control for Your Computer
+[![wakatime](https://wakatime.com/badge/user/c8cd0c53-219b-4950-8025-0e666e97e8c8/project/97a5f5cf-c9bb-46e7-907a-61f9745a72fb.svg)](https://wakatime.com/badge/user/c8cd0c53-219b-4950-8025-0e666e97e8c8/project/97a5f5cf-c9bb-46e7-907a-61f9745a72fb)
 
 Quazaar is a remote control application for your computer. It connects to a WebSocket server, allowing you to control media playback, view system information, and execute quick actions from your Android device.
 
