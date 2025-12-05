@@ -1,5 +1,6 @@
 package com.quazaar.remote.ui
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Base64
@@ -25,6 +26,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -36,11 +39,15 @@ import com.quazaar.remote.BluetoothDevice
 import com.quazaar.remote.MediaInfo
 import com.quazaar.remote.MainViewModel
 import com.quazaar.remote.MusicCardStyle
+import com.quazaar.remote.R
 import com.quazaar.remote.WiFiInfo
 import com.quazaar.remote.ui.theme.*
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import com.quazaar.remote.FileShareManager
+import java.text.SimpleDateFormat
+import java.util.*
+import kotlinx.coroutines.delay
 
 // Dynamic color data class
 data class DynamicColors(
@@ -221,16 +228,9 @@ fun Header(
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.background)
             .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.End
     ) {
-        Text(
-            text = "⚡ QUAZAAR REMOTE",
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.weight(1f)
-        )
-
         if (onSettingsClick != null) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 // Connection status dot
@@ -244,10 +244,10 @@ fun Header(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 IconButton(onClick = onSettingsClick) {
-                    Text(
-                        text = "⚙️",
-                        fontSize = 32.sp,
-                        color = MaterialTheme.colorScheme.primary
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_settings),
+                        contentDescription = "Settings",
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -261,9 +261,12 @@ fun ConnectionCard(
     onConnect: (String, String, String) -> Unit,
     dynamicColors: DynamicColors = DynamicColors()
 ) {
-    var ipAddress by remember { mutableStateOf("192.168.1.109") }
-    var port by remember { mutableStateOf("8765") }
-    var path by remember { mutableStateOf("/ws") }
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE) }
+
+    var ipAddress by remember { mutableStateOf(prefs.getString("ip", "192.168.1.109") ?: "192.168.1.109") }
+    var port by remember { mutableStateOf(prefs.getString("port", "8765") ?: "8765") }
+    var path by remember { mutableStateOf(prefs.getString("path", "/ws") ?: "/ws") }
 
     Card(
         modifier = Modifier
@@ -306,7 +309,14 @@ fun ConnectionCard(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Button(
-                    onClick = { onConnect(ipAddress, port, path) },
+                    onClick = {
+                        prefs.edit()
+                            .putString("ip", ipAddress)
+                            .putString("port", port)
+                            .putString("path", path)
+                            .apply()
+                        onConnect(ipAddress, port, path)
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = PrimaryAccent),
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier.height(48.dp)
@@ -331,7 +341,139 @@ fun ConnectionCard(
         }
     }
 }
+@Composable
+fun DateTimeCard() {
+    var currentTime by remember { mutableStateOf(System.currentTimeMillis()) }
 
+    LaunchedEffect(Unit) {
+        while (true) {
+            currentTime = System.currentTimeMillis()
+            delay(1000)
+        }
+    }
+
+    val dateFormat = SimpleDateFormat("EEE, MMM d, yyyy", Locale.getDefault())
+    val timeFormat = SimpleDateFormat("h:mm:ss a", Locale.getDefault())
+
+    val date = dateFormat.format(Date(currentTime))
+    val time = timeFormat.format(Date(currentTime))
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = date,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Text(
+                text = time,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = PrimaryAccent
+            )
+        }
+    }
+}
+@Composable
+fun MusicWidget(
+    mediaInfo: MediaInfo?,
+    onCommand: (String) -> Unit
+) {
+    val isPlaying = mediaInfo?.status == "Playing"
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Album art
+            if (!mediaInfo?.albumArt.isNullOrBlank() && mediaInfo?.albumArt?.startsWith("data:") == true) {
+                val imageBitmap = remember(mediaInfo.albumArt) {
+                    try {
+                        val pureBase64 = mediaInfo.albumArt.substringAfter(',')
+                        val decodedBytes = Base64.decode(pureBase64, Base64.DEFAULT)
+                        BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.size)
+                    } catch (_: Exception) {
+                        null
+                    }
+                }
+                imageBitmap?.let {
+                    Image(
+                        bitmap = it.asImageBitmap(),
+                        contentDescription = "Album Art",
+                        modifier = Modifier
+                            .size(56.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+            } else {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .background(Color(0xFF333333), RoundedCornerShape(8.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("🎵", fontSize = 24.sp)
+                }
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Title and artist
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = mediaInfo?.title ?: "No Title",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
+                Text(
+                    text = mediaInfo?.artist ?: "Unknown Artist",
+                    color = Color.Gray,
+                    maxLines = 1
+                )
+            }
+
+            // Controls
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = { onCommand("player_prev") }) {
+                    Text("⏮", fontSize = 24.sp)
+                }
+                IconButton(onClick = { onCommand("player_toggle") }) {
+                    Text(if (isPlaying) "⏸" else "▶", fontSize = 24.sp)
+                }
+                IconButton(onClick = { onCommand("player_next") }) {
+                    Text("⏭", fontSize = 24.sp)
+                }
+            }
+        }
+    }
+}
 @Composable
 fun NowPlayingCard(
     mediaInfo: MediaInfo?,
