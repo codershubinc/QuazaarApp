@@ -2789,9 +2789,14 @@ fun SystemOutputCard(
 fun formatTime(microseconds: Double?): String {
     if (microseconds == null || microseconds <= 0) return "0:00"
     val seconds = (microseconds / 1_000_000).toInt()
-    val mins = seconds / 60
+    val hours = seconds / 3600
+    val mins = (seconds % 3600) / 60
     val secs = seconds % 60
-    return "$mins:${secs.toString().padStart(2, '0')}"
+    return if (hours > 0) {
+        "%d:%02d:%02d".format(hours, mins, secs)
+    } else {
+        "%d:%02d".format(mins, secs)
+    }
 }
 
 @Composable

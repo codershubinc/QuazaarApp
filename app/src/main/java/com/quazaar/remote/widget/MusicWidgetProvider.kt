@@ -140,9 +140,14 @@ class MusicWidgetProvider : AppWidgetProvider() {
         private fun formatTime(microseconds: Long): String {
             if (microseconds <= 0) return "0:00"
             val seconds = (microseconds / 1_000_000).toInt()
-            val mins = seconds / 60
+            val hours = seconds / 3600
+            val mins = (seconds % 3600) / 60
             val secs = seconds % 60
-            return String.format(java.util.Locale.US, "%d:%02d", mins, secs)
+            return if (hours > 0) {
+                String.format(java.util.Locale.US, "%d:%02d:%02d", hours, mins, secs)
+            } else {
+                String.format(java.util.Locale.US, "%d:%02d", mins, secs)
+            }
         }
 
         private fun setupClickHandlers(context: Context, views: RemoteViews) {
