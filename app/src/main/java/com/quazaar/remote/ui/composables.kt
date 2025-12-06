@@ -2901,12 +2901,24 @@ fun SystemControlsCard(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Volume Control
-            Text(
-                text = "Volume: ${if (isMuted) "Muted" else "$volumeLevel%"}",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Volume",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Text(
+                    text = if (isMuted) "Muted" else "$volumeLevel%",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = if (isMuted) Color(0xFFFF6B6B) else dynamicColors.primary
+                )
+            }
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier
@@ -2968,12 +2980,24 @@ fun SystemControlsCard(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Brightness Control
-            Text(
-                text = "Brightness: $brightnessLevel%",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Brightness",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                Text(
+                    text = "$brightnessLevel%",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFFFFD700)
+                )
+            }
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 modifier = Modifier

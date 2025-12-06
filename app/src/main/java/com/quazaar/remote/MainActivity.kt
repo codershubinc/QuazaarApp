@@ -257,11 +257,11 @@ fun PortraitLayout(
                 volumeLevel = volumeLevel,
                 isMuted = isMuted,
                 brightnessLevel = brightnessLevel,
-                onVolumeUp = { /* handled by onCommand */ },
-                onVolumeDown = { /* handled by onCommand */ },
-                onToggleMute = { /* handled by onCommand */ },
-                onBrightnessUp = { /* handled by onCommand */ },
-                onBrightnessDown = { /* handled by onCommand */ },
+                onVolumeUp = { onCommand("volume_up") },
+                onVolumeDown = { onCommand("volume_down") },
+                onToggleMute = { onCommand("mute") },
+                onBrightnessUp = { onCommand("brightness_up") },
+                onBrightnessDown = { onCommand("brightness_down") },
                 dynamicColors = dynamicColors
             )
         }
