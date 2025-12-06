@@ -22,6 +22,11 @@ class MainViewModel : ViewModel() {
     val musicCardStyle = mutableStateOf(MusicCardStyle.MODERN)
     val currentDateTime = mutableStateOf(LocalDateTime.now())
 
+    // System Controls
+    val volumeLevel = mutableStateOf(50)
+    val isMuted = mutableStateOf(false)
+    val brightnessLevel = mutableStateOf(50)
+
     // Settings storage
     private var sharedPreferences: SharedPreferences? = null
 
@@ -62,6 +67,17 @@ class MainViewModel : ViewModel() {
         error.value = errorMessage
     }
 
+    fun updateVolume(level: Int) {
+        volumeLevel.value = level.coerceIn(0, 100)
+    }
+
+    fun updateMuteState(muted: Boolean) {
+        isMuted.value = muted
+    }
+
+    fun updateBrightness(level: Int) {
+        brightnessLevel.value = level.coerceIn(0, 100)
+    }
 
     // ...existing code...
 
