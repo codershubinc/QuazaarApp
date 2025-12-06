@@ -2912,12 +2912,18 @@ fun SystemControlsCard(
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
-                Text(
-                    text = if (isMuted) "Muted" else "$volumeLevel%",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = if (isMuted) Color(0xFFFF6B6B) else dynamicColors.primary
-                )
+                Surface(
+                    color = if (isMuted) Color(0xFFFF6B6B) else dynamicColors.primary,
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = if (isMuted) "MUTED" else "$volumeLevel%",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.White,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(8.dp))
             Row(
@@ -2991,12 +2997,18 @@ fun SystemControlsCard(
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
-                Text(
-                    text = "$brightnessLevel%",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color(0xFFFFD700)
-                )
+                Surface(
+                    color = Color(0xFFFFD700),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "$brightnessLevel%",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color.Black,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(8.dp))
             Row(
