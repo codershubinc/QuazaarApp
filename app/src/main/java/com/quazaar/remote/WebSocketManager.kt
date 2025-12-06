@@ -102,6 +102,50 @@ class WebSocketManager(
         webSocket?.send(json)
     }
 
+    // Volume Control Methods
+    fun volumeIncrease() {
+        val cmd = SystemCommand(msg_of = "volume", action = "inc")
+        webSocket?.send(gson.toJson(cmd))
+        Log.d("WebSocketManager", "Volume increased")
+    }
+
+    fun volumeDecrease() {
+        val cmd = SystemCommand(msg_of = "volume", action = "dec")
+        webSocket?.send(gson.toJson(cmd))
+        Log.d("WebSocketManager", "Volume decreased")
+    }
+
+    fun setVolume(level: Int) {
+        val cmd = SystemCommand(msg_of = "volume", action = "set", set_to_vol = level.coerceIn(0, 100))
+        webSocket?.send(gson.toJson(cmd))
+        Log.d("WebSocketManager", "Volume set to $level")
+    }
+
+    fun toggleMute() {
+        val cmd = SystemCommand(msg_of = "volume", action = "mute")
+        webSocket?.send(gson.toJson(cmd))
+        Log.d("WebSocketManager", "Mute toggled")
+    }
+
+    // Brightness Control Methods
+    fun brightnessIncrease() {
+        val cmd = SystemCommand(msg_of = "brightness", action = "inc")
+        webSocket?.send(gson.toJson(cmd))
+        Log.d("WebSocketManager", "Brightness increased")
+    }
+
+    fun brightnessDecrease() {
+        val cmd = SystemCommand(msg_of = "brightness", action = "dec")
+        webSocket?.send(gson.toJson(cmd))
+        Log.d("WebSocketManager", "Brightness decreased")
+    }
+
+    fun setBrightness(level: Int) {
+        val cmd = SystemCommand(msg_of = "brightness", action = "set", set_to = level.coerceIn(0, 100))
+        webSocket?.send(gson.toJson(cmd))
+        Log.d("WebSocketManager", "Brightness set to $level")
+    }
+
     private fun parseMessage(json: String) {
         try {
             // Parse as RawServerResponse wrapper
@@ -138,6 +182,21 @@ class WebSocketManager(
                     serverResponse.data?.let { dataElement ->
                         val output = dataElement.asString
                         viewModel.updateCommandOutput(output)
+                    }
+                }
+                "volume_status", "system_volume" -> {
+                    if (serverResponse.data != null) {
+                        val systemStatus = gson.fromJson(serverResponse.data, SystemStatus::class.java)
+                        systemStatus.value?.let { viewModel.updateVolume(it) }
+                        systemStatus.muted?.let { viewModel.updateMuteState(it) }
+                        Log.d("WebSocketManager", "Volume status: ${systemStatus.value}%, muted: ${systemStatus.muted}")
+                    }
+                }
+                "brightness_status", "system_brightness" -> {
+                    if (serverResponse.data != null) {
+                        val systemStatus = gson.fromJson(serverResponse.data, SystemStatus::class.java)
+                        systemStatus.value?.let { viewModel.updateBrightness(it) }
+                        Log.d("WebSocketManager", "Brightness status: ${systemStatus.value}%")
                     }
                 }
             }

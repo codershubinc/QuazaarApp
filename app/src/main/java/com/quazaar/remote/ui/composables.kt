@@ -2195,7 +2195,7 @@ fun NowPlayingCardRetro(
                             fontSize = 22.sp,
                             color = if (isPlaying) Color.Black else Color(0xFF00FF00),
                             fontFamily = FontFamily.Monospace,
-                            fontWeight = FontWeight.Black
+                            fontWeight = FontWeight.Bold
                         )
                     }
 
@@ -2870,3 +2870,148 @@ fun SettingsScreen(
         ConnectionCard(isConnected = connectionStatus, onConnect = onConnect, dynamicColors = dynamicColors.value)
     }
 }
+
+// System Controls Card - Volume & Brightness Controls
+@Composable
+fun SystemControlsCard(
+    volumeLevel: Int,
+    isMuted: Boolean,
+    brightnessLevel: Int,
+    onVolumeUp: () -> Unit,
+    onVolumeDown: () -> Unit,
+    onToggleMute: () -> Unit,
+    onBrightnessUp: () -> Unit,
+    onBrightnessDown: () -> Unit,
+    dynamicColors: DynamicColors
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(
+                text = "🎚️ System Controls",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Volume Control
+            Text(
+                text = "Volume: ${if (isMuted) "Muted" else "$volumeLevel%"}",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = onVolumeDown,
+                    modifier = Modifier.height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = dynamicColors.surface
+                    )
+                ) {
+                    Text("🔉 Down", fontSize = 14.sp)
+                }
+                LinearProgressIndicator(
+                    progress = volumeLevel / 100f,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(8.dp),
+                    color = dynamicColors.primary,
+                    trackColor = Color(0xFF333333)
+                )
+                Button(
+                    onClick = onVolumeUp,
+                    modifier = Modifier.height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = dynamicColors.surface
+                    )
+                ) {
+                    Text("🔊 Up", fontSize = 14.sp)
+                }
+            }
+
+            Button(
+                onClick = onToggleMute,
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .height(48.dp)
+                    .padding(top = 8.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isMuted) Color(0xFFFF6B6B) else dynamicColors.primary
+                )
+            ) {
+                Text(
+                    text = if (isMuted) "🔇 Unmute" else "🔇 Mute",
+                    fontSize = 14.sp,
+                    color = Color.White
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Divider(color = Color(0xFF333333), thickness = 1.dp)
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Brightness Control
+            Text(
+                text = "Brightness: $brightnessLevel%",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = onBrightnessDown,
+                    modifier = Modifier.height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = dynamicColors.surface
+                    )
+                ) {
+                    Text("🔅 Down", fontSize = 14.sp)
+                }
+                LinearProgressIndicator(
+                    progress = brightnessLevel / 100f,
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(8.dp),
+                    color = Color(0xFFFFD700),
+                    trackColor = Color(0xFF333333)
+                )
+                Button(
+                    onClick = onBrightnessUp,
+                    modifier = Modifier.height(48.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = dynamicColors.surface
+                    )
+                ) {
+                    Text("🔆 Up", fontSize = 14.sp)
+                }
+            }
+        }
+    }
+}
+

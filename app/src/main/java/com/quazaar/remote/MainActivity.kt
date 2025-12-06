@@ -91,10 +91,14 @@ class MainActivity : ComponentActivity() {
                                 webSocketManager.connect(url)
                             },
                             onCommand = { command ->
-                                if (command == "upload_file") {
-                                    pickFileLauncher.launch("*/*")
-                                } else {
-                                    webSocketManager.sendCommand(command)
+                                when (command) {
+                                    "upload_file" -> pickFileLauncher.launch("*/*")
+                                    "volume_up" -> webSocketManager.volumeIncrease()
+                                    "volume_down" -> webSocketManager.volumeDecrease()
+                                    "mute" -> webSocketManager.toggleMute()
+                                    "brightness_up" -> webSocketManager.brightnessIncrease()
+                                    "brightness_down" -> webSocketManager.brightnessDecrease()
+                                    else -> webSocketManager.sendCommand(command)
                                 }
                             },
                             onSettingsClick = { currentScreen.value = Screen.SETTINGS }
@@ -240,6 +244,25 @@ fun PortraitLayout(
                 onCommand = onCommand,
                 dynamicColors = dynamicColors,
                 onThemeChange = { style -> viewModel.saveCardStyle(style) }
+            )
+        }
+
+        // System Controls (Volume & Brightness)
+        item {
+            val volumeLevel by viewModel.volumeLevel
+            val isMuted by viewModel.isMuted
+            val brightnessLevel by viewModel.brightnessLevel
+
+            SystemControlsCard(
+                volumeLevel = volumeLevel,
+                isMuted = isMuted,
+                brightnessLevel = brightnessLevel,
+                onVolumeUp = { /* handled by onCommand */ },
+                onVolumeDown = { /* handled by onCommand */ },
+                onToggleMute = { /* handled by onCommand */ },
+                onBrightnessUp = { /* handled by onCommand */ },
+                onBrightnessDown = { /* handled by onCommand */ },
+                dynamicColors = dynamicColors
             )
         }
 

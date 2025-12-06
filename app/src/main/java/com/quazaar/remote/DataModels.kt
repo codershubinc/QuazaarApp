@@ -53,3 +53,20 @@ data class WiFiInfo(
     @SerializedName("interface") val interfaceName: String?,
     @SerializedName("unitOfSpeed") val unitOfSpeed: String?
 )
+
+// System Control Commands for Volume & Brightness
+data class SystemCommand(
+    val type: String = "system",
+    val msg_of: String, // "volume" or "brightness"
+    val action: String, // "inc", "dec", "set", "mute", "get"
+    val set_to_vol: Int? = null, // For volume set
+    val set_to: Int? = null      // For brightness set
+)
+
+// System Status Response
+data class SystemStatus(
+    @SerializedName("type") val type: String?,
+    @SerializedName("msg_of") val msgOf: String?, // "volume" or "brightness"
+    @SerializedName("value") val value: Int?,
+    @SerializedName("muted") val muted: Boolean? = false
+)
