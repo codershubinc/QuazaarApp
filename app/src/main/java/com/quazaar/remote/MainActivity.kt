@@ -333,6 +333,24 @@ fun LandscapeLayout(
                 dynamicColors = dynamicColors,
                 onThemeChange = { style -> viewModel.saveCardStyle(style) }
             )
+
+            // System Controls (Volume & Brightness)
+            val volumeLevel by viewModel.volumeLevel
+            val isMuted by viewModel.isMuted
+            val brightnessLevel by viewModel.brightnessLevel
+
+            SystemControlsCard(
+                volumeLevel = volumeLevel,
+                isMuted = isMuted,
+                brightnessLevel = brightnessLevel,
+                onVolumeUp = { onCommand("volume_up") },
+                onVolumeDown = { onCommand("volume_down") },
+                onToggleMute = { onCommand("mute") },
+                onBrightnessUp = { onCommand("brightness_up") },
+                onBrightnessDown = { onCommand("brightness_down") },
+                dynamicColors = dynamicColors
+            )
+
             if (!commandOutput.isNullOrEmpty()) {
                 SystemOutputCard(output = commandOutput, dynamicColors = dynamicColors)
             }
