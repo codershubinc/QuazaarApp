@@ -11,6 +11,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -2649,8 +2651,7 @@ fun BluetoothDevicesCard(
 @Composable
 fun QuickActionsCard(
     onCommand: (String) -> Unit,
-    dynamicColors: DynamicColors,
-    onThemeChange: ((MusicCardStyle) -> Unit)? = null
+    dynamicColors: DynamicColors
 ) {
     Card(
         modifier = Modifier
@@ -2692,51 +2693,6 @@ fun QuickActionsCard(
                         contentPadding = PaddingValues(0.dp)
                     ) {
                         Text(text = icon, fontSize = 24.sp)
-                    }
-                }
-            }
-
-            // Music Card Theme Buttons
-            if (onThemeChange != null) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "🎨 Music Card Theme",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-                FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    listOf(
-                        MusicCardStyle.MODERN to "🎵 Modern",
-                        MusicCardStyle.NEON to "💡 Neon",
-                        MusicCardStyle.MINIMAL to "📱 Minimal",
-                        MusicCardStyle.CLASSIC to "🎼 Classic",
-                        MusicCardStyle.VINYL to "💿 Vinyl",
-                        MusicCardStyle.GRADIENT to "🌈 Gradient",
-                        MusicCardStyle.NEUMORPHIC to "◉ Neumorphic",
-                        MusicCardStyle.RETRO to "👾 Retro"
-                    ).forEach { (style, label) ->
-                        Button(
-                            onClick = { onThemeChange(style) },
-                            modifier = Modifier.height(48.dp),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = dynamicColors.primary.copy(alpha = 0.8f)
-                            ),
-                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
-                        ) {
-                            Text(
-                                text = label,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Medium,
-                                color = Color.White
-                            )
-                        }
                     }
                 }
             }
@@ -2832,6 +2788,73 @@ fun SettingsButton(onClick: () -> Unit, dynamicColors: DynamicColors = DynamicCo
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun MusicThemeCard(
+    currentTheme: MusicCardStyle,
+    onThemeChange: (MusicCardStyle) -> Unit,
+    dynamicColors: DynamicColors
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E)),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Text(
+                text = "🎨 Music Card Theme",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Choose your preferred music player style",
+                fontSize = 14.sp,
+                color = Color.White.copy(alpha = 0.7f)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                listOf(
+                    MusicCardStyle.MODERN to "🎵 Modern",
+                    MusicCardStyle.NEON to "💡 Neon",
+                    MusicCardStyle.MINIMAL to "📱 Minimal",
+                    MusicCardStyle.CLASSIC to "🎼 Classic",
+                    MusicCardStyle.VINYL to "💿 Vinyl",
+                    MusicCardStyle.GRADIENT to "🌈 Gradient",
+                    MusicCardStyle.NEUMORPHIC to "◉ Neumorphic",
+                    MusicCardStyle.RETRO to "👾 Retro"
+                ).forEach { (style, label) ->
+                    val isSelected = currentTheme == style
+                    Button(
+                        onClick = { onThemeChange(style) },
+                        modifier = Modifier.height(48.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isSelected) dynamicColors.primary else dynamicColors.surface
+                        ),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        border = if (isSelected) androidx.compose.foundation.BorderStroke(2.dp, Color.White) else null
+                    ) {
+                        Text(
+                            text = label,
+                            fontSize = 14.sp,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
 @Composable
 fun SettingsScreen(
     viewModel: MainViewModel,
@@ -2839,6 +2862,7 @@ fun SettingsScreen(
     onBackClick: () -> Unit
 ) {
     val connectionStatus by viewModel.connectionStatus
+    val musicCardStyle by viewModel.musicCardStyle
     val dynamicColors = remember { mutableStateOf(DynamicColors()) }
 
     Column(modifier = Modifier.fillMaxSize()) {
@@ -2866,8 +2890,22 @@ fun SettingsScreen(
             )
         }
 
-        // Connection Card
-        ConnectionCard(isConnected = connectionStatus, onConnect = onConnect, dynamicColors = dynamicColors.value)
+        // Scrollable content
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+        ) {
+            // Connection Card
+            ConnectionCard(isConnected = connectionStatus, onConnect = onConnect, dynamicColors = dynamicColors.value)
+
+            // Music Theme Card
+            MusicThemeCard(
+                currentTheme = musicCardStyle,
+                onThemeChange = { style -> viewModel.saveCardStyle(style) },
+                dynamicColors = dynamicColors.value
+            )
+        }
     }
 }
 

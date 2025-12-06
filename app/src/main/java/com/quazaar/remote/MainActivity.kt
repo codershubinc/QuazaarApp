@@ -242,8 +242,7 @@ fun PortraitLayout(
         item {
             QuickActionsCard(
                 onCommand = onCommand,
-                dynamicColors = dynamicColors,
-                onThemeChange = { style -> viewModel.saveCardStyle(style) }
+                dynamicColors = dynamicColors
             )
         }
 
@@ -330,8 +329,7 @@ fun LandscapeLayout(
             }
             QuickActionsCard(
                 onCommand = onCommand,
-                dynamicColors = dynamicColors,
-                onThemeChange = { style -> viewModel.saveCardStyle(style) }
+                dynamicColors = dynamicColors
             )
 
             // System Controls (Volume & Brightness)
