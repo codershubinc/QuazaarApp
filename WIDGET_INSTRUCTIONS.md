@@ -3,6 +3,7 @@
 This guide outlines the steps to create a home screen widget that displays the current music information (Title, Artist) from the QuazaarApp.
 
 ## Overview
+
 1.  **Native Android UI**: Create the layout XML for the widget.
 2.  **Widget Provider**: Write the Java/Kotlin code to handle widget updates.
 3.  **Manifest Registration**: Register the widget in `AndroidManifest.xml`.
@@ -147,7 +148,7 @@ public class WidgetModule extends ReactContextBaseJavaModule {
             int[] ids = AppWidgetManager.getInstance(context).getAppWidgetIds(new ComponentName(context, MusicWidget.class));
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
             context.sendBroadcast(intent);
-            
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -159,7 +160,8 @@ public class WidgetModule extends ReactContextBaseJavaModule {
 
 If you don't have a separate Package class, you can add it to the `getPackages()` list in `MainApplication.kt` (or `.java`).
 
-*Ideally, create `WidgetPackage.java`:*
+_Ideally, create `WidgetPackage.java`:_
+
 ```java
 package com.codershubinc.quazaar;
 
@@ -186,7 +188,7 @@ public class WidgetPackage implements ReactPackage {
 }
 ```
 
-*Then add `new WidgetPackage()` to your `MainApplication`.*
+_Then add `new WidgetPackage()` to your `MainApplication`._
 
 ## Step 5: Update AndroidManifest.xml
 
@@ -216,7 +218,7 @@ case 'media_info':
     if (response.data) {
         const mediaInfo = response.data as MediaInfo;
         store.setMediaInfo(mediaInfo);
-        
+
         // UPDATE WIDGET
         if (WidgetModule) {
             WidgetModule.setMediaInfo(JSON.stringify(mediaInfo));
