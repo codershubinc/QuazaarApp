@@ -73,7 +73,7 @@ export const MainScreen = () => {
                         {bluetoothDevices && bluetoothDevices.length > 0 && <BluetoothDevicesCard />}
                         <QuickActionsCard />
                         <SystemControlsCard />
-                        <SystemOutputCard />
+                        {/* <SystemOutputCard /> */}
                     </View>
                 </View>
             </ScrollView>

@@ -55,3 +55,29 @@ export interface SystemStatus {
     value?: number;
     muted?: boolean;
 }
+
+export interface SystemActionResponse {
+    action: string;
+    current_volume?: number;
+    previous_volume?: number;
+    current_brightness?: number;
+    previous_brightness?: number;
+    success: boolean;
+    timestamp: number;
+}
+
+export interface ThemeColors {
+    background: string;
+    surface: string;
+    surfaceHighlight: string;
+    primary: string;
+    secondary: string;
+    accent: string;
+    text: string;
+    textSecondary: string;
+    textDim: string;
+    success: string;
+    error: string;
+    warning: string;
+    border: string;
+}

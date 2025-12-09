@@ -26,15 +26,15 @@ export const SystemOutputCard = () => {
                     <Ionicons name="wifi" size={16} color={theme.colors.secondary} />
                     <Text style={styles.infoLabel}>Network:</Text>
                     <Text style={styles.infoValue} numberOfLines={1}>
-                        {wifiInfo?.SSID || 'Not Connected'}
+                        {wifiInfo?.ssid || 'Not Connected'}
                     </Text>
                 </View>
 
-                {wifiInfo?.IP && (
+                {wifiInfo?.ipAddress && (
                     <View style={styles.infoRow}>
                         <Ionicons name="globe-outline" size={16} color={theme.colors.secondary} />
                         <Text style={styles.infoLabel}>IP Address:</Text>
-                        <Text style={styles.infoValue}>{wifiInfo.IP}</Text>
+                        <Text style={styles.infoValue}>{wifiInfo.ipAddress}</Text>
                     </View>
                 )}
             </View>

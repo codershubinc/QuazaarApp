@@ -55,11 +55,9 @@ export const SystemControlsCard = () => {
                         <Ionicons name="add" size={16} color={theme.colors.text} />
                     </TouchableOpacity>
                 </View>
-                <TouchableOpacity onPress={() => webSocketService.toggleMute()}>
-                    <Text style={[styles.valueText, isMuted && { color: theme.colors.error }]}>
-                        {isMuted ? 'MUTED' : `${volumeLevel}%`}
-                    </Text>
-                </TouchableOpacity>
+                <Text style={[styles.valueText, isMuted && { color: theme.colors.error }]}>
+                    {isMuted ? 'MUTED' : `${volumeLevel}%`}
+                </Text>
             </View>
 
             <View style={styles.divider} />

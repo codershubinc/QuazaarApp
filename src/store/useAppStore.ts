@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { MediaInfo, BluetoothDevice, WiFiInfo, ArtWork } from '../types';
+import { MediaInfo, BluetoothDevice, WiFiInfo, ArtWork, ThemeColors } from '../types';
+import { theme } from '../constants/theme';
 
 interface AppState {
     isConnected: boolean;
@@ -13,6 +14,7 @@ interface AppState {
     volumeLevel: number;
     isMuted: boolean;
     brightnessLevel: number;
+    themeColors: ThemeColors;
 
     setConnected: (isConnected: boolean) => void;
     setConnecting: (isConnecting: boolean) => void;
@@ -25,6 +27,7 @@ interface AppState {
     setVolumeLevel: (level: number) => void;
     setIsMuted: (isMuted: boolean) => void;
     setBrightnessLevel: (level: number) => void;
+    setThemeColors: (colors: Partial<ThemeColors>) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -39,6 +42,7 @@ export const useAppStore = create<AppState>((set) => ({
     volumeLevel: 0,
     isMuted: false,
     brightnessLevel: 0,
+    themeColors: theme.colors,
 
     setConnected: (isConnected) => set({ isConnected }),
     setConnecting: (isConnecting) => set({ isConnecting }),
@@ -51,4 +55,5 @@ export const useAppStore = create<AppState>((set) => ({
     setVolumeLevel: (volumeLevel) => set({ volumeLevel }),
     setIsMuted: (isMuted) => set({ isMuted }),
     setBrightnessLevel: (brightnessLevel) => set({ brightnessLevel }),
+    setThemeColors: (colors) => set((state) => ({ themeColors: { ...state.themeColors, ...colors } })),
 }));

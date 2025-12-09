@@ -1,5 +1,5 @@
 import { useAppStore } from '../store/useAppStore';
-import { ServerResponse, MediaInfo, BluetoothDevice, WiFiInfo, SystemStatus, SystemCommand } from '../types';
+import { ServerResponse, MediaInfo, BluetoothDevice, WiFiInfo, SystemStatus, SystemCommand, SystemActionResponse } from '../types';
 
 class WebSocketService {
     private ws: WebSocket | null = null;
@@ -149,6 +149,18 @@ class WebSocketService {
                     if (response.data) {
                         const status = response.data as SystemStatus;
                         if (status.value !== undefined) store.setBrightnessLevel(status.value);
+                    }
+                    break;
+                case "system":
+                    console.log("system type of responce", response.data);
+                    if (response.data) {
+                        const systemData = response.data as SystemActionResponse;
+                        if (systemData.current_volume !== undefined) {
+                            store.setVolumeLevel(systemData.current_volume);
+                        }
+                        if (systemData.current_brightness !== undefined) {
+                            store.setBrightnessLevel(systemData.current_brightness);
+                        }
                     }
                     break;
             }
