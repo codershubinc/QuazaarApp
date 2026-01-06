@@ -81,3 +81,9 @@ export interface ThemeColors {
     warning: string;
     border: string;
 }
+
+export interface BatteryData {
+    percentage: number;
+    state: string; // 'charging', 'discharging', 'full', 'unknown'
+    timeRemaining?: number;
+}
