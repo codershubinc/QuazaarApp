@@ -105,6 +105,22 @@ class WebSocketService {
         this.sendSystemCommand({ type: 'system', msg_of: 'brightness', action: 'dec' });
     }
 
+    getVolume() {
+        this.sendSystemCommand({ type: 'system', msg_of: 'volume', action: 'get' });
+    }
+
+    getBrightness() {
+        this.sendSystemCommand({ type: 'system', msg_of: 'brightness', action: 'get' });
+    }
+
+    setVolume(value: number) {
+        this.sendSystemCommand({ type: 'system', msg_of: 'volume', action: 'set', set_to_vol: value });
+    }
+
+    setBrightness(value: number) {
+        this.sendSystemCommand({ type: 'system', msg_of: 'brightness', action: 'set', set_to: value });
+    }
+
     private parseMessage(json: string) {
         try {
             const response: ServerResponse<any> = JSON.parse(json);

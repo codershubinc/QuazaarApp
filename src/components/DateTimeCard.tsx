@@ -3,6 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { FlipClock } from './FlipClock';
 
 export const DateTimeCard = () => {
     const [date, setDate] = useState(new Date());
@@ -10,7 +11,7 @@ export const DateTimeCard = () => {
     useEffect(() => {
         const timer = setInterval(() => {
             setDate(new Date());
-        }, 1000);
+        }, 60000); // Update date every minute is enough
         return () => clearInterval(timer);
     }, []);
 
@@ -18,11 +19,6 @@ export const DateTimeCard = () => {
         weekday: 'long',
         month: 'long',
         day: 'numeric',
-    });
-
-    const timeString = date.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
     });
 
     return (
@@ -34,10 +30,14 @@ export const DateTimeCard = () => {
         >
             <View style={styles.content}>
                 <View style={styles.dateContainer}>
-                    <Ionicons name="calendar-outline" size={18} color={theme.colors.secondary} />
-                    <Text style={styles.dateText}>{dateString}</Text>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.s }}>
+                        <Ionicons name="calendar-outline" size={18} color={theme.colors.secondary} />
+                        <Text style={styles.dateText}>{dateString}</Text>
+                    </View>
                 </View>
-                <Text style={styles.timeText}>{timeString}</Text>
+                <View style={styles.rightContainer}>
+                    <FlipClock />
+                </View>
             </View>
         </LinearGradient>
     );
@@ -62,16 +62,14 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: theme.spacing.s,
     },
+    rightContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: theme.spacing.m,
+    },
     dateText: {
         color: theme.colors.textSecondary,
         fontSize: 16,
         fontWeight: '500',
-    },
-    timeText: {
-        color: theme.colors.secondary,
-        fontSize: 24,
-        fontWeight: 'bold',
-        letterSpacing: 1,
-        ...theme.shadows.glow,
     },
 });

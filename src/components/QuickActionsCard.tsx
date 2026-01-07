@@ -5,8 +5,11 @@ import * as DocumentPicker from 'expo-document-picker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import { useAppStore } from '../store/useAppStore';
 
 export const QuickActionsCard = () => {
+    const { showToast } = useAppStore();
+
     async function handleUpload() {
         try {
             const result = await DocumentPicker.getDocumentAsync({
@@ -42,7 +45,14 @@ export const QuickActionsCard = () => {
                     <TouchableOpacity
                         key={action.id}
                         style={styles.actionButton}
-                        onPress={() => action.action ? action.action() : webSocketService.sendCommand(action.id)}
+                        onPress={() => {
+                            if (action.action) {
+                                action.action();
+                            } else {
+                                webSocketService.sendCommand(action.id);
+                                showToast(`${action.label} sent`, 'info');
+                            }
+                        }}
                     >
                         <LinearGradient
                             colors={[theme.colors.surfaceHighlight, 'rgba(255,255,255,0.05)']}

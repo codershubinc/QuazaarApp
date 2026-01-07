@@ -15,16 +15,25 @@ export const BluetoothDevicesCard = () => {
             onPress={() => webSocketService.sendCommand('connect_bt', { address: item.macAddress })}
         >
             <View style={styles.deviceIconContainer}>
-                <Ionicons name="bluetooth" size={20} color={theme.colors.secondary} />
+                <Ionicons name="bluetooth" size={16} color={theme.colors.secondary} />
             </View>
             <View style={styles.deviceInfo}>
                 <Text style={styles.deviceName} numberOfLines={1}>{item.name || 'Unknown Device'}</Text>
                 <Text style={styles.deviceAddress}>{item.macAddress}</Text>
             </View>
             {item.battery !== undefined && (
-                <View style={styles.batteryBadge}>
-                    <Ionicons name="battery-half" size={12} color={theme.colors.background} style={{ marginRight: 4 }} />
-                    <Text style={styles.batteryText}>{item.battery}%</Text>
+                <View style={[styles.batteryBadge, {
+                    borderColor: item.battery > 20 ? theme.colors.success : theme.colors.error
+                }]}>
+                    <Ionicons
+                        name={item.battery > 20 ? "battery-full" : "battery-dead"}
+                        size={10}
+                        color={item.battery > 20 ? theme.colors.success : theme.colors.error}
+                        style={{ marginRight: 4 }}
+                    />
+                    <Text style={[styles.batteryText, {
+                        color: item.battery > 20 ? theme.colors.success : theme.colors.error
+                    }]}>{item.battery}%</Text>
                 </View>
             )}
         </TouchableOpacity>
@@ -38,9 +47,12 @@ export const BluetoothDevicesCard = () => {
             style={styles.card}
         >
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>BLUETOOTH DEVICES</Text>
-                <TouchableOpacity onPress={() => webSocketService.sendCommand('scan_bt')}>
-                    <Ionicons name="refresh" size={18} color={theme.colors.secondary} />
+                <Text style={styles.headerTitle}>BLUETOOTH</Text>
+                <TouchableOpacity
+                    onPress={() => webSocketService.sendCommand('scan_bt')}
+                    style={styles.refreshButton}
+                >
+                    <Ionicons name="refresh" size={14} color={theme.colors.secondary} />
                 </TouchableOpacity>
             </View>
 
@@ -51,11 +63,11 @@ export const BluetoothDevicesCard = () => {
                     keyExtractor={(item, index) => item.macAddress || index.toString()}
                     style={styles.list}
                     showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ gap: 4 }}
                 />
             ) : (
                 <View style={styles.emptyState}>
-                    <Ionicons name="bluetooth-outline" size={48} color={theme.colors.textDim} />
-                    <Text style={styles.emptyText}>No devices found</Text>
+                    <Text style={styles.emptyText}>NO DEVICES</Text>
                 </View>
             )}
         </LinearGradient>
@@ -65,80 +77,85 @@ export const BluetoothDevicesCard = () => {
 const styles = StyleSheet.create({
     card: {
         borderRadius: theme.borderRadius.l,
-        padding: theme.spacing.l,
+        padding: theme.spacing.m,
         ...theme.shadows.default,
         borderWidth: 1,
         borderColor: theme.colors.border,
-        flex: 1,
-        minHeight: 200,
+        maxHeight: 200, // Limit height
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: theme.spacing.m,
+        marginBottom: theme.spacing.s,
     },
     headerTitle: {
         color: theme.colors.secondary,
         fontWeight: '600',
-        letterSpacing: 1.5,
-        fontSize: 12,
+        letterSpacing: 2,
+        fontSize: 10,
+    },
+    refreshButton: {
+        padding: 4,
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        borderRadius: theme.borderRadius.s,
     },
     list: {
-        flex: 1,
+        flexGrow: 0,
     },
     deviceItem: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingVertical: theme.spacing.s,
-        borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255,255,255,0.05)',
+        paddingVertical: 8,
+        paddingHorizontal: 8,
+        backgroundColor: 'rgba(0,0,0,0.2)',
+        borderRadius: theme.borderRadius.s,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.03)',
     },
     deviceIconContainer: {
-        width: 36,
-        height: 36,
-        borderRadius: 18,
+        width: 24,
+        height: 24,
+        borderRadius: 12,
         backgroundColor: 'rgba(255,255,255,0.05)',
         justifyContent: 'center',
         alignItems: 'center',
-        marginRight: theme.spacing.m,
+        marginRight: theme.spacing.s,
     },
     deviceInfo: {
         flex: 1,
     },
     deviceName: {
         color: theme.colors.text,
-        fontSize: 14,
+        fontSize: 12,
         fontWeight: '500',
     },
     deviceAddress: {
         color: theme.colors.textDim,
-        fontSize: 10,
+        fontSize: 8,
         fontFamily: 'monospace',
     },
     batteryBadge: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: theme.colors.secondary,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 12,
-        marginLeft: theme.spacing.s,
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 4,
+        borderWidth: 1,
+        backgroundColor: 'rgba(0,0,0,0.3)',
     },
     batteryText: {
-        color: theme.colors.background,
-        fontSize: 10,
+        fontSize: 9,
         fontWeight: 'bold',
+        fontFamily: 'monospace',
     },
     emptyState: {
-        flex: 1,
-        justifyContent: 'center',
+        paddingVertical: theme.spacing.m,
         alignItems: 'center',
-        paddingVertical: theme.spacing.xl,
     },
     emptyText: {
         color: theme.colors.textDim,
-        marginTop: theme.spacing.m,
-        fontSize: 14,
+        fontSize: 10,
+        letterSpacing: 1,
     },
 });

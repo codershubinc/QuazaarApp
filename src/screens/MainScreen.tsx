@@ -13,19 +13,55 @@ import { QuickActionsCard } from '../components/QuickActionsCard';
 import { SystemControlsCard } from '../components/SystemControlsCard';
 import { BluetoothDevicesCard } from '../components/BluetoothDevicesCard';
 import { SystemOutputCard } from '../components/SystemOutputCard';
+import { Toast } from '../components/Toast';
 import { SettingsScreen } from './SettingsScreen';
+import { LoginScreen } from './LoginScreen';
 
 export const MainScreen = () => {
     const { width } = useWindowDimensions();
     const isLandscape = width > 600;
-    const { isConnected, isConnecting, error, mediaInfo, bluetoothDevices } = useAppStore();
-    const [currentScreen, setCurrentScreen] = useState<'MAIN' | 'SETTINGS'>('MAIN');
+    const { isConnected, isConnecting, error, mediaInfo, bluetoothDevices, authToken, setAuthToken } = useAppStore();
+    const [currentScreen, setCurrentScreen] = useState<'MAIN' | 'SETTINGS' | 'LOGIN'>('LOGIN');
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        // Check for existing token
+        const checkAuth = async () => {
+            try {
+                const token = await AsyncStorage.getItem('authToken');
+                if (token) {
+                    setAuthToken(token);
+                    // If we have a token, we can proceed to connect
+                }
+            } catch (e) {
+                console.error("Auth check failed", e);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        checkAuth();
+    }, []);
+
+    useEffect(() => {
+        if (!authToken) {
+            setCurrentScreen('LOGIN');
+            return;
+        } else {
+            if (currentScreen === 'LOGIN') setCurrentScreen('MAIN');
+        }
+
         const connect = async () => {
             const ip = await AsyncStorage.getItem('ip') || '192.168.1.110';
             const port = await AsyncStorage.getItem('port') || '8765';
-            const path = await AsyncStorage.getItem('path') || '/ws?deviceId=$2a$10$jWT5DfCYez7vSyrR2NiBg.REJDNvP5dxy8Pr0uyuJXqGgg3XHpqv2';
+
+            let path = await AsyncStorage.getItem('path');
+
+            if (authToken) {
+                path = `/ws?deviceId=${encodeURIComponent(authToken)}`;
+            } else if (!path) {
+                path = '/ws?deviceId=$2a$10$jWT5DfCYez7vSyrR2NiBg.REJDNvP5dxy8Pr0uyuJXqGgg3XHpqv2';
+            }
+
             const url = `ws://${ip}:${port}${path}`;
             webSocketService.connect(url);
         };
@@ -34,7 +70,22 @@ export const MainScreen = () => {
         return () => {
             webSocketService.close();
         };
-    }, []);
+    }, [authToken]);
+
+    if (isLoading) {
+        return (
+            <LinearGradient
+                colors={[theme.colors.background, '#161b33', theme.colors.background]}
+                style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}
+            >
+                <Text style={{ color: theme.colors.text }}>Loading...</Text>
+            </LinearGradient>
+        );
+    }
+
+    if (currentScreen === 'LOGIN') {
+        return <LoginScreen />;
+    }
 
     if (currentScreen === 'SETTINGS') {
         return <SettingsScreen onBack={() => setCurrentScreen('MAIN')} />;
@@ -45,6 +96,7 @@ export const MainScreen = () => {
             colors={[theme.colors.background, '#161b33', theme.colors.background]}
             style={styles.container}
         >
+            <Toast />
             <ScrollView
                 style={styles.scrollView}
                 contentContainerStyle={styles.content}
@@ -70,7 +122,6 @@ export const MainScreen = () => {
                         {mediaInfo && (mediaInfo.Title || mediaInfo.Artist) && <NowPlayingCard />}
                     </View>
                     <View style={isLandscape ? styles.columnHalf : styles.column}>
-                        {bluetoothDevices && bluetoothDevices.length > 0 && <BluetoothDevicesCard />}
                         <QuickActionsCard />
                         <SystemControlsCard />
                         {/* <SystemOutputCard /> */}
