@@ -90,7 +90,7 @@ export const NowPlayingCard = () => {
             <View style={styles.controls}>
                 <TouchableOpacity
                     style={styles.controlButton}
-                    onPress={() => webSocketService.sendCommand('player_prev')}
+                    onPress={() => webSocketService.sendCommand('prev')}
                 >
                     <Ionicons name="play-skip-back" size={24} color={theme.colors.text} />
                 </TouchableOpacity>
@@ -109,7 +109,7 @@ export const NowPlayingCard = () => {
 
                 <TouchableOpacity
                     style={styles.controlButton}
-                    onPress={() => webSocketService.sendCommand('player_next')}
+                    onPress={() => webSocketService.sendCommand('next')}
                 >
                     <Ionicons name="play-skip-forward" size={24} color={theme.colors.text} />
                 </TouchableOpacity>
@@ -131,13 +131,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         width: '100%',
-        marginBottom: theme.spacing.l,
+        marginBottom: theme.spacing.s,
     },
     headerTitle: {
         color: theme.colors.secondary,
         fontWeight: '600',
-        letterSpacing: 1.5,
-        fontSize: 12,
+        letterSpacing: 2,
+        fontSize: 10,
+        opacity: 0.8,
     },
     statusContainer: {
         flexDirection: 'row',
@@ -159,7 +160,8 @@ const styles = StyleSheet.create({
         height: 240,
         borderRadius: theme.borderRadius.m,
         overflow: 'hidden',
-        marginBottom: theme.spacing.l,
+        marginTop: theme.spacing.s,
+        marginBottom: theme.spacing.m,
         ...theme.shadows.glow,
         backgroundColor: '#000',
     },
@@ -178,60 +180,67 @@ const styles = StyleSheet.create({
     },
     title: {
         color: theme.colors.text,
-        fontSize: 24,
+        fontSize: 18,
         fontWeight: 'bold',
         textAlign: 'center',
-        marginBottom: theme.spacing.s,
+        marginBottom: 4,
+        letterSpacing: 0.5,
     },
     artist: {
         color: theme.colors.textSecondary,
-        fontSize: 16,
+        fontSize: 14,
         textAlign: 'center',
-        marginBottom: theme.spacing.l,
+        marginBottom: theme.spacing.m,
+        opacity: 0.8,
     },
     progressContainer: {
         width: '100%',
-        marginBottom: theme.spacing.l,
+        marginBottom: theme.spacing.m,
     },
     progressBarBackground: {
-        height: 6,
+        height: 4,
         backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        borderRadius: 3,
+        borderRadius: 2,
         overflow: 'hidden',
     },
     progressBarFill: {
         height: '100%',
-        borderRadius: 3,
+        borderRadius: 2,
     },
     timeContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        marginTop: theme.spacing.s,
+        marginTop: 6,
     },
     timeText: {
         color: theme.colors.textDim,
-        fontSize: 12,
+        fontSize: 10,
         fontFamily: 'monospace',
     },
     controls: {
         flexDirection: 'row',
-        justifyContent: 'space-evenly',
+        justifyContent: 'center',
         width: '100%',
         alignItems: 'center',
+        gap: 32,
+        marginBottom: theme.spacing.m,
     },
     controlButton: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
         justifyContent: 'center',
         alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.05)',
     },
     playButton: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
+        width: 56,
+        height: 56,
+        borderRadius: 28,
         backgroundColor: theme.colors.secondary,
         ...theme.shadows.glow,
+        borderWidth: 0,
     },
 });
