@@ -53,10 +53,13 @@ export const MainScreen = () => {
         const connect = async () => {
             const ip = await AsyncStorage.getItem('ip') || '192.168.1.110';
             const port = await AsyncStorage.getItem('port') || '8765';
+            const deviceId = await AsyncStorage.getItem('deviceId');
 
             let path = await AsyncStorage.getItem('path');
 
-            if (authToken) {
+            if (deviceId) {
+                path = `/ws?deviceId=${encodeURIComponent(deviceId)}`;
+            } else if (authToken) {
                 path = `/ws?deviceId=${encodeURIComponent(authToken)}`;
             } else if (!path) {
                 path = '/ws?deviceId=$2a$10$jWT5DfCYez7vSyrR2NiBg.REJDNvP5dxy8Pr0uyuJXqGgg3XHpqv2';

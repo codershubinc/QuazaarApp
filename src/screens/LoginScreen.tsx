@@ -24,7 +24,7 @@ export const LoginScreen = () => {
             // Allow user to override just for login if needed, or rely on SettingsScreen in Main
             // Ideally settings should be accessible before login, but for now let's assume default or previously set
 
-            const response = await fetch(`http://${ip}:${port}/api/v0.1/login`, {
+            const response = await fetch(`http://192.168.1.109:${port}/api/v0.1/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -41,6 +41,11 @@ export const LoginScreen = () => {
 
             if (data.token) {
                 await AsyncStorage.setItem('authToken', data.token);
+
+                if (data.deviceId) {
+                    await AsyncStorage.setItem('deviceId', data.deviceId);
+                }
+
                 setAuthToken(data.token);
             } else {
                 throw new Error('No auth token received');

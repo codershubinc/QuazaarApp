@@ -38,8 +38,8 @@ export const BluetoothDisplay = () => {
 
                 if (response.ok) {
                     const data = await response.json();
-                    if (data.success && Array.isArray(data.devices)) {
-                        setDevices(data.devices);
+                    if (data.success) {
+                        setDevices(Array.isArray(data.devices) ? data.devices : []);
                     }
                 }
             } catch (error) {
