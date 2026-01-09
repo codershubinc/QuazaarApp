@@ -33,10 +33,9 @@ export const BatteryDisplay = ({ type, iconName }: BatteryDisplayProps) => {
                         Battery.getBatteryLevelAsync(),
                         Battery.getBatteryStateAsync(),
                     ]);
-                    let isCharging = state === Battery.BatteryState.CHARGING;
-                    if (isCharging && Battery.BatteryState.FULL) {
-                        isCharging = false;  // Consider FULL as not charging for our UI purposes
-                    }
+                    // Ensure we capture charging state correctly, including FULL
+                    let isCharging = state === Battery.BatteryState.CHARGING || state === Battery.BatteryState.FULL;
+
                     setBatteryInfo({
                         level: Math.round(level * 100),
                         charging: isCharging

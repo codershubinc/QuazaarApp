@@ -16,6 +16,7 @@ import { SystemOutputCard } from '../components/SystemOutputCard';
 import { Toast } from '../components/Toast';
 import { SettingsScreen } from './SettingsScreen';
 import { LoginScreen } from './LoginScreen';
+import { ActivityFeed } from '../components/ActivityFeed';
 
 export const MainScreen = () => {
     const { width } = useWindowDimensions();
@@ -126,6 +127,7 @@ export const MainScreen = () => {
                     </View>
                     <View style={isLandscape ? styles.columnHalf : styles.column}>
                         <QuickActionsCard />
+                        <ActivityFeed />
                         <SystemControlsCard />
                         {/* <SystemOutputCard /> */}
                     </View>
