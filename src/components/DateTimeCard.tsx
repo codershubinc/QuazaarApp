@@ -16,8 +16,8 @@ export const DateTimeCard = () => {
     }, []);
 
     const dateString = date.toLocaleDateString('en-US', {
-        weekday: 'long',
-        month: 'long',
+        weekday: 'short',
+        month: 'short',
         day: 'numeric',
     });
 
@@ -31,7 +31,7 @@ export const DateTimeCard = () => {
             <View style={styles.content}>
                 <View style={styles.dateContainer}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.s }}>
-                        <Ionicons name="calendar-outline" size={18} color={theme.colors.secondary} />
+                        <Ionicons name="calendar-outline" size={16} color={theme.colors.secondary} />
                         <Text style={styles.dateText}>{dateString}</Text>
                     </View>
                 </View>
@@ -46,16 +46,18 @@ export const DateTimeCard = () => {
 const styles = StyleSheet.create({
     card: {
         borderRadius: theme.borderRadius.l,
-        padding: theme.spacing.l,
+        padding: theme.spacing.m,
         ...theme.shadows.default,
         borderWidth: 1,
         borderColor: theme.colors.border,
-        marginBottom: theme.spacing.m,
+        flex: 1, // Allow flexing in a row
+
     },
     content: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
+        gap: 8,
     },
     dateContainer: {
         flexDirection: 'row',
@@ -65,11 +67,10 @@ const styles = StyleSheet.create({
     rightContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: theme.spacing.m,
     },
     dateText: {
         color: theme.colors.textSecondary,
-        fontSize: 16,
+        fontSize: 12,
         fontWeight: '500',
     },
 });
