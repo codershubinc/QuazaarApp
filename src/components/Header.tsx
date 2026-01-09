@@ -6,6 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { BatteryDisplay } from './BatteryDisplay';
 import { BluetoothDisplay } from './BluetoothDisplay';
 import { WakaTimeDisplay } from './WakaTimeDisplay';
+import { StreakDisplay } from './StreakDisplay';
+import { GithubStatsDisplay } from './GithubStatsDisplay';
 
 export const Header = ({ onSettingsClick }: { onSettingsClick?: () => void }) => {
     const { isConnected } = useAppStore();
@@ -20,22 +22,43 @@ export const Header = ({ onSettingsClick }: { onSettingsClick?: () => void }) =>
             </View>
 
             <View style={styles.rightContainer}>
-                <WakaTimeDisplay />
-                <View style={styles.batteryGroup}>
-                    <BatteryDisplay
-                        type="remote"
-                        iconName="desktop-outline"
-                    />
-                    <View style={styles.batteryDivider} />
-                    <BatteryDisplay
-                        type="local"
-                        iconName="tablet-portrait-outline"
-                    />
+                <View style={styles.headerItem}>
+                    <GithubStatsDisplay />
+                    <Text style={styles.headerLabel}>GH STATS</Text>
                 </View>
-                <BluetoothDisplay />
+
+                <View style={styles.headerItem}>
+                    <StreakDisplay />
+                    <Text style={styles.headerLabel}>GH/LC STREAKS</Text>
+                </View>
+
+                <View style={styles.headerItem}>
+                    <WakaTimeDisplay />
+                    <Text style={styles.headerLabel}>WAKA TIME</Text>
+                </View>
+
+                <View style={styles.headerItem}>
+                    <View style={styles.batteryGroup}>
+                        <BatteryDisplay
+                            type="remote"
+                            iconName="desktop-outline"
+                        />
+                        <View style={styles.batteryDivider} />
+                        <BatteryDisplay
+                            type="local"
+                            iconName="tablet-portrait-outline"
+                        />
+                    </View>
+                    <Text style={styles.headerLabel}>SYS POWER</Text>
+                </View>
+
+                <View style={styles.headerItem}>
+                    <BluetoothDisplay />
+                    <Text style={styles.headerLabel}>BT DEVICES</Text>
+                </View>
 
                 {onSettingsClick && (
-                    <TouchableOpacity onPress={onSettingsClick} style={styles.settingsButton}>
+                    <TouchableOpacity onPress={onSettingsClick} style={[styles.settingsButton, { alignSelf: 'flex-start' }]}>
                         <Ionicons name="settings-sharp" size={24} color={theme.colors.text} />
                     </TouchableOpacity>
                 )}
@@ -94,6 +117,17 @@ const styles = StyleSheet.create({
         width: 1,
         height: 16,
         backgroundColor: 'rgba(255,255,255,0.1)',
+    },
+    headerItem: {
+        alignItems: 'center',
+        gap: 2,
+    },
+    headerLabel: {
+        fontSize: 7,
+        color: theme.colors.textDim,
+        fontWeight: '700',
+        letterSpacing: 0.5,
+        textAlign: 'center',
     },
     settingsButton: {
         padding: theme.spacing.s,
