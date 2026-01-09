@@ -27,32 +27,45 @@ export const BatteryDisplay = ({ type, iconName }: BatteryDisplayProps) => {
         let cleanup = () => { };
 
         const setupLocalBattery = async () => {
-            try {
-                const [level, state] = await Promise.all([
-                    Battery.getBatteryLevelAsync(),
-                    Battery.getBatteryStateAsync(),
-                ]);
-                setBatteryInfo({
-                    level: Math.round(level * 100),
-                    charging: state === Battery.BatteryState.CHARGING
-                });
+            const fetchBattery = async () => {
+                try {
+                    const [level, state] = await Promise.all([
+                        Battery.getBatteryLevelAsync(),
+                        Battery.getBatteryStateAsync(),
+                    ]);
+                    let isCharging = state === Battery.BatteryState.CHARGING;
+                    if (isCharging && Battery.BatteryState.FULL) {
+                        isCharging = false;  // Consider FULL as not charging for our UI purposes
+                    }
+                    setBatteryInfo({
+                        level: Math.round(level * 100),
+                        charging: isCharging
+                    });
+                } catch (e) {
+                    console.error("Local battery error:", e);
+                }
+            };
 
-                const levelSub = Battery.addBatteryLevelListener(({ batteryLevel }) => {
-                    setBatteryInfo(prev => ({ ...prev, level: Math.round(batteryLevel * 100) }));
-                });
+            fetchBattery(); // Initial fetch
 
-                const stateSub = Battery.addBatteryStateListener(({ batteryState }) => {
-                    setBatteryInfo(prev => ({ ...prev, charging: batteryState === Battery.BatteryState.CHARGING }));
-                });
+            const levelSub = Battery.addBatteryLevelListener(({ batteryLevel }) => {
+                setBatteryInfo(prev => ({ ...prev, level: Math.round(batteryLevel * 100) }));
+            });
 
-                cleanup = () => {
-                    levelSub.remove();
-                    stateSub.remove();
-                };
-            } catch (e) {
-                console.error("Local battery error:", e);
-            }
+            const stateSub = Battery.addBatteryStateListener(({ batteryState }) => {
+                setBatteryInfo(prev => ({ ...prev, charging: batteryState === Battery.BatteryState.CHARGING }));
+            });
+
+            // Poll every 1 second to ensure live updates on Android where listeners might be lazy
+            const interval = setInterval(fetchBattery, 5000);
+
+            cleanup = () => {
+                levelSub.remove();
+                stateSub.remove();
+                clearInterval(interval);
+            };
         };
+
 
         const setupRemoteBattery = () => {
             const fetchBattery = async () => {

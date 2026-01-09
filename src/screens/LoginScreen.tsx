@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ActivityIndicator, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import { theme } from '../constants/theme';
 import { useAppStore } from '../store/useAppStore';
@@ -9,22 +9,32 @@ import { Ionicons } from '@expo/vector-icons';
 export const LoginScreen = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [ipAddress, setIpAddress] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [localError, setLocalError] = useState<string | null>(null);
-    const { setAuthToken } = useAppStore();
+    const { setAuthToken, setUsername: setStoreUsername } = useAppStore();
+
+    useEffect(() => {
+        const loadSettings = async () => {
+            const savedIp = await AsyncStorage.getItem('ip');
+            if (savedIp) {
+                setIpAddress(savedIp);
+            } else {
+                setIpAddress('192.168.1.110');
+            }
+        };
+        loadSettings();
+    }, []);
 
     const handleLogin = async () => {
         setIsLoading(true);
         setLocalError(null);
 
         try {
-            const ip = await AsyncStorage.getItem('ip') || '192.168.1.110';
+            await AsyncStorage.setItem('ip', ipAddress);
             const port = await AsyncStorage.getItem('port') || '8765';
 
-            // Allow user to override just for login if needed, or rely on SettingsScreen in Main
-            // Ideally settings should be accessible before login, but for now let's assume default or previously set
-
-            const response = await fetch(`http://192.168.1.109:${port}/api/v0.1/login`, {
+            const response = await fetch(`http://${ipAddress}:${port}/api/v0.1/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -41,12 +51,14 @@ export const LoginScreen = () => {
 
             if (data.token) {
                 await AsyncStorage.setItem('authToken', data.token);
+                await AsyncStorage.setItem('username', username);
 
                 if (data.deviceId) {
                     await AsyncStorage.setItem('deviceId', data.deviceId);
                 }
 
                 setAuthToken(data.token);
+                setStoreUsername(username);
             } else {
                 throw new Error('No auth token received');
             }
@@ -79,6 +91,19 @@ export const LoginScreen = () => {
                                 <Text style={styles.errorText}>{localError}</Text>
                             </View>
                         )}
+
+                        <View style={styles.inputContainer}>
+                            <Ionicons name="server-outline" size={20} color={theme.colors.textSecondary} style={styles.inputIcon} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Server IP"
+                                placeholderTextColor={theme.colors.textDim}
+                                value={ipAddress}
+                                onChangeText={setIpAddress}
+                                autoCapitalize="none"
+                                keyboardType="numeric"
+                            />
+                        </View>
 
                         <View style={styles.inputContainer}>
                             <Ionicons name="person-outline" size={20} color={theme.colors.textSecondary} style={styles.inputIcon} />
