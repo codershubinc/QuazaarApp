@@ -86,7 +86,7 @@ export const TopLangsCard = ({ username }: { username: string }) => {
     return (
         <View style={styles.container}>
             {/* Ambient Background Gradient */}
-            <LinearGradient
+            {/* <LinearGradient
                 colors={bgColors as [string, string, ...string[]]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
@@ -96,7 +96,7 @@ export const TopLangsCard = ({ username }: { username: string }) => {
             <LinearGradient
                 colors={['transparent', 'rgba(0,0,0,0.5)']}
                 style={[StyleSheet.absoluteFill, { borderRadius: theme.borderRadius.l }]}
-            />
+            /> */}
 
             <View style={styles.header}>
                 <View style={styles.headerTitle}>
