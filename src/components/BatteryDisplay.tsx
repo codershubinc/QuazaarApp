@@ -33,9 +33,13 @@ export const BatteryDisplay = ({ type, iconName }: BatteryDisplayProps) => {
                         Battery.getBatteryLevelAsync(),
                         Battery.getBatteryStateAsync(),
                     ]);
+                    let isCharging = state === Battery.BatteryState.CHARGING;
+                    if (isCharging && Battery.BatteryState.FULL) {
+                        isCharging = false;  // Consider FULL as not charging for our UI purposes
+                    }
                     setBatteryInfo({
                         level: Math.round(level * 100),
-                        charging: state === Battery.BatteryState.CHARGING
+                        charging: isCharging
                     });
                 } catch (e) {
                     console.error("Local battery error:", e);

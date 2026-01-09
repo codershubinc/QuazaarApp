@@ -54,46 +54,49 @@ export const BluetoothDisplay = () => {
         return cleanup;
     }, [authToken]);
 
-    // Find first connected device or just first device
-    const device = devices.find(d => d.connected) || devices[0];
 
-    if (!device) return null;
+    // Sort by name
+    const sortedDevices = [...devices].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
 
-    // Determine battery level (use average or specific)
-    // Sometimes battery is -1 if unknown
-    const batteryLevel = device.battery && device.battery > -1 ? device.battery : null;
-    const hasBattery = batteryLevel !== null;
-
-    // Determine color based on battery if available
-    const getColor = () => {
-        if (!hasBattery) return theme.colors.secondary;
-        if (batteryLevel! <= 20) return theme.colors.error;
-        return theme.colors.success;
-    };
-
-    const iconName = getIconName(device.icon);
+    if (sortedDevices.length === 0) return null;
 
     return (
         <View style={styles.wrapper}>
-            <View style={styles.container}>
-                <Ionicons name={iconName} size={14} color={theme.colors.textSecondary} />
-                {hasBattery ? (
-                    <View style={styles.row}>
-                        <Ionicons
-                            name={batteryLevel! > 20 ? "battery-full" : "battery-dead"}
-                            size={14}
-                            color={getColor()}
-                        />
-                        <Text style={[styles.text, { color: getColor() }]}>
-                            {batteryLevel}%
-                        </Text>
+            {sortedDevices.map((device, index) => {
+                // Determine battery level (use average or specific)
+                const batteryLevel = device.battery && device.battery > -1 ? device.battery : null;
+                const hasBattery = batteryLevel !== null;
+
+                const getColor = () => {
+                    if (!hasBattery) return theme.colors.secondary;
+                    if (batteryLevel! <= 20) return theme.colors.error;
+                    return theme.colors.success;
+                };
+
+                const iconName = getIconName(device.icon);
+
+                return (
+                    <View key={device.macAddress || index} style={styles.container}>
+                        <Ionicons name={iconName} size={14} color={theme.colors.textSecondary} />
+                        {hasBattery ? (
+                            <View style={styles.row}>
+                                <Ionicons
+                                    name={batteryLevel! > 20 ? "battery-full" : "battery-dead"}
+                                    size={14}
+                                    color={getColor()}
+                                />
+                                <Text style={[styles.text, { color: getColor() }]}>
+                                    {batteryLevel}%
+                                </Text>
+                            </View>
+                        ) : (
+                            <Text style={[styles.text, { color: theme.colors.secondary }]}>
+                                {device.name?.substring(0, 10) || 'Device'}
+                            </Text>
+                        )}
                     </View>
-                ) : (
-                    <Text style={[styles.text, { color: theme.colors.secondary }]}>
-                        {device.name?.substring(0, 10) || 'Device'}
-                    </Text>
-                )}
-            </View>
+                );
+            })}
         </View>
     );
 };
@@ -102,6 +105,7 @@ const styles = StyleSheet.create({
     wrapper: {
         flexDirection: 'row',
         alignItems: 'center',
+        gap: 8,
     },
     container: {
         flexDirection: 'row',

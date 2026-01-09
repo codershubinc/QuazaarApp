@@ -18,6 +18,7 @@ interface AppState {
     brightnessLevel: number;
     themeColors: ThemeColors;
     authToken: string | null;
+    username: string | null;
     toast: { message: string; type: 'success' | 'error' | 'info' } | null;
 
     setConnected: (isConnected: boolean) => void;
@@ -37,6 +38,7 @@ interface AppState {
     showToast: (message: string, type?: 'success' | 'error' | 'info') => void;
     hideToast: () => void;
     setAuthToken: (token: string | null) => void;
+    setUsername: (username: string | null) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -56,6 +58,7 @@ export const useAppStore = create<AppState>((set) => ({
     toast: null,
     themeColors: theme.colors,
     authToken: null,
+    username: null,
 
     setConnected: (isConnected) => set({ isConnected }),
     setConnecting: (isConnecting) => set({ isConnecting }),
@@ -70,6 +73,7 @@ export const useAppStore = create<AppState>((set) => ({
     setVolumeLevel: (volumeLevel) => set({ volumeLevel }),
     setIsMuted: (isMuted) => set({ isMuted }),
     setAuthToken: (authToken) => set({ authToken }),
+    setUsername: (username) => set({ username }),
     setBrightnessLevel: (brightnessLevel) => set({ brightnessLevel }),
     showToast: (message, type = 'info') => set({ toast: { message, type } }),
     hideToast: () => set({ toast: null }),

@@ -5,6 +5,7 @@ import { theme } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { BatteryDisplay } from './BatteryDisplay';
 import { BluetoothDisplay } from './BluetoothDisplay';
+import { WakaTimeDisplay } from './WakaTimeDisplay';
 
 export const Header = ({ onSettingsClick }: { onSettingsClick?: () => void }) => {
     const { isConnected } = useAppStore();
@@ -19,6 +20,7 @@ export const Header = ({ onSettingsClick }: { onSettingsClick?: () => void }) =>
             </View>
 
             <View style={styles.rightContainer}>
+                <WakaTimeDisplay />
                 <View style={styles.batteryGroup}>
                     <BatteryDisplay
                         type="remote"
