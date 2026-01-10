@@ -72,7 +72,7 @@ export const TopLangsCard = ({ username }: { username: string }) => {
         );
     }
 
-    const top5 = langs.slice(0, 5);
+    const top5 = langs.slice(0, 7);
     const totalSize = langs.reduce((acc, curr) => acc + curr.size, 0);
 
     // Create a rich background gradient based on top languages

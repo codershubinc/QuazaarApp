@@ -16,6 +16,7 @@ import { Toast } from '../components/Toast';
 import { SettingsScreen } from './SettingsScreen';
 import { LoginScreen } from './LoginScreen';
 import { ActivityFeed } from '../components/ActivityFeed';
+import { TodoCard } from '../components/TodoCard';
 
 export const MainScreen = () => {
     const { width } = useWindowDimensions();
@@ -131,6 +132,7 @@ export const MainScreen = () => {
                         <QuickActionsCard />
                         <ActivityFeed />
                         <SystemControlsCard />
+                        <TodoCard />
                         {/* <SystemOutputCard /> */}
                     </View>
                 </View>
