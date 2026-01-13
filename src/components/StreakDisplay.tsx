@@ -62,12 +62,18 @@ export const StreakDisplay = () => {
             .catch(err => console.error("Github streak fetch failed", err));
 
         // Fetch Today's Contributions
-        const todaysDate = new Date().toISOString().split('T')[0];
-        fetch(`https://github-contributions-api.deno.dev/${user}.json?flat=true&to=${todaysDate}`, { cache: 'no-cache' })
+        const date = new Date();
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const todaysDate = `${year}-${month}-${day}`;
+        fetch(`https://github-contributions-api.deno.dev/${user}.json?flat=true&to=${todaysDate}&no-cache=true`, { cache: 'no-cache' })
             .then(res => res.json())
             .then(data => {
                 if (data.contributions && data.contributions.length > 0) {
                     const last = data.contributions[data.contributions.length - 1];
+                    // console.log("last cont", last, "date:", todaysDate);
+
                     setTodayContrib(last.contributionCount);
                 }
             })
