@@ -21,6 +21,7 @@ interface AppState {
     username: string | null;
     toast: { message: string; type: 'success' | 'error' | 'info' } | null;
     todos: Todo[];
+    isFactPopupOpen: boolean;
 
     setConnected: (isConnected: boolean) => void;
     setConnecting: (isConnecting: boolean) => void;
@@ -44,6 +45,8 @@ interface AppState {
     toggleTodo: (id: string) => void;
     deleteTodo: (id: string) => void;
     setTodos: (todos: Todo[]) => void;
+    openFactPopup: () => void;
+    closeFactPopup: () => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -65,6 +68,7 @@ export const useAppStore = create<AppState>((set) => ({
     authToken: null,
     username: null,
     todos: [],
+    isFactPopupOpen: false,
 
     setConnected: (isConnected) => set({ isConnected }),
     setConnecting: (isConnecting) => set({ isConnecting }),
@@ -105,4 +109,6 @@ export const useAppStore = create<AppState>((set) => ({
         todos: state.todos.filter((todo) => todo.id !== id),
     })),
     setTodos: (todos) => set({ todos }),
+    openFactPopup: () => set({ isFactPopupOpen: true }),
+    closeFactPopup: () => set({ isFactPopupOpen: false }),
 }));

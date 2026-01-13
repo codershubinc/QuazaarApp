@@ -3,6 +3,7 @@ import { StyleSheet, View, Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { MainScreen } from './src/screens/MainScreen';
 import { SplashScreen } from './src/screens/SplashScreen';
+import FactPopup from './src/components/FactPopup';
 import { useState, useEffect } from 'react';
 import * as NavigationBar from 'expo-navigation-bar';
 import { theme } from './src/constants/theme';
@@ -33,6 +34,7 @@ export default function App() {
       <View style={styles.container}>
         <StatusBar hidden={true} />
         <MainScreen />
+        <FactPopup />
       </View>
     </SafeAreaProvider>
   );

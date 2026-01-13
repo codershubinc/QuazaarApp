@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useAppStore } from '../store/useAppStore';
 import { theme } from '../constants/theme';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { BatteryDisplay } from './BatteryDisplay';
 import { BluetoothDisplay } from './BluetoothDisplay';
 import { WakaTimeDisplay } from './WakaTimeDisplay';
@@ -11,7 +11,7 @@ import { GithubStatsDisplay } from './GithubStatsDisplay';
 import { SystemCapsule } from './SystemCapsule';
 
 export const Header = ({ onSettingsClick }: { onSettingsClick?: () => void }) => {
-    const { isConnected } = useAppStore();
+    const { isConnected, openFactPopup } = useAppStore();
 
     return (
         <View style={styles.container}>
@@ -62,6 +62,10 @@ export const Header = ({ onSettingsClick }: { onSettingsClick?: () => void }) =>
                     <BluetoothDisplay />
                     <Text style={styles.headerLabel}>BT DEVICES</Text>
                 </View>
+
+                <TouchableOpacity onPress={openFactPopup} style={[styles.settingsButton, { alignSelf: 'flex-start' }]}>
+                    <MaterialCommunityIcons name="lightbulb-on-outline" size={24} color={theme.colors.warning} />
+                </TouchableOpacity>
 
                 {onSettingsClick && (
                     <TouchableOpacity onPress={onSettingsClick} style={[styles.settingsButton, { alignSelf: 'flex-start' }]}>
