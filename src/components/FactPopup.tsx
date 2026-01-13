@@ -13,7 +13,7 @@ interface FactData {
 
 const API_URL = 'https://the-truth-one.vercel.app/api/generate';
 const STORAGE_KEY = '@daily_fact_date';
-const VISIBILITY_DURATION = 5 * 60 * 1000; // 5 Minutes
+const VISIBILITY_DURATION = 60 * 1000; //   1 minutewqq 
 
 const getIconName = (animalName: string): keyof typeof MaterialCommunityIcons.glyphMap => {
     const n = animalName.toLowerCase();
@@ -38,15 +38,19 @@ const getIconName = (animalName: string): keyof typeof MaterialCommunityIcons.gl
 const FactPopup: React.FC = () => {
     const { isFactPopupOpen, openFactPopup, closeFactPopup } = useAppStore();
     const [data, setData] = useState<FactData | null>(null);
+    const [factNumber, setFactNumber] = useState(0);
     const [visible, setVisible] = useState(false);
+    const [touched, setTouched] = useState(false);
 
     // Animation Values
     const scaleAnim = useRef(new Animated.Value(0)).current;
     const opacityAnim = useRef(new Animated.Value(0)).current;
+    const timerAnim = useRef(new Animated.Value(1)).current;
 
     // Fetch Fact Function
     const fetchFact = async () => {
         try {
+            setFactNumber(Math.floor(Math.random() * 90000) + 10000); // Random 5 digit number
             const response = await fetch(API_URL);
             const result = await response.json();
             if (result && result.fact) {
@@ -99,13 +103,27 @@ const FactPopup: React.FC = () => {
     // Auto-close timer
     useEffect(() => {
         let timer: NodeJS.Timeout;
-        if (isFactPopupOpen) {
+        if (isFactPopupOpen && !touched) {
+            // Start Timer Animation
+            timerAnim.setValue(1);
+            Animated.timing(timerAnim, {
+                toValue: 0,
+                duration: VISIBILITY_DURATION,
+                easing: Easing.linear,
+                useNativeDriver: false,
+            }).start();
+
             timer = setTimeout(() => {
                 handleClose();
             }, VISIBILITY_DURATION);
+        } else {
+            timerAnim.stopAnimation();
         }
-        return () => clearTimeout(timer);
-    }, [isFactPopupOpen]);
+        return () => {
+            clearTimeout(timer);
+            timerAnim.stopAnimation();
+        };
+    }, [isFactPopupOpen, touched]);
 
     const startEnterAnimation = () => {
         scaleAnim.setValue(0);
@@ -142,6 +160,7 @@ const FactPopup: React.FC = () => {
 
     const handleClose = () => {
         closeFactPopup();
+        setTouched(false);
     };
 
     const showModal = () => openFactPopup();
@@ -174,19 +193,22 @@ const FactPopup: React.FC = () => {
                         </TouchableOpacity>
 
                         <View style={styles.content}>
-                            {/* Icon Bubble */}
-                            <View style={styles.iconWrapper}>
-                                <LinearGradient
-                                    colors={[theme.colors.secondary, 'rgba(0,0,0,0)']}
-                                    style={styles.iconGradient}
-                                >
-                                    <MaterialCommunityIcons name={iconName} size={32} color="#fff" />
-                                </LinearGradient>
-                            </View>
+                            <View style={styles.headerRow}>
+                                {/* Icon Bubble - Smaller & Aside */}
+                                <View style={styles.iconWrapperSmall}>
+                                    <LinearGradient
+                                        colors={[theme.colors.secondary, 'rgba(0,0,0,0)']}
+                                        style={styles.iconGradientSmall}
+                                    >
+                                        <MaterialCommunityIcons name={iconName} size={24} color="#fff" />
+                                    </LinearGradient>
+                                </View>
 
-                            {/* Title */}
-                            <Text style={styles.didYouKnow}>DID YOU KNOW?</Text>
-                            <Text style={styles.animalTitle}>{data?.animal?.toUpperCase() || 'LOADING...'}</Text>
+                                <View style={styles.headerTextContainer}>
+                                    <Text style={styles.didYouKnow}>FACT #{factNumber}</Text>
+                                    <Text style={styles.animalTitle}>{data?.animal?.toUpperCase() || 'LOADING...'}</Text>
+                                </View>
+                            </View>
 
                             <View style={styles.divider} />
 
@@ -196,8 +218,21 @@ const FactPopup: React.FC = () => {
                             </Text>
                         </View>
 
+
                         {/* Timer Bar (Visual decoration) */}
-                        <View style={styles.timerBar} />
+                        {!touched && (
+                            <Animated.View
+                                style={[
+                                    styles.timerBar,
+                                    {
+                                        width: timerAnim.interpolate({
+                                            inputRange: [0, 1],
+                                            outputRange: ['0%', '100%']
+                                        })
+                                    }
+                                ]}
+                            />
+                        )}
                     </LinearGradient>
                 </Animated.View>
             </View>
@@ -248,50 +283,65 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: '100%',
     },
-    iconWrapper: {
-        marginBottom: 16,
+    headerRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '100%',
+        marginBottom: 8,
+    },
+    headerTextContainer: {
+        flex: 1,
+        alignItems: 'flex-start',
+    },
+    iconWrapperSmall: {
+        marginRight: 16,
         shadowColor: theme.colors.secondary,
         shadowOpacity: 0.5,
         shadowRadius: 10,
         elevation: 5,
     },
-    iconGradient: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
+    iconGradientSmall: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.2)',
     },
+    // Old larger styles kept if needed or can be removed if not used elsewhere, 
+    // but I will modify them or replace since we changed the usage.
+    // For now I'm adding the new ones.
+
     didYouKnow: {
         color: theme.colors.textDim,
         fontSize: 10,
         fontWeight: 'bold',
         letterSpacing: 2,
-        marginBottom: 4,
+        marginBottom: 2,
     },
     animalTitle: {
         color: theme.colors.text,
         fontSize: 22,
         fontWeight: '800',
         letterSpacing: 1,
-        textAlign: 'center',
+        textAlign: 'left', // Aligned left now
     },
     divider: {
         height: 1,
-        width: 40,
+        width: '100%', // Full width divider
         backgroundColor: theme.colors.secondary,
         marginVertical: 16,
-        opacity: 0.5,
+        opacity: 0.3, // Lower opacity for full width
     },
     factText: {
         color: theme.colors.textSecondary,
-        fontSize: 15,
+        fontSize: 18,
         textAlign: 'center',
-        lineHeight: 22,
+        lineHeight: 26,
         fontWeight: '500',
         fontStyle: 'italic',
+        marginTop: 10,
     },
     timerBar: {
         position: 'absolute',
