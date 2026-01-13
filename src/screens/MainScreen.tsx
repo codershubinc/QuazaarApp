@@ -17,6 +17,7 @@ import { SettingsScreen } from './SettingsScreen';
 import { LoginScreen } from './LoginScreen';
 import { ActivityFeed } from '../components/ActivityFeed';
 import { TodoCard } from '../components/TodoCard';
+import { SystemStatsCard } from '../components/SystemStatsCard';
 
 export const MainScreen = () => {
     const { width } = useWindowDimensions();
@@ -107,9 +108,10 @@ export const MainScreen = () => {
                 showsVerticalScrollIndicator={false}
             >
                 <Header onSettingsClick={() => setCurrentScreen('SETTINGS')} />
-                <View style={{ flexDirection: 'row', gap: 16, marginBottom: theme.spacing.m }}>
+                <View style={{ flexDirection: isLandscape ? 'row' : 'column', gap: 16, marginBottom: theme.spacing.m }}>
                     <DateTimeCard />
-                    <PomodoroCard />
+                    <SystemStatsCard />
+
                 </View>
 
                 {isConnecting && !isConnected && (
@@ -132,7 +134,7 @@ export const MainScreen = () => {
                         <QuickActionsCard />
                         <ActivityFeed />
                         <SystemControlsCard />
-                        {/* <TodoCard /> */}
+                        <PomodoroCard />
                         {/* <SystemOutputCard /> */}
                     </View>
                 </View>
