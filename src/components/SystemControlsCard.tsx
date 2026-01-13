@@ -5,9 +5,9 @@ import { webSocketService } from '../services/WebSocketService';
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Slider from '@react-native-community/slider';
 import { AudioOutputSelector } from './AudioOutputSelector';
+import { fetcher } from './helper/Fetcher';
 
 export const SystemControlsCard = () => {
     const { volumeLevel, isMuted, brightnessLevel, showToast, authToken, setVolumeLevel, setBrightnessLevel } = useAppStore();
@@ -16,14 +16,8 @@ export const SystemControlsCard = () => {
         const fetchSystemState = async () => {
             if (!authToken) return;
             try {
-                const ip = await AsyncStorage.getItem('ip') || '192.168.1.110';
-                const port = await AsyncStorage.getItem('port') || '8765';
-                const headers = { 'deviceId': authToken };
-                const query = `?deviceId=${encodeURIComponent(authToken)}`;
-
                 // Fetch Volume
-                fetch(`http://${ip}:${port}/api/v0.1/system/volume${query}`, { headers })
-                    .then(r => r.json())
+                fetcher('/api/v0.1/system/volume')
                     .then(data => {
                         if (data.success && data.volume !== undefined) {
                             setVolumeLevel(data.volume);
@@ -32,8 +26,7 @@ export const SystemControlsCard = () => {
                     .catch(e => console.log('Volume fetch error', e));
 
                 // Fetch Brightness
-                fetch(`http://${ip}:${port}/api/v0.1/system/brightness${query}`, { headers })
-                    .then(r => r.json())
+                fetcher('/api/v0.1/system/brightness')
                     .then(data => {
                         if (data.success && data.brightness !== undefined) {
                             setBrightnessLevel(data.brightness);

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { theme } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppStore } from '../store/useAppStore';
+import { fetcher } from './helper/Fetcher';
 
 interface SystemUsage {
     cpu_usage: number;
@@ -20,13 +20,8 @@ export const SystemCapsule = () => {
     const fetchData = async () => {
         try {
             if (!authToken) return;
-            const ip = await AsyncStorage.getItem('ip') || '192.168.1.110';
-            const port = await AsyncStorage.getItem('port') || '8765';
-            const url = `http://${ip}:${port}/api/v0.1/system/usage?deviceId=${encodeURIComponent(authToken)}`;
-            const response = await fetch(url);
+            const data = await fetcher('/api/v0.1/system/usage');
 
-
-            const data = await response.json();
             // console.log("got  data ::", data);
             if (data.success && data.usage) {
                 setUsage(data.usage);

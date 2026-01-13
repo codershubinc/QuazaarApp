@@ -4,9 +4,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { FlipClock } from './FlipClock';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppStore } from '../store/useAppStore';
 import Svg, { Circle, G } from 'react-native-svg';
+import { fetcher } from './helper/Fetcher';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -97,18 +97,13 @@ export const DateTimeCard = () => {
         const fetchUsage = async () => {
             try {
                 if (!authToken) return;
-                const ip = await AsyncStorage.getItem('ip') || '192.168.1.110';
-                const port = await AsyncStorage.getItem('port') || '8765';
-                const query = `?deviceId=${encodeURIComponent(authToken)}`;
 
                 // Parallel Fetch for efficiency
-                const [usageRes, storageRes] = await Promise.all([
-                    fetch(`http://${ip}:${port}/api/v0.1/system/usage${query}`),
-                    fetch(`http://${ip}:${port}/api/v0.1/system/storage${query}`)
+                // usageData and storageData will be the parsed JSON objects
+                const [usageData, storageData] = await Promise.all([
+                    fetcher('/api/v0.1/system/usage'),
+                    fetcher('/api/v0.1/system/storage')
                 ]);
-
-                const usageData = await usageRes.json();
-                const storageData = await storageRes.json();
 
                 let newUsage = { ...usage };
 

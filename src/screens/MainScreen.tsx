@@ -132,7 +132,7 @@ export const MainScreen = () => {
                         <QuickActionsCard />
                         <ActivityFeed />
                         <SystemControlsCard />
-                        <TodoCard />
+                        {/* <TodoCard /> */}
                         {/* <SystemOutputCard /> */}
                     </View>
                 </View>

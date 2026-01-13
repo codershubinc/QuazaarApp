@@ -3,9 +3,9 @@ import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppStore } from '../store/useAppStore';
 import Svg, { Circle, G } from 'react-native-svg';
+import { fetcher } from './helper/Fetcher';
 
 // Create animated wrapper for SVG Circle
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -116,11 +116,7 @@ export const SystemUsageCard = () => {
     const fetchData = async () => {
         try {
             if (!authToken) return;
-            const ip = await AsyncStorage.getItem('ip') || '192.168.1.110';
-            const port = await AsyncStorage.getItem('port') || '8765';
-            const url = `http://${ip}:${port}/api/v0.1/system/usage?deviceId=${encodeURIComponent(authToken)}`;
-            const response = await fetch(url);
-            const data = await response.json();
+            const data = await fetcher('/api/v0.1/system/usage');
 
             if (data.success && data.usage) {
                 setUsage(data.usage);
