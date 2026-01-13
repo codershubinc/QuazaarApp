@@ -8,6 +8,7 @@ import { BluetoothDisplay } from './BluetoothDisplay';
 import { WakaTimeDisplay } from './WakaTimeDisplay';
 import { StreakDisplay } from './StreakDisplay';
 import { GithubStatsDisplay } from './GithubStatsDisplay';
+import { SystemCapsule } from './SystemCapsule';
 
 export const Header = ({ onSettingsClick }: { onSettingsClick?: () => void }) => {
     const { isConnected } = useAppStore();
@@ -36,6 +37,11 @@ export const Header = ({ onSettingsClick }: { onSettingsClick?: () => void }) =>
                     <WakaTimeDisplay />
                     <Text style={styles.headerLabel}>WAKA TIME</Text>
                 </View>
+
+                {/* <View style={styles.headerItem}>
+                    <SystemCapsule />
+                    <Text style={styles.headerLabel}>SYS USAGE</Text>
+                </View> */}
 
                 <View style={styles.headerItem}>
                     <View style={styles.batteryGroup}>
