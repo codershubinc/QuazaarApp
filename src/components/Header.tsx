@@ -8,7 +8,6 @@ import { BluetoothDisplay } from './BluetoothDisplay';
 import { WakaTimeDisplay } from './WakaTimeDisplay';
 import { StreakDisplay } from './StreakDisplay';
 import { GithubStatsDisplay } from './GithubStatsDisplay';
-import { SystemCapsule } from './SystemCapsule';
 
 export const Header = ({ onSettingsClick }: { onSettingsClick?: () => void }) => {
     const { isConnected, openFactPopup } = useAppStore();
