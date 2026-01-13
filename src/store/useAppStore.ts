@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { MediaInfo, BluetoothDevice, WiFiInfo, ArtWork, ThemeColors, BatteryData } from '../types';
+import { MediaInfo, BluetoothDevice, WiFiInfo, ArtWork, ThemeColors, BatteryData, Todo } from '../types';
 import { theme } from '../constants/theme';
 
 interface AppState {
@@ -20,6 +20,7 @@ interface AppState {
     authToken: string | null;
     username: string | null;
     toast: { message: string; type: 'success' | 'error' | 'info' } | null;
+    todos: Todo[];
 
     setConnected: (isConnected: boolean) => void;
     setConnecting: (isConnecting: boolean) => void;
@@ -39,6 +40,10 @@ interface AppState {
     hideToast: () => void;
     setAuthToken: (token: string | null) => void;
     setUsername: (username: string | null) => void;
+    addTodo: (text: string) => void;
+    toggleTodo: (id: string) => void;
+    deleteTodo: (id: string) => void;
+    setTodos: (todos: Todo[]) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -59,6 +64,7 @@ export const useAppStore = create<AppState>((set) => ({
     themeColors: theme.colors,
     authToken: null,
     username: null,
+    todos: [],
 
     setConnected: (isConnected) => set({ isConnected }),
     setConnecting: (isConnecting) => set({ isConnecting }),
@@ -78,4 +84,25 @@ export const useAppStore = create<AppState>((set) => ({
     showToast: (message, type = 'info') => set({ toast: { message, type } }),
     hideToast: () => set({ toast: null }),
     setThemeColors: (colors) => set((state) => ({ themeColors: { ...state.themeColors, ...colors } })),
+
+    addTodo: (text) => set((state) => ({
+        todos: [
+            {
+                id: Date.now().toString(),
+                text,
+                completed: false,
+                createdAt: Date.now(),
+            },
+            ...state.todos,
+        ],
+    })),
+    toggleTodo: (id) => set((state) => ({
+        todos: state.todos.map((todo) =>
+            todo.id === id ? { ...todo, completed: !todo.completed } : todo
+        ),
+    })),
+    deleteTodo: (id) => set((state) => ({
+        todos: state.todos.filter((todo) => todo.id !== id),
+    })),
+    setTodos: (todos) => set({ todos }),
 }));

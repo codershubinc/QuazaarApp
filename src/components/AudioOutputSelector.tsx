@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { useAppStore } from '../store/useAppStore';
 import { theme } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fetcher } from './helper/Fetcher';
 
 interface SoundDevice {
     id: string;
@@ -28,14 +28,8 @@ export const AudioOutputSelector = () => {
     const fetchSoundDevices = async () => {
         if (!authToken) return;
         try {
-            const ip = await AsyncStorage.getItem('ip') || '192.168.1.110';
-            const port = await AsyncStorage.getItem('port') || '8765';
-            const headers = { 'deviceId': authToken };
-            const query = `?deviceId=${encodeURIComponent(authToken)}`;
+            const data = await fetcher('/api/v0.1/system/sound/devices');
 
-            const response = await fetch(`http://${ip}:${port}/api/v0.1/system/sound/devices${query}`, { headers });
-            const data = await response.json();
-            
             if (data.success && Array.isArray(data.devices)) {
                 setSoundDevices(data.devices);
             }
@@ -48,20 +42,11 @@ export const AudioOutputSelector = () => {
         if (!authToken) return;
         setLoadingDevice(true);
         try {
-            const ip = await AsyncStorage.getItem('ip') || '192.168.1.110';
-            const port = await AsyncStorage.getItem('port') || '8765';
-            const headers = { 
-                'deviceId': authToken,
-                'Content-Type': 'application/json'
-            };
-            const query = `?deviceId=${encodeURIComponent(authToken)}`;
-
-            await fetch(`http://${ip}:${port}/api/v0.1/system/sound/device${query}`, {
+            await fetcher('/api/v0.1/system/sound/device', {
                 method: 'POST',
-                headers,
                 body: JSON.stringify({ deviceName })
             });
-            
+
             setTimeout(fetchSoundDevices, 500);
         } catch (error) {
             console.error(error);
@@ -80,8 +65,8 @@ export const AudioOutputSelector = () => {
 
     return (
         <View style={styles.deviceContainer}>
-            <ScrollView 
-                horizontal 
+            <ScrollView
+                horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.deviceScroll}
             >
@@ -95,10 +80,10 @@ export const AudioOutputSelector = () => {
                         onPress={() => !device.active && setSoundOutput(device.name)}
                         disabled={loadingDevice || device.active}
                     >
-                        <Ionicons 
-                            name={getDeviceIcon(device.name, device.description)} 
-                            size={14} 
-                            color={device.active ? theme.colors.success : theme.colors.textDim} 
+                        <Ionicons
+                            name={getDeviceIcon(device.name, device.description)}
+                            size={14}
+                            color={device.active ? theme.colors.success : theme.colors.textDim}
                         />
                         {device.active && <View style={styles.activeIndicator} />}
                     </TouchableOpacity>

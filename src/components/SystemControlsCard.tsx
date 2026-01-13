@@ -5,9 +5,9 @@ import { webSocketService } from '../services/WebSocketService';
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import Slider from '@react-native-community/slider';
 import { AudioOutputSelector } from './AudioOutputSelector';
+import { fetcher } from './helper/Fetcher';
 
 export const SystemControlsCard = () => {
     const { volumeLevel, isMuted, brightnessLevel, showToast, authToken, setVolumeLevel, setBrightnessLevel } = useAppStore();
@@ -16,14 +16,8 @@ export const SystemControlsCard = () => {
         const fetchSystemState = async () => {
             if (!authToken) return;
             try {
-                const ip = await AsyncStorage.getItem('ip') || '192.168.1.110';
-                const port = await AsyncStorage.getItem('port') || '8765';
-                const headers = { 'deviceId': authToken };
-                const query = `?deviceId=${encodeURIComponent(authToken)}`;
-
                 // Fetch Volume
-                fetch(`http://${ip}:${port}/api/v0.1/system/volume${query}`, { headers })
-                    .then(r => r.json())
+                fetcher('/api/v0.1/system/volume')
                     .then(data => {
                         if (data.success && data.volume !== undefined) {
                             setVolumeLevel(data.volume);
@@ -32,8 +26,7 @@ export const SystemControlsCard = () => {
                     .catch(e => console.log('Volume fetch error', e));
 
                 // Fetch Brightness
-                fetch(`http://${ip}:${port}/api/v0.1/system/brightness${query}`, { headers })
-                    .then(r => r.json())
+                fetcher('/api/v0.1/system/brightness')
                     .then(data => {
                         if (data.success && data.brightness !== undefined) {
                             setBrightnessLevel(data.brightness);
@@ -58,68 +51,73 @@ export const SystemControlsCard = () => {
             end={{ x: 1, y: 1 }}
             style={styles.card}
         >
-            <View style={styles.header}>
-                <Text style={styles.headerTitle}>SYSTEM</Text>
+            {/* Header: Compact Row */}
+            <View style={styles.headerRow}>
+                <View style={styles.titleContainer}>
+                    <Ionicons name="settings-outline" size={10} color={theme.colors.secondary} />
+                    <Text style={styles.headerTitle}>SYSTEM</Text>
+                </View>
+                {/* Audio Selector inline or slightly below if needed. Currently keeping it separate for clarity */}
             </View>
 
-            {/* Volume Control */}
-            <View style={styles.row}>
-                <TouchableOpacity
-                    onPress={() => {
-                        webSocketService.toggleMute();
-                        showToast(isMuted ? 'Unmuted' : 'Muted', 'info');
-                    }}
-                    style={styles.iconContainer}
-                >
-                    <Ionicons
-                        name={isMuted ? "volume-mute" : "volume-high"}
-                        size={18}
-                        color={isMuted ? theme.colors.error : theme.colors.secondary}
+            <View style={styles.controlsContainer}>
+
+                {/* Volume Control */}
+                <View style={styles.controlRow}>
+                    <TouchableOpacity
+                        onPress={() => {
+                            webSocketService.toggleMute();
+                            showToast(isMuted ? 'Unmuted' : 'Muted', 'info');
+                        }}
+                        style={styles.iconContainer}
+                    >
+                        <Ionicons
+                            name={isMuted ? "volume-mute" : "volume-high"}
+                            size={16}
+                            color={isMuted ? theme.colors.error : theme.colors.secondary}
+                        />
+                    </TouchableOpacity>
+
+                    <Slider
+                        style={styles.slider}
+                        minimumValue={0}
+                        maximumValue={100}
+                        step={1}
+                        value={volumeLevel}
+                        onValueChange={(val) => setVolumeLevel(val)}
+                        onSlidingComplete={(val) => webSocketService.setVolume(val)}
+                        minimumTrackTintColor={isMuted ? theme.colors.error : theme.colors.secondary}
+                        maximumTrackTintColor="rgba(255, 255, 255, 0.1)"
+                        thumbTintColor="#FFFFFF"
                     />
-                </TouchableOpacity>
-
-                <Slider
-                    style={styles.slider}
-                    minimumValue={0}
-                    maximumValue={100}
-                    step={1}
-                    value={volumeLevel}
-                    onValueChange={(val) => setVolumeLevel(val)}
-                    onSlidingComplete={(val) => webSocketService.setVolume(val)}
-                    minimumTrackTintColor={isMuted ? theme.colors.error : theme.colors.secondary}
-                    maximumTrackTintColor="rgba(255, 255, 255, 0.1)"
-                    thumbTintColor="#FFFFFF"
-                />
-
-                {/* output devices */}
-
-
-
-                <Text style={styles.valueText}>{volumeLevel}%</Text>
-            </View>
-            <AudioOutputSelector />
-
-
-            {/* Brightness Control */}
-            <View style={styles.row}>
-                <View style={styles.iconContainer}>
-                    <Ionicons name="sunny" size={18} color={theme.colors.warning} />
+                    <Text style={styles.valueText}>{volumeLevel}%</Text>
                 </View>
 
-                <Slider
-                    style={styles.slider}
-                    minimumValue={0}
-                    maximumValue={100}
-                    step={1}
-                    value={brightnessLevel}
-                    onValueChange={(val) => setBrightnessLevel(val)}
-                    onSlidingComplete={(val) => webSocketService.setBrightness(val)}
-                    minimumTrackTintColor={theme.colors.warning}
-                    maximumTrackTintColor="rgba(255, 255, 255, 0.1)"
-                    thumbTintColor="#FFFFFF"
-                />
+                {/* Audio Output Selector (Compact version assumed) */}
+                <View style={{ marginVertical: 2, paddingLeft: 30 }}>
+                    <AudioOutputSelector />
+                </View>
 
-                <Text style={styles.valueText}>{brightnessLevel}%</Text>
+                {/* Brightness Control */}
+                <View style={styles.controlRow}>
+                    <View style={styles.iconContainer}>
+                        <Ionicons name="sunny" size={16} color={theme.colors.warning} />
+                    </View>
+
+                    <Slider
+                        style={styles.slider}
+                        minimumValue={0}
+                        maximumValue={100}
+                        step={1}
+                        value={brightnessLevel}
+                        onValueChange={(val) => setBrightnessLevel(val)}
+                        onSlidingComplete={(val) => webSocketService.setBrightness(val)}
+                        minimumTrackTintColor={theme.colors.warning}
+                        maximumTrackTintColor="rgba(255, 255, 255, 0.1)"
+                        thumbTintColor="#FFFFFF"
+                    />
+                    <Text style={styles.valueText}>{brightnessLevel}%</Text>
+                </View>
             </View>
         </LinearGradient>
     );
@@ -128,42 +126,57 @@ export const SystemControlsCard = () => {
 const styles = StyleSheet.create({
     card: {
         borderRadius: theme.borderRadius.l,
-        padding: theme.spacing.m,
+        padding: 12, // Reduced padding
         ...theme.shadows.default,
         borderWidth: 1,
         borderColor: theme.colors.border,
+        marginBottom: theme.spacing.m,
     },
-    header: {
-        marginBottom: theme.spacing.xs,
+    headerRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
+        marginBottom: 8,
     },
-    headerTitle: {
-        color: theme.colors.secondary,
-        fontWeight: '600',
-        letterSpacing: 2,
-        fontSize: 10,
-        opacity: 0.8,
-    },
-    row: {
+    titleContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: 4,
+        gap: 6,
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+        borderRadius: 6,
+    },
+    headerTitle: {
+        color: theme.colors.textSecondary,
+        fontWeight: '700',
+        fontSize: 9,
+        letterSpacing: 1,
+    },
+    controlsContainer: {
+        gap: 2, // Tighter gap between rows
+    },
+    controlRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        height: 28, // Fixed height for consistency
     },
     iconContainer: {
-        width: 24,
+        width: 20,
         alignItems: 'center',
         marginRight: 4,
     },
     slider: {
         flex: 1,
-        height: 40,
-        marginHorizontal: 8,
+        height: 28, // Reduced height
+        marginHorizontal: 4,
+        transform: [{ scaleY: 0.9 }] // Visually slims the slider track slightly if needed
     },
     valueText: {
         color: theme.colors.textDim,
         fontSize: 10,
         fontWeight: 'bold',
-        width: 32,
+        width: 30,
         textAlign: 'right',
         fontFamily: 'monospace',
     },

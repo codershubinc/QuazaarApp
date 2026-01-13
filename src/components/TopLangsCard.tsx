@@ -72,7 +72,7 @@ export const TopLangsCard = ({ username }: { username: string }) => {
         );
     }
 
-    const top5 = langs.slice(0, 5);
+    const top5 = langs.slice(0, 7);
     const totalSize = langs.reduce((acc, curr) => acc + curr.size, 0);
 
     // Create a rich background gradient based on top languages
@@ -86,7 +86,7 @@ export const TopLangsCard = ({ username }: { username: string }) => {
     return (
         <View style={styles.container}>
             {/* Ambient Background Gradient */}
-            <LinearGradient
+            {/* <LinearGradient
                 colors={bgColors as [string, string, ...string[]]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
@@ -96,7 +96,7 @@ export const TopLangsCard = ({ username }: { username: string }) => {
             <LinearGradient
                 colors={['transparent', 'rgba(0,0,0,0.5)']}
                 style={[StyleSheet.absoluteFill, { borderRadius: theme.borderRadius.l }]}
-            />
+            /> */}
 
             <View style={styles.header}>
                 <View style={styles.headerTitle}>

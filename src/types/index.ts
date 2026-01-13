@@ -87,3 +87,10 @@ export interface BatteryData {
     state: string; // 'charging', 'discharging', 'full', 'unknown'
     timeRemaining?: number;
 }
+
+export interface Todo {
+    id: string;
+    text: string;
+    completed: boolean;
+    createdAt: number;
+}

@@ -10,8 +10,8 @@ import { TopLangsCard } from './TopLangsCard';
 
 export const QuickActionsCard = () => {
     const { showToast, username } = useAppStore();
-    const [isFlipped, setIsFlipped] = useState(false);
-    const flipAnim = React.useRef(new Animated.Value(0)).current;
+    const [isFlipped, setIsFlipped] = useState(true);
+    const flipAnim = React.useRef(new Animated.Value(180)).current;
 
     async function handleUpload() {
         try {

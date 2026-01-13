@@ -3,8 +3,8 @@ import { View, Text, StyleSheet, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../constants/theme';
 import * as Battery from 'expo-battery';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAppStore } from '../store/useAppStore';
+import { fetcher } from './helper/Fetcher';
 
 interface BatteryDisplayProps {
     type: 'remote' | 'local';
@@ -33,10 +33,9 @@ export const BatteryDisplay = ({ type, iconName }: BatteryDisplayProps) => {
                         Battery.getBatteryLevelAsync(),
                         Battery.getBatteryStateAsync(),
                     ]);
-                    let isCharging = state === Battery.BatteryState.CHARGING;
-                    if (isCharging && Battery.BatteryState.FULL) {
-                        isCharging = false;  // Consider FULL as not charging for our UI purposes
-                    }
+                    // Ensure we capture charging state correctly, including FULL
+                    let isCharging = state === Battery.BatteryState.CHARGING || state === Battery.BatteryState.FULL;
+
                     setBatteryInfo({
                         level: Math.round(level * 100),
                         charging: isCharging
@@ -71,16 +70,8 @@ export const BatteryDisplay = ({ type, iconName }: BatteryDisplayProps) => {
             const fetchBattery = async () => {
                 if (!authToken) return;
                 try {
-                    const ip = await AsyncStorage.getItem('ip') || '192.168.1.110';
-                    const port = await AsyncStorage.getItem('port') || '8765';
-                    let url = `http://${ip}:${port}/api/v0.1/system/battery`;
-
-                    const headers: HeadersInit = { 'deviceId': authToken };
-                    url += `?deviceId=${encodeURIComponent(authToken)}`;
-
-                    const response = await fetch(url, { headers });
-                    if (response.ok) {
-                        const data = await response.json();
+                    const data = await fetcher('/api/v0.1/system/battery');
+                    if (data && data.percentage !== undefined) {
                         setBatteryInfo({
                             level: Math.round(data.percentage),
                             charging: data.state === 'charging' || data.state === 'PluggedIn' // Safe broad check? MainScreen used 'charging'

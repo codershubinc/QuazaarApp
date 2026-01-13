@@ -8,14 +8,15 @@ import { theme } from '../constants/theme';
 
 import { Header } from '../components/Header';
 import { DateTimeCard } from '../components/DateTimeCard';
+import { PomodoroCard } from '../components/PomodoroCard';
 import { NowPlayingCard } from '../components/NowPlayingCard';
 import { QuickActionsCard } from '../components/QuickActionsCard';
 import { SystemControlsCard } from '../components/SystemControlsCard';
-import { BluetoothDevicesCard } from '../components/BluetoothDevicesCard';
-import { SystemOutputCard } from '../components/SystemOutputCard';
 import { Toast } from '../components/Toast';
 import { SettingsScreen } from './SettingsScreen';
 import { LoginScreen } from './LoginScreen';
+import { ActivityFeed } from '../components/ActivityFeed';
+import { TodoCard } from '../components/TodoCard';
 
 export const MainScreen = () => {
     const { width } = useWindowDimensions();
@@ -106,7 +107,10 @@ export const MainScreen = () => {
                 showsVerticalScrollIndicator={false}
             >
                 <Header onSettingsClick={() => setCurrentScreen('SETTINGS')} />
-                <DateTimeCard />
+                <View style={{ flexDirection: 'row', gap: 16, marginBottom: theme.spacing.m }}>
+                    <DateTimeCard />
+                    <PomodoroCard />
+                </View>
 
                 {isConnecting && !isConnected && (
                     <View style={styles.statusCard}>
@@ -126,7 +130,9 @@ export const MainScreen = () => {
                     </View>
                     <View style={isLandscape ? styles.columnHalf : styles.column}>
                         <QuickActionsCard />
+                        <ActivityFeed />
                         <SystemControlsCard />
+                        {/* <TodoCard /> */}
                         {/* <SystemOutputCard /> */}
                     </View>
                 </View>

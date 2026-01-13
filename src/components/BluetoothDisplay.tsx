@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../constants/theme';
 import { useAppStore } from '../store/useAppStore';
 import { BluetoothDevice } from '../types';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fetcher } from './helper/Fetcher';
 
 const getIconName = (serverIcon?: string): keyof typeof Ionicons.glyphMap => {
     switch (serverIcon) {
@@ -28,19 +28,10 @@ export const BluetoothDisplay = () => {
         const fetchDevices = async () => {
             if (!authToken) return;
             try {
-                const ip = await AsyncStorage.getItem('ip') || '192.168.1.110';
-                const port = await AsyncStorage.getItem('port') || '8765';
-                const url = `http://${ip}:${port}/api/v0.1/system/bluetooth?deviceId=${encodeURIComponent(authToken)}`;
+                const data = await fetcher('/api/v0.1/system/bluetooth');
 
-                const response = await fetch(url, {
-                    headers: { 'deviceId': authToken }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success) {
-                        setDevices(Array.isArray(data.devices) ? data.devices : []);
-                    }
+                if (data && data.success) {
+                    setDevices(Array.isArray(data.devices) ? data.devices : []);
                 }
             } catch (error) {
                 // Silent fail

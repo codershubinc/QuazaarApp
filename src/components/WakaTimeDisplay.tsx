@@ -2,52 +2,32 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../constants/theme';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Image } from 'expo-image';
+import { getLangIcon } from './helper/GetLanguageIcon';
+import { fetcher } from './helper/Fetcher';
 
 export const WakaTimeDisplay = () => {
     const [workingHours, setWorkingHours] = useState<string>('0 hrs 0 mins');
     const [topLanguages, setTopLanguages] = useState<string[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const getLangIcon = (langName: string) => {
-        const n = langName.toLowerCase();
-        const map: Record<string, string> = {
-            'c#': 'csharp', 'c++': 'cplusplus', 'css': 'css3', 'html': 'html5',
-            'shell': 'bash', 'vue': 'vuejs', 'jupyter notebook': 'jupyter', 'vim script': 'vim',
-        };
-        const slug = map[n] || n.replace(/\s+/g, '');
-        return `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${slug}/${slug}-original.svg`;
-    };
-
     const fetchWakaTime = async () => {
         try {
-            const ip = await AsyncStorage.getItem('ip') || '192.168.1.110';
-            const port = await AsyncStorage.getItem('port') || '8765';
-            const deviceId = '$2a$10$FdbfnL3QJJ39vcJPM4WhyOSg8a6EHKIRE/6LaIDSbIrQ7BZZH8TB6';
+            const data = await fetcher('/api/v0.1/system/wakatime');
 
-            // Encode the deviceId properly for URL
-            const encodedDeviceId = encodeURIComponent(deviceId);
-            const url = `http://${ip}:${port}/api/v0.1/system/wakatime?deviceId=${encodedDeviceId}`;
+            if (data.stats) {
+                // Get working hours
+                if (data.stats.cumulative_total && data.stats.cumulative_total.text) {
+                    setWorkingHours(data.stats.cumulative_total.text);
+                }
 
-            const response = await fetch(url);
-            if (response.ok) {
-                const data = await response.json();
-
-                if (data.stats) {
-                    // Get working hours
-                    if (data.stats.cumulative_total && data.stats.cumulative_total.text) {
-                        setWorkingHours(data.stats.cumulative_total.text);
-                    }
-
-                    // Get top languages
-                    if (data.stats.data &&
-                        data.stats.data.length > 0 &&
-                        data.stats.data[0].languages &&
-                        data.stats.data[0].languages.length > 0) {
-                        const langs = data.stats.data[0].languages.slice(0, 2).map((l: any) => l.name);
-                        setTopLanguages(langs);
-                    }
+                // Get top languages
+                if (data.stats.data &&
+                    data.stats.data.length > 0 &&
+                    data.stats.data[0].languages &&
+                    data.stats.data[0].languages.length > 0) {
+                    const langs = data.stats.data[0].languages.slice(0, 2).map((l: any) => l.name);
+                    setTopLanguages(langs);
                 }
             }
         } catch (error) {

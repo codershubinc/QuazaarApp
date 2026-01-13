@@ -4,7 +4,7 @@ import { useAppStore } from '../store/useAppStore';
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fetcher } from './helper/Fetcher';
 
 interface SoundDevice {
     id: string;
@@ -21,13 +21,7 @@ export const SystemOutputCard = () => {
     const fetchSoundDevices = async () => {
         if (!authToken) return;
         try {
-            const ip = await AsyncStorage.getItem('ip') || '192.168.1.110';
-            const port = await AsyncStorage.getItem('port') || '8765';
-            const headers = { 'deviceId': authToken };
-            const query = `?deviceId=${encodeURIComponent(authToken)}`;
-
-            const response = await fetch(`http://${ip}:${port}/api/v0.1/system/sound/devices${query}`, { headers });
-            const data = await response.json();
+            const data = await fetcher('/api/v0.1/system/sound/devices');
 
             if (data.success && Array.isArray(data.devices)) {
                 setSoundDevices(data.devices);
@@ -41,17 +35,8 @@ export const SystemOutputCard = () => {
         if (!authToken) return;
         setLoading(true);
         try {
-            const ip = await AsyncStorage.getItem('ip') || '192.168.1.110';
-            const port = await AsyncStorage.getItem('port') || '8765';
-            const headers = {
-                'deviceId': authToken,
-                'Content-Type': 'application/json'
-            };
-            const query = `?deviceId=${encodeURIComponent(authToken)}`;
-
-            await fetch(`http://${ip}:${port}/api/v0.1/system/sound/device${query}`, {
+            await fetcher('/api/v0.1/system/sound/device', {
                 method: 'POST',
-                headers,
                 body: JSON.stringify({ deviceName })
             });
 
