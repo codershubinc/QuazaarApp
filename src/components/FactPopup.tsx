@@ -193,22 +193,20 @@ const FactPopup: React.FC = () => {
                         </TouchableOpacity>
 
                         <View style={styles.content}>
-                            <View style={styles.headerRow}>
-                                {/* Icon Bubble - Smaller & Aside */}
-                                <View style={styles.iconWrapperSmall}>
-                                    <LinearGradient
-                                        colors={[theme.colors.secondary, 'rgba(0,0,0,0)']}
-                                        style={styles.iconGradientSmall}
-                                    >
-                                        <MaterialCommunityIcons name={iconName} size={24} color="#fff" />
-                                    </LinearGradient>
-                                </View>
-
-                                <View style={styles.headerTextContainer}>
-                                    <Text style={styles.didYouKnow}>FACT #{factNumber}</Text>
-                                    <Text style={styles.animalTitle}>{data?.animal?.toUpperCase() || 'LOADING...'}</Text>
-                                </View>
+                            {/* Icon Bubble */}
+                            <View style={styles.iconWrapper}>
+                                <LinearGradient
+                                    colors={[theme.colors.secondary, 'rgba(0,0,0,0)']}
+                                    style={styles.iconGradient}
+                                >
+                                    <MaterialCommunityIcons name={iconName} size={32} color="#fff" />
+                                </LinearGradient>
                             </View>
+
+
+                            {/* Title */}
+                            <Text style={styles.didYouKnow}>FACT #{factNumber}</Text>
+                            <Text style={styles.animalTitle}>{data?.animal?.toUpperCase() || 'LOADING...'}</Text>
 
                             <View style={styles.divider} />
 
@@ -283,56 +281,42 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         width: '100%',
     },
-    headerRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        width: '100%',
-        marginBottom: 8,
-    },
-    headerTextContainer: {
-        flex: 1,
-        alignItems: 'flex-start',
-    },
-    iconWrapperSmall: {
-        marginRight: 16,
+    iconWrapper: {
+        marginBottom: 16,
         shadowColor: theme.colors.secondary,
         shadowOpacity: 0.5,
         shadowRadius: 10,
         elevation: 5,
     },
-    iconGradientSmall: {
-        width: 48,
-        height: 48,
-        borderRadius: 24,
+    iconGradient: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.2)',
     },
-    // Old larger styles kept if needed or can be removed if not used elsewhere, 
-    // but I will modify them or replace since we changed the usage.
-    // For now I'm adding the new ones.
-
     didYouKnow: {
         color: theme.colors.textDim,
         fontSize: 10,
         fontWeight: 'bold',
         letterSpacing: 2,
-        marginBottom: 2,
+        marginBottom: 4,
     },
     animalTitle: {
         color: theme.colors.text,
         fontSize: 22,
         fontWeight: '800',
         letterSpacing: 1,
-        textAlign: 'left', // Aligned left now
+        textAlign: 'center',
     },
     divider: {
         height: 1,
-        width: '100%', // Full width divider
+        width: 40,
         backgroundColor: theme.colors.secondary,
         marginVertical: 16,
-        opacity: 0.3, // Lower opacity for full width
+        opacity: 0.5,
     },
     factText: {
         color: theme.colors.textSecondary,

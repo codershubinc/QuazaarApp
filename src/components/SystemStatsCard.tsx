@@ -85,6 +85,7 @@ export const SystemStatsCard = () => {
         gpu: 0, vram: 0, vramUsed: 0, vramTotal: 0,
         storagePercent: 0, storageUsed: 0, storageTotal: 0,
         cpuTemp: 0, wattage: 0, gpuWattage: 0,
+        uptime: 0, distro: '', kernel: ''
     });
     const { authToken } = useAppStore();
 
@@ -114,6 +115,9 @@ export const SystemStatsCard = () => {
                         vramTotal: usageData.usage.gpu_memory_total || 0,
                         wattage: usageData.usage.wattage || 0,
                         gpuWattage: usageData.usage.gpu_wattage || 0,
+                        uptime: usageData.usage.uptime || 0,
+                        distro: usageData.usage.distro || '',
+                        kernel: usageData.usage.kernel || '',
                     };
                 }
 
@@ -141,6 +145,15 @@ export const SystemStatsCard = () => {
     }, [authToken]);
 
     const formatSize = (bytes: number) => (bytes / (1024 * 1024 * 1024)).toFixed(1);
+
+    const formatUptime = (seconds: number) => {
+        const d = Math.floor(seconds / (3600 * 24));
+        const h = Math.floor((seconds % (3600 * 24)) / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        if (d > 0) return `${d}d ${h}h`;
+        if (h > 0) return `${h}h ${m}m`;
+        return `${m}m`;
+    };
 
     return (
         <LinearGradient
@@ -216,6 +229,26 @@ export const SystemStatsCard = () => {
                         </View>
                     )}
                 </View>
+
+                {/* Divider & Right Section */}
+                <View style={styles.verticalDivider} />
+
+                <View style={styles.infoSection}>
+                    <View style={styles.infoItem}>
+                        <Text style={styles.infoLabel}>DISTRO</Text>
+                        <Text style={styles.infoValue} numberOfLines={1}>{usage.distro?.trim() || 'N/A'}</Text>
+                    </View>
+                    <View style={styles.separator} />
+                    <View style={styles.infoItem}>
+                        <Text style={styles.infoLabel}>KERNEL</Text>
+                        <Text style={styles.infoValue} numberOfLines={1}>{usage.kernel?.replace('-arch1-1', '') || 'N/A'}</Text>
+                    </View>
+                    <View style={styles.separator} />
+                    <View style={styles.infoItem}>
+                        <Text style={styles.infoLabel}>UPTIME</Text>
+                        <Text style={styles.infoValue}>{formatUptime(usage.uptime)}</Text>
+                    </View>
+                </View>
             </View>
         </LinearGradient>
     );
@@ -284,6 +317,37 @@ const styles = StyleSheet.create({
         color: theme.colors.textDim,
         fontWeight: '600',
         letterSpacing: 0.5,
+        fontFamily: 'monospace',
+    },
+    verticalDivider: {
+        width: 1,
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        height: '80%',
+        marginHorizontal: 16,
+    },
+    infoSection: {
+        justifyContent: 'center',
+        gap: 8,
+        minWidth: 100,
+    },
+    infoItem: {
+        gap: 2,
+    },
+    separator: {
+        height: 1,
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        width: '100%',
+    },
+    infoLabel: {
+        fontSize: 9,
+        color: theme.colors.textDim,
+        fontWeight: '700',
+        letterSpacing: 0.5,
+    },
+    infoValue: {
+        fontSize: 13,
+        color: theme.colors.text,
+        fontWeight: '600',
         fontFamily: 'monospace',
     }
 });
