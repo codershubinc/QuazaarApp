@@ -13,7 +13,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.codershubinc.quazaar"
     },
     "android": {
       "package": "com.codershubinc.quazaar",
@@ -33,6 +34,15 @@
       "eas": {
         "projectId": "135ff897-1ce7-45d0-a34b-98eb26d2c112"
       }
-    }
+    },
+    "plugins": [
+      "expo-build-properties",
+      [
+        "react-native-health-connect",
+        {
+          "rationaleActivityName": "HealthConnectRationaleActivity"
+        }
+      ]
+    ]
   }
 }

@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Platform } from 'react-native';
+import { StyleSheet, View, Platform, Alert } from 'react-native'; // Added Alert
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { MainScreen } from './src/screens/MainScreen';
 import { SplashScreen } from './src/screens/SplashScreen';
@@ -12,7 +12,7 @@ export default function App() {
   const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
-    async function configureFullScreen() {
+    async function configureApp() {
       if (Platform.OS === 'android') {
         try {
           await NavigationBar.setVisibilityAsync("hidden");
@@ -22,7 +22,7 @@ export default function App() {
         }
       }
     }
-    configureFullScreen();
+    configureApp();
   }, []);
 
   if (showSplash) {

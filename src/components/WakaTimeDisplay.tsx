@@ -26,7 +26,7 @@ export const WakaTimeDisplay = () => {
                     data.stats.data.length > 0 &&
                     data.stats.data[0].languages &&
                     data.stats.data[0].languages.length > 0) {
-                    const langs = data.stats.data[0].languages.slice(0, 2).map((l: any) => l.name);
+                    const langs = data.stats.data[0].languages.slice(0, 3).map((l: any) => l.name);
                     setTopLanguages(langs);
                 }
             }
@@ -40,7 +40,7 @@ export const WakaTimeDisplay = () => {
     useEffect(() => {
         fetchWakaTime();
 
-        // Refresh every 5 minutes (300,000 ms)
+        // Refresh every   (300,000 ms)
         const interval = setInterval(fetchWakaTime, 300000);
 
         return () => clearInterval(interval);
