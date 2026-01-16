@@ -1,9 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Modal, View, Text, StyleSheet, TouchableOpacity, Animated, Easing } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Modal, View, Text, StyleSheet, TouchableOpacity, Animated, Easing, Platform, Dimensions } from 'react-native';
+import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { theme } from '../constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LinearGradient } from 'expo-linear-gradient';
 import { useAppStore } from '../store/useAppStore';
 
 interface FactData {
@@ -13,7 +12,8 @@ interface FactData {
 
 const API_URL = 'https://the-truth-one.vercel.app/api/generate';
 const STORAGE_KEY = '@daily_fact_date';
-const VISIBILITY_DURATION = 60 * 1000; //   1 minutewqq 
+const VISIBILITY_DURATION = 60 * 1000; // 1 minute
+const { width } = Dimensions.get('window');
 
 const getIconName = (animalName: string): keyof typeof MaterialCommunityIcons.glyphMap => {
     const n = animalName.toLowerCase();
@@ -32,7 +32,7 @@ const getIconName = (animalName: string): keyof typeof MaterialCommunityIcons.gl
     if (n.includes('jellyfish')) return 'jellyfish';
     if (n.includes('pig')) return 'pig';
     if (n.includes('deployment')) return 'server-network';
-    return 'paw'; // Default fallback
+    return 'paw';
 };
 
 const FactPopup: React.FC = () => {
@@ -40,17 +40,17 @@ const FactPopup: React.FC = () => {
     const [data, setData] = useState<FactData | null>(null);
     const [factNumber, setFactNumber] = useState(0);
     const [visible, setVisible] = useState(false);
-    const [touched, setTouched] = useState(false);
 
-    // Animation Values
-    const scaleAnim = useRef(new Animated.Value(0)).current;
+    // Animation Refs
+    const scaleAnim = useRef(new Animated.Value(0.9)).current;
     const opacityAnim = useRef(new Animated.Value(0)).current;
     const timerAnim = useRef(new Animated.Value(1)).current;
 
-    // Fetch Fact Function
+    // --- Logic ---
+
     const fetchFact = async () => {
         try {
-            setFactNumber(Math.floor(Math.random() * 90000) + 10000); // Random 5 digit number
+            setFactNumber(Math.floor(Math.random() * 90000) + 10000);
             const response = await fetch(API_URL);
             const result = await response.json();
             if (result && result.fact) {
@@ -61,177 +61,148 @@ const FactPopup: React.FC = () => {
         }
     };
 
-    // Automatic Check on Mount
+    // Auto-Open Logic
     useEffect(() => {
         const checkAndFetch = async () => {
             try {
                 const today = new Date().toDateString();
                 const lastShown = await AsyncStorage.getItem(STORAGE_KEY);
 
-                if (lastShown === today) {
-                    return;
-                }
+                if (lastShown === today) return;
 
-                // Wait 30 minutes before showing
-                const DELAY_30_MIN = 30 * 60 * 1000;
-                await new Promise(resolve => setTimeout(resolve, DELAY_30_MIN));
+                // Wait 30 minutes before showing automatically
+                const DELAY = 30 * 60 * 1000;
+                await new Promise(resolve => setTimeout(resolve, DELAY));
 
-                // If the user hasn't opened it manually yet, open it
                 if (!useAppStore.getState().isFactPopupOpen) {
                     openFactPopup();
                     await AsyncStorage.setItem(STORAGE_KEY, today);
                 }
             } catch (error) {
-                // console.log("Fact check error", error);
+                // Silent fail
             }
         };
-
         checkAndFetch();
     }, []);
 
-    // Handle Open/Close state from Store
+    // Open/Close Animation Trigger
     useEffect(() => {
         if (isFactPopupOpen) {
-            setVisible(true); // Mount the modal
-            fetchFact(); // Always fetch fresh
-            startEnterAnimation();
-        } else {
-            startExitAnimation(() => setVisible(false));
-        }
-    }, [isFactPopupOpen]);
+            setVisible(true);
+            fetchFact();
 
-    // Auto-close timer
-    useEffect(() => {
-        let timer: NodeJS.Timeout;
-        if (isFactPopupOpen && !touched) {
-            // Start Timer Animation
+            // Enter Animation
+            Animated.parallel([
+                Animated.spring(scaleAnim, {
+                    toValue: 1,
+                    friction: 7,
+                    tension: 40,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(opacityAnim, {
+                    toValue: 1,
+                    duration: 250,
+                    useNativeDriver: true,
+                })
+            ]).start();
+
+            // Start Timer
             timerAnim.setValue(1);
             Animated.timing(timerAnim, {
                 toValue: 0,
                 duration: VISIBILITY_DURATION,
                 easing: Easing.linear,
                 useNativeDriver: false,
-            }).start();
+            }).start(({ finished }) => {
+                if (finished) handleClose();
+            });
 
-            timer = setTimeout(() => {
-                handleClose();
-            }, VISIBILITY_DURATION);
         } else {
-            timerAnim.stopAnimation();
+            // Exit Animation
+            Animated.parallel([
+                Animated.timing(scaleAnim, {
+                    toValue: 0.95,
+                    duration: 150,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(opacityAnim, {
+                    toValue: 0,
+                    duration: 150,
+                    useNativeDriver: true,
+                })
+            ]).start(() => setVisible(false));
         }
-        return () => {
-            clearTimeout(timer);
-            timerAnim.stopAnimation();
-        };
-    }, [isFactPopupOpen, touched]);
-
-    const startEnterAnimation = () => {
-        scaleAnim.setValue(0);
-        opacityAnim.setValue(0);
-        Animated.parallel([
-            Animated.spring(scaleAnim, {
-                toValue: 1,
-                friction: 6,
-                tension: 50,
-                useNativeDriver: true,
-            }),
-            Animated.timing(opacityAnim, {
-                toValue: 1,
-                duration: 300,
-                useNativeDriver: true,
-            })
-        ]).start();
-    };
-
-    const startExitAnimation = (onFinish?: () => void) => {
-        Animated.parallel([
-            Animated.timing(scaleAnim, {
-                toValue: 0.8,
-                duration: 200,
-                useNativeDriver: true,
-            }),
-            Animated.timing(opacityAnim, {
-                toValue: 0,
-                duration: 200,
-                useNativeDriver: true,
-            })
-        ]).start(onFinish);
-    };
+    }, [isFactPopupOpen]);
 
     const handleClose = () => {
         closeFactPopup();
-        setTouched(false);
     };
-
-    const showModal = () => openFactPopup();
-    const hideModal = () => closeFactPopup();
 
     if (!visible) return null;
 
     const iconName = data ? getIconName(data.animal) : 'paw';
 
     return (
-        <Modal
-            transparent
-            visible={visible}
-            onRequestClose={handleClose}
-        >
+        <Modal transparent visible={visible} onRequestClose={handleClose}>
             <View style={styles.overlay}>
-                {/* Backdrop with Fade In */}
+                {/* Dark Backdrop */}
                 <Animated.View style={[styles.backdrop, { opacity: opacityAnim }]}>
                     <TouchableOpacity style={StyleSheet.absoluteFill} onPress={handleClose} activeOpacity={1} />
                 </Animated.View>
 
-                {/* Main Card with Scale In */}
-                <Animated.View style={[styles.cardContainer, { transform: [{ scale: scaleAnim }], opacity: opacityAnim }]}>
-                    <LinearGradient
-                        colors={[theme.colors.surface, theme.colors.surfaceHighlight]}
-                        style={styles.card}
-                    >
+                {/* Main Card */}
+                <Animated.View
+                    style={[
+                        styles.card,
+                        { transform: [{ scale: scaleAnim }], opacity: opacityAnim }
+                    ]}
+                >
+                    {/* 1. Header Row */}
+                    <View style={styles.header}>
+                        <View style={styles.badgeContainer}>
+                            <Ionicons name="information-circle" size={12} color={theme.colors.secondary} />
+                            <Text style={styles.badgeText}>INTEL #{factNumber}</Text>
+                        </View>
                         <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-                            <MaterialCommunityIcons name="close" size={20} color={theme.colors.textDim} />
+                            <Ionicons name="close" size={20} color={theme.colors.textDim} />
                         </TouchableOpacity>
+                    </View>
 
-                        <View style={styles.content}>
-                            {/* Icon Bubble */}
-                            <View style={styles.iconWrapper}>
-                                <LinearGradient
-                                    colors={[theme.colors.secondary, 'rgba(0,0,0,0)']}
-                                    style={styles.iconGradient}
-                                >
-                                    <MaterialCommunityIcons name={iconName} size={32} color="#fff" />
-                                </LinearGradient>
-                            </View>
+                    {/* 2. Icon Area */}
+                    <View style={styles.iconContainer}>
+                        <View style={styles.iconCircle}>
+                            <MaterialCommunityIcons name={iconName} size={42} color="#FFF" />
+                        </View>
+                    </View>
 
+                    {/* 3. Text Content */}
+                    <View style={styles.contentContainer}>
+                        <Text style={styles.animalName}>
+                            {data?.animal?.toUpperCase() || 'LOADING...'}
+                        </Text>
 
-                            {/* Title */}
-                            <Text style={styles.didYouKnow}>FACT #{factNumber}</Text>
-                            <Text style={styles.animalTitle}>{data?.animal?.toUpperCase() || 'LOADING...'}</Text>
-
-                            <View style={styles.divider} />
-
-                            {/* Fact */}
+                        <View style={styles.factWrapper}>
+                            <MaterialCommunityIcons name="format-quote-open" size={24} color={theme.colors.secondary} style={styles.quoteIcon} />
                             <Text style={styles.factText}>
-                                {data?.fact ? `"${data.fact}"` : 'Fetching interesting fact...'}
+                                {data?.fact || 'Retrieving daily data...'}
                             </Text>
                         </View>
+                    </View>
 
-
-                        {/* Timer Bar (Visual decoration) */}
-                        {!touched && (
-                            <Animated.View
-                                style={[
-                                    styles.timerBar,
-                                    {
-                                        width: timerAnim.interpolate({
-                                            inputRange: [0, 1],
-                                            outputRange: ['0%', '100%']
-                                        })
-                                    }
-                                ]}
-                            />
-                        )}
-                    </LinearGradient>
+                    {/* 4. Timer Bar (Bottom Border) */}
+                    <View style={styles.timerTrack}>
+                        <Animated.View
+                            style={[
+                                styles.timerFill,
+                                {
+                                    width: timerAnim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: ['0%', '100%']
+                                    })
+                                }
+                            ]}
+                        />
+                    </View>
                 </Animated.View>
             </View>
         </Modal>
@@ -247,94 +218,108 @@ const styles = StyleSheet.create({
     },
     backdrop: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(0, 0, 0, 0.85)', // Darker for focus
-    },
-    cardContainer: {
-        width: '85%',
-        maxWidth: 400,
-        borderRadius: 24,
-        ...theme.shadows.glow,
-        // Force shadow for Android
-        elevation: 10,
-        shadowColor: theme.colors.secondary,
-        shadowOpacity: 0.4,
-        shadowRadius: 20,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        // backdropFilter: 'blur(10px)',  
     },
     card: {
-        borderRadius: 24,
-        borderWidth: 1,
-        borderColor: theme.colors.border,
+        width: width * 0.85,
+        maxWidth: 380,
+        backgroundColor: '#1C1C1E', // Matching dashboard dark
+        borderRadius: 32,
         padding: 24,
-        alignItems: 'center',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.08)',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 10 },
+        shadowOpacity: 0.5,
+        shadowRadius: 20,
+        elevation: 10,
         overflow: 'hidden',
     },
-    closeButton: {
-        position: 'absolute',
-        top: 16,
-        right: 16,
-        padding: 4,
-        zIndex: 10,
-        backgroundColor: 'rgba(255,255,255,0.05)',
-        borderRadius: 20,
-    },
-    content: {
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
-        width: '100%',
+        marginBottom: 20,
     },
-    iconWrapper: {
-        marginBottom: 16,
-        shadowColor: theme.colors.secondary,
-        shadowOpacity: 0.5,
-        shadowRadius: 10,
-        elevation: 5,
-    },
-    iconGradient: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-        justifyContent: 'center',
+    badgeContainer: {
+        flexDirection: 'row',
         alignItems: 'center',
+        gap: 6,
+        backgroundColor: 'rgba(255,255,255,0.06)',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 12,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.2)',
+        borderColor: 'rgba(255,255,255,0.05)',
     },
-    didYouKnow: {
-        color: theme.colors.textDim,
+    badgeText: {
+        color: theme.colors.textSecondary,
         fontSize: 10,
         fontWeight: 'bold',
-        letterSpacing: 2,
-        marginBottom: 4,
+        fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
     },
-    animalTitle: {
-        color: theme.colors.text,
-        fontSize: 22,
+    closeButton: {
+        padding: 4,
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        borderRadius: 16,
+    },
+    iconContainer: {
+        alignItems: 'center',
+        marginBottom: 16,
+    },
+    iconCircle: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: theme.colors.secondary, // Uses the secondary (cyan/teal) color
+        justifyContent: 'center',
+        alignItems: 'center',
+        shadowColor: theme.colors.secondary,
+        shadowOffset: { width: 0, height: 0 },
+        shadowOpacity: 0.6,
+        shadowRadius: 20,
+        elevation: 10,
+    },
+    contentContainer: {
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    animalName: {
+        color: '#FFF',
+        fontSize: 20,
         fontWeight: '800',
-        letterSpacing: 1,
+        letterSpacing: 2,
+        marginBottom: 12,
         textAlign: 'center',
     },
-    divider: {
-        height: 1,
-        width: 40,
-        backgroundColor: theme.colors.secondary,
-        marginVertical: 16,
+    factWrapper: {
+        flexDirection: 'row',
+        gap: 8,
+    },
+    quoteIcon: {
         opacity: 0.5,
+        marginTop: -4,
     },
     factText: {
-        color: theme.colors.textSecondary,
-        fontSize: 18,
-        textAlign: 'center',
-        lineHeight: 26,
-        fontWeight: '500',
-        fontStyle: 'italic',
-        marginTop: 10,
+        color: 'rgba(255,255,255,0.8)',
+        fontSize: 16,
+        lineHeight: 24,
+        textAlign: 'left',
+        flex: 1,
+        fontWeight: '400',
     },
-    timerBar: {
+    timerTrack: {
         position: 'absolute',
         bottom: 0,
         left: 0,
         right: 0,
-        height: 3,
+        height: 4,
+        backgroundColor: 'rgba(255,255,255,0.1)',
+    },
+    timerFill: {
+        height: '100%',
         backgroundColor: theme.colors.secondary,
-        opacity: 0.3,
     }
 });
 

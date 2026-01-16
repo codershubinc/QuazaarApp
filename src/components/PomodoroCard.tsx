@@ -1,36 +1,40 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing, Platform } from 'react-native';
 import { theme } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '../store/useAppStore';
 
 const BREAK_TIME = 5 * 60;
 const PRESETS = [
-    { label: '15m', h: 0, m: 15 },
-    { label: '25m', h: 0, m: 25 },
-    { label: '45m', h: 0, m: 45 },
-    { label: '1h', h: 1, m: 0 },
+    { label: '15m', m: 15 },
+    { label: '25m', m: 25 },
+    { label: '45m', m: 45 },
+    { label: '60m', m: 60 },
 ];
 
 export const PomodoroCard = () => {
     const { showToast } = useAppStore();
 
-    // View State
+    // View & Logic State
     const [view, setView] = useState<'SETUP' | 'TIMER'>('SETUP');
-
-    // Timer State
-    const [focusDuration, setFocusDuration] = useState(25 * 60);
-    const [timeLeft, setTimeLeft] = useState(25 * 60);
-    const [isActive, setIsActive] = useState(false);
     const [mode, setMode] = useState<'FOCUS' | 'BREAK'>('FOCUS');
+    const [isActive, setIsActive] = useState(false);
 
-    // Setup State (Custom Input)
-    const [hrs, setHrs] = useState(0);
-    const [mins, setMins] = useState(25);
-    const progressAnim = useRef(new Animated.Value(1)).current;
+    // Time State
+    const [duration, setDuration] = useState(25 * 60); // Total time for calculation
+    const [timeLeft, setTimeLeft] = useState(25 * 60); // Current ticker
 
-    // --- TIMER LOGIC ---
+    // Setup Inputs
+    const [setupMins, setSetupMins] = useState(25);
+
+    // Animation Values
+    const progressAnim = useRef(new Animated.Value(0)).current;
+
+    // --- Colors based on Mode ---
+    const activeColor = mode === 'FOCUS' ? '#FF453A' : '#30D158'; // iOS Red : iOS Green
+    const bgFillColor = mode === 'FOCUS' ? 'rgba(255, 69, 58, 0.15)' : 'rgba(48, 209, 88, 0.15)';
+
+    // --- Timer Tick ---
     useEffect(() => {
         let interval: NodeJS.Timeout | null = null;
         if (isActive && timeLeft > 0) {
@@ -38,285 +42,251 @@ export const PomodoroCard = () => {
                 setTimeLeft((prev) => prev - 1);
             }, 1000);
         } else if (timeLeft === 0 && isActive) {
+            // Timer Finished
             setIsActive(false);
-            if (interval) clearInterval(interval);
-            showToast(`${mode === 'FOCUS' ? 'Focus Session' : 'Break'} Completed!`, 'success');
+            showToast(`${mode === 'FOCUS' ? 'Focus' : 'Break'} session complete`, 'success');
 
+            // Auto-switch modes for next run
             if (mode === 'FOCUS') {
                 setMode('BREAK');
+                setDuration(BREAK_TIME);
                 setTimeLeft(BREAK_TIME);
             } else {
                 setMode('FOCUS');
-                setTimeLeft(focusDuration);
+                setDuration(setupMins * 60);
+                setTimeLeft(setupMins * 60);
             }
+            setView('SETUP');
         }
         return () => { if (interval) clearInterval(interval); };
-    }, [isActive, timeLeft, mode]);
+    }, [isActive, timeLeft]);
 
+    // --- Progress Animation ---
     useEffect(() => {
-        const totalTime = mode === 'FOCUS' ? focusDuration : BREAK_TIME;
-        const progress = totalTime > 0 ? timeLeft / totalTime : 0;
-
-        Animated.timing(progressAnim, {
-            toValue: progress,
-            duration: 1000,
-            easing: Easing.linear,
-            useNativeDriver: false
-        }).start();
-    }, [timeLeft, mode, focusDuration]);
-
-    // --- HANDLERS ---
-    const adjustTime = (type: 'hrs' | 'mins', amount: number) => {
-        if (type === 'hrs') {
-            setHrs(prev => {
-                const newVal = prev + amount;
-                return newVal < 0 ? 0 : newVal > 12 ? 12 : newVal;
-            });
-        } else {
-            setMins(prev => {
-                const newVal = prev + amount;
-                return newVal < 0 ? 55 : newVal > 55 ? 0 : newVal;
-            });
+        if (duration > 0) {
+            const progress = 1 - (timeLeft / duration);
+            Animated.timing(progressAnim, {
+                toValue: progress,
+                duration: 1000,
+                easing: Easing.linear,
+                useNativeDriver: false // width animation requires false
+            }).start();
         }
+    }, [timeLeft, duration]);
+
+    // --- Actions ---
+    const adjustSetupTime = (delta: number) => {
+        setSetupMins(prev => {
+            const next = prev + delta;
+            return next < 1 ? 1 : next > 120 ? 120 : next;
+        });
     };
 
-    const startTimer = () => {
-        const totalSeconds = (hrs * 3600) + (mins * 60);
-        if (totalSeconds === 0) {
-            showToast("Please set a duration", "error");
-            return;
-        }
-        setFocusDuration(totalSeconds);
-        setTimeLeft(totalSeconds);
-        setMode('FOCUS');
+    const handleStart = () => {
+        setMode('FOCUS'); // Always start fresh as Focus
+        const seconds = setupMins * 60;
+        setDuration(seconds);
+        setTimeLeft(seconds);
         setIsActive(true);
         setView('TIMER');
     };
 
-    const resetTimer = () => {
+    const handleReset = () => {
         setIsActive(false);
-        setMode('FOCUS');
-        setTimeLeft(focusDuration);
+        setView('SETUP');
+        progressAnim.setValue(0);
     };
 
-    const applyPreset = (h: number, m: number) => {
-        setHrs(h);
-        setMins(m);
-    };
-
-    const formatTime = (seconds: number) => {
-        const h = Math.floor(seconds / 3600);
-        const m = Math.floor((seconds % 3600) / 60);
-        const s = seconds % 60;
-
-        if (h > 0) {
-            return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-        }
-        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    const formatTime = (s: number) => {
+        const m = Math.floor(s / 60);
+        const sec = s % 60;
+        return `${m}:${sec.toString().padStart(2, '0')}`;
     };
 
     return (
-        <LinearGradient
-            colors={[theme.colors.surface, theme.colors.surfaceHighlight]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.card}
-        >
-            {view === 'SETUP' ? (
-                <View style={styles.setupContainer}>
-                    {/* Header */}
-                    <View style={styles.header}>
-                        <Text style={styles.label}>Pomodoro </Text>
-                        <TouchableOpacity style={styles.startBtn} onPress={startTimer}>
-                            <Ionicons name="play" size={12} color="#000" />
-                            <Text style={styles.startBtnText}>START</Text>
-                        </TouchableOpacity>
-                    </View>
+        <View style={styles.card}>
 
-                    {/* Custom Time Picker */}
-                    <View style={styles.pickerContainer}>
-                        {/* Hours Column */}
-                        <View style={styles.pickerColumn}>
-                            <TouchableOpacity onPress={() => adjustTime('hrs', 1)} hitSlop={8}>
-                                <Ionicons name="chevron-up" size={20} color={theme.colors.textDim} />
-                            </TouchableOpacity>
-                            <Text style={styles.timeDigit}>{hrs.toString().padStart(2, '0')}</Text>
-                            <Text style={styles.unitLabel}>hr</Text>
-                            <TouchableOpacity onPress={() => adjustTime('hrs', -1)} hitSlop={8}>
-                                <Ionicons name="chevron-down" size={20} color={theme.colors.textDim} />
+            {/* --- SETUP VIEW --- */
+                view === 'SETUP' ? (
+                    <View style={styles.contentContainer}>
+                        {/* Header */}
+                        <View style={styles.header}>
+                            <View style={styles.headerTitleContainer}>
+                                <Ionicons name="timer-outline" size={14} color={theme.colors.textSecondary} />
+                                <Text style={styles.headerTitle}>POMODORO</Text>
+                            </View>
+                            {/* Play Button */}
+                            <TouchableOpacity style={styles.startBtn} onPress={handleStart}>
+                                <Ionicons name="play" size={16} color="#000" style={{ marginLeft: 2 }} />
                             </TouchableOpacity>
                         </View>
 
-                        <Text style={styles.colon}>:</Text>
-
-                        {/* Minutes Column */}
-                        <View style={styles.pickerColumn}>
-                            <TouchableOpacity onPress={() => adjustTime('mins', 5)} hitSlop={8}>
-                                <Ionicons name="chevron-up" size={20} color={theme.colors.textDim} />
+                        {/* Main Picker */}
+                        <View style={styles.pickerContainer}>
+                            <TouchableOpacity onPress={() => adjustSetupTime(-5)} style={styles.adjustBtn}>
+                                <Ionicons name="remove" size={24} color={theme.colors.textDim} />
                             </TouchableOpacity>
-                            <Text style={styles.timeDigit}>{mins.toString().padStart(2, '0')}</Text>
-                            <Text style={styles.unitLabel}>min</Text>
-                            <TouchableOpacity onPress={() => adjustTime('mins', -5)} hitSlop={8}>
-                                <Ionicons name="chevron-down" size={20} color={theme.colors.textDim} />
+
+                            <View style={styles.timeDisplay}>
+                                <Text style={styles.hugeTimeText}>{setupMins}</Text>
+                                <Text style={styles.unitText}>min</Text>
+                            </View>
+
+                            <TouchableOpacity onPress={() => adjustSetupTime(5)} style={styles.adjustBtn}>
+                                <Ionicons name="add" size={24} color={theme.colors.textDim} />
                             </TouchableOpacity>
                         </View>
-                    </View>
 
-                    {/* Presets Footer */}
-                    <View style={styles.presetsRow}>
-                        {PRESETS.map((p, idx) => (
-                            <TouchableOpacity
-                                key={idx}
-                                style={[
-                                    styles.presetChip,
-                                    (hrs === p.h && mins === p.m) && styles.presetChipActive
-                                ]}
-                                onPress={() => applyPreset(p.h, p.m)}
-                            >
-                                <Text style={[
-                                    styles.presetText,
-                                    (hrs === p.h && mins === p.m) && styles.presetTextActive
-                                ]}>
-                                    {p.label}
-                                </Text>
-                            </TouchableOpacity>
-                        ))}
+                        {/* Presets */}
+                        <View style={styles.presetsRow}>
+                            {PRESETS.map((p) => (
+                                <TouchableOpacity
+                                    key={p.label}
+                                    style={[styles.presetChip, setupMins === p.m && styles.presetChipActive]}
+                                    onPress={() => setSetupMins(p.m)}
+                                >
+                                    <Text style={[styles.presetText, setupMins === p.m && styles.presetTextActive]}>
+                                        {p.label}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
                     </View>
-                </View>
-            ) : (
-                /* --- TIMER VIEW --- */
-                <>
-                    <View style={styles.progressBgContainer}>
+                ) : (
+                    /* --- TIMER VIEW --- */
+                    <View style={styles.timerContainer}>
+                        {/* Background Fill Animation */}
                         <Animated.View
                             style={[
-                                styles.progressFill,
+                                StyleSheet.absoluteFill,
                                 {
-                                    width: progressAnim.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] }),
-                                    backgroundColor: mode === 'FOCUS' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(52, 211, 153, 0.15)'
+                                    backgroundColor: bgFillColor,
+                                    width: progressAnim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: ['0%', '100%']
+                                    })
                                 }
                             ]}
                         />
-                    </View>
 
-                    <View style={styles.timerContent}>
+                        {/* Timer Header */}
                         <View style={styles.timerHeader}>
-                            <View style={styles.modeBadge}>
-                                <Ionicons
-                                    name={mode === 'FOCUS' ? "flame" : "cafe"}
-                                    size={12}
-                                    color={mode === 'FOCUS' ? theme.colors.error : theme.colors.success}
-                                />
-                                <Text style={[styles.modeText, { color: mode === 'FOCUS' ? theme.colors.error : theme.colors.success }]}>
-                                    {mode}
+                            <View style={[styles.statusPill, { borderColor: activeColor }]}>
+                                <View style={[styles.dot, { backgroundColor: activeColor }]} />
+                                <Text style={[styles.statusText, { color: activeColor }]}>
+                                    {mode === 'FOCUS' ? 'FOCUSING' : 'ON BREAK'}
                                 </Text>
                             </View>
-
-                            <View style={styles.controlsRow}>
-                                <TouchableOpacity onPress={resetTimer} style={styles.iconBtn}>
-                                    <Ionicons name="refresh" size={14} color={theme.colors.textDim} />
-                                </TouchableOpacity>
-                                <TouchableOpacity onPress={() => { setIsActive(false); setView('SETUP'); }} style={styles.iconBtn}>
-                                    <Ionicons name="settings-sharp" size={14} color={theme.colors.textDim} />
-                                </TouchableOpacity>
-                            </View>
+                            <TouchableOpacity onPress={handleReset}>
+                                <Ionicons name="close-circle" size={24} color={theme.colors.textDim} />
+                            </TouchableOpacity>
                         </View>
 
-                        <Text style={styles.mainTimerText}>{formatTime(timeLeft)}</Text>
+                        {/* Big Countdown */}
+                        <View style={styles.countdownWrapper}>
+                            <Text style={styles.countdownText}>{formatTime(timeLeft)}</Text>
+                        </View>
 
-                        <TouchableOpacity
-                            style={[styles.playPauseBtn, { borderColor: isActive ? theme.colors.textDim : theme.colors.primary }]}
-                            onPress={() => setIsActive(!isActive)}
-                        >
-                            <Ionicons
-                                name={isActive ? "pause" : "play"}
-                                size={20}
-                                color={isActive ? theme.colors.text : theme.colors.primary}
-                            />
-                        </TouchableOpacity>
+                        {/* Footer Controls */}
+                        <View style={styles.timerControls}>
+                            <TouchableOpacity
+                                style={styles.circleBtn}
+                                onPress={() => setIsActive(!isActive)}
+                            >
+                                <Ionicons
+                                    name={isActive ? "pause" : "play"}
+                                    size={28}
+                                    color={theme.colors.text}
+                                    style={{ marginLeft: isActive ? 0 : 4 }}
+                                />
+                            </TouchableOpacity>
+                        </View>
                     </View>
-                </>
-            )}
-        </LinearGradient>
+                )}
+        </View>
     );
 };
 
 const styles = StyleSheet.create({
     card: {
-        borderRadius: theme.borderRadius.l,
-        padding: theme.spacing.m,
-        ...theme.shadows.default,
+        height: 180, // Fixed comfortable height
+        borderRadius: 28,
+        backgroundColor: '#1C1C1E',
         borderWidth: 1,
-        borderColor: theme.colors.border,
-        flex: 1,
-        height: 120, // Standardized height
-        position: 'relative',
+        borderColor: 'rgba(255,255,255,0.05)',
+        marginBottom: theme.spacing.m,
         overflow: 'hidden',
+        width: "auto"
     },
-    // SETUP
-    setupContainer: {
+    contentContainer: {
         flex: 1,
+        padding: 16,
         justifyContent: 'space-between',
     },
+    // Header
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
     },
-    label: {
+    headerTitleContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 12,
+    },
+    headerTitle: {
+        color: theme.colors.textSecondary,
         fontSize: 10,
-        color: theme.colors.textDim,
-        fontWeight: 'bold',
+        fontWeight: '700',
         letterSpacing: 1,
     },
     startBtn: {
-        flexDirection: 'row',
-        backgroundColor: theme.colors.secondary,
-        paddingVertical: 4,
-        paddingHorizontal: 12,
+        width: 32,
+        height: 32,
         borderRadius: 16,
+        backgroundColor: '#FFF',
+        justifyContent: 'center',
         alignItems: 'center',
-        gap: 4,
     },
-    startBtnText: {
-        color: '#000',
-        fontWeight: 'bold',
-        fontSize: 10,
-    },
-
-    // PICKER
+    // Picker
     pickerContainer: {
         flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: 12,
-        marginVertical: 4,
-    },
-    pickerColumn: {
         alignItems: 'center',
         justifyContent: 'center',
+        gap: 24,
     },
-    timeDigit: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: theme.colors.text,
-        fontFamily: 'monospace',
-        marginVertical: -2,
+    adjustBtn: {
+        width: 44,
+        height: 44,
+        borderRadius: 22,
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        justifyContent: 'center',
+        alignItems: 'center',
     },
-    unitLabel: {
-        fontSize: 9,
+    timeDisplay: {
+        alignItems: 'flex-end',
+        flexDirection: 'row',
+    },
+    hugeTimeText: {
+        fontSize: 48,
+        fontWeight: '300',
+        color: '#FFF',
+        fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+        letterSpacing: -2,
+        lineHeight: 56,
+    },
+    unitText: {
+        fontSize: 14,
         color: theme.colors.textDim,
-        position: 'absolute',
-        right: -14,
-        bottom: 8,
+        marginBottom: 10,
+        marginLeft: 4,
+        fontWeight: '600',
     },
-    colon: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: theme.colors.textDim,
-        marginBottom: 4,
-    },
-
-    // PRESETS
+    // Presets
     presetsRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -324,87 +294,78 @@ const styles = StyleSheet.create({
     },
     presetChip: {
         flex: 1,
-        backgroundColor: 'rgba(255,255,255,0.05)',
-        paddingVertical: 6,
-        borderRadius: 8,
+        paddingVertical: 8,
+        borderRadius: 12,
+        backgroundColor: 'rgba(255,255,255,0.03)',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.1)',
+        borderColor: 'transparent',
     },
     presetChipActive: {
-        backgroundColor: theme.colors.primary,
-        borderColor: theme.colors.primary,
+        backgroundColor: 'rgba(255,255,255,0.1)',
+        borderColor: 'rgba(255,255,255,0.2)',
     },
     presetText: {
         color: theme.colors.textDim,
-        fontSize: 10,
+        fontSize: 11,
         fontWeight: '600',
     },
     presetTextActive: {
-        color: '#000',
-        fontWeight: 'bold',
+        color: '#FFF',
     },
-
-    // TIMER
-    progressBgContainer: {
-        ...StyleSheet.absoluteFillObject,
-        zIndex: 0,
-    },
-    progressFill: {
-        height: '100%',
-    },
-    timerContent: {
+    // Timer View
+    timerContainer: {
         flex: 1,
-        zIndex: 1,
+        padding: 20,
         justifyContent: 'space-between',
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 4,
     },
     timerHeader: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
         flexDirection: 'row',
         justifyContent: 'space-between',
+        alignItems: 'center',
     },
-    modeBadge: {
+    statusPill: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4,
-        backgroundColor: 'rgba(0,0,0,0.3)',
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        borderRadius: 4,
+        gap: 6,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 20,
+        borderWidth: 1,
+        backgroundColor: 'rgba(0,0,0,0.2)',
     },
-    modeText: {
+    dot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+    },
+    statusText: {
         fontSize: 10,
         fontWeight: 'bold',
+        letterSpacing: 1,
     },
-    controlsRow: {
-        flexDirection: 'row',
-        gap: 12,
+    countdownWrapper: {
+        alignItems: 'center',
+        justifyContent: 'center',
     },
-    iconBtn: {
-        padding: 4,
+    countdownText: {
+        fontSize: 56,
+        fontWeight: '700', // Bold for visibility
+        color: '#FFF',
+        fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+        letterSpacing: 2,
     },
-    mainTimerText: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        color: theme.colors.text,
-        fontFamily: 'monospace',
-        marginLeft: 8,
-        marginTop: 10,
+    timerControls: {
+        alignItems: 'center',
     },
-    playPauseBtn: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: 'rgba(0,0,0,0.2)',
+    circleBtn: {
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        backgroundColor: 'rgba(255,255,255,0.1)',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        marginTop: 10,
+        borderColor: 'rgba(255,255,255,0.1)',
     },
 });

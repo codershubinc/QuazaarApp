@@ -1,6 +1,6 @@
 export const theme = {
     colors: {
-        background: '#0a0e27', // Deep dark blue/purple
+        background: '#000000', // Deep dark blue/purple
         surface: '#1a1f3a',    // Lighter blue/purple for cards
         surfaceHighlight: '#252a4a',
         primary: '#6366f1',    // Indigo/Purple

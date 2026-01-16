@@ -20,7 +20,7 @@ import { TodoCard } from '../components/TodoCard';
 import { SystemStatsCard } from '../components/SystemStatsCard';
 
 export const MainScreen = () => {
-    const { width } = useWindowDimensions();
+    const { width, height } = useWindowDimensions();
     const isLandscape = width > 600;
     const { isConnected, isConnecting, error, mediaInfo, bluetoothDevices, authToken, setAuthToken } = useAppStore();
     const [currentScreen, setCurrentScreen] = useState<'MAIN' | 'SETTINGS' | 'LOGIN'>('LOGIN');
@@ -98,18 +98,15 @@ export const MainScreen = () => {
 
     return (
         <LinearGradient
-            colors={[theme.colors.background, '#161b33', theme.colors.background]}
-            style={styles.container}
+            colors={[theme.colors.background, '#000000', theme.colors.background]}
+            style={[styles.container, { width, height }]}
         >
             <Toast />
-            <ScrollView
-                style={styles.scrollView}
-                contentContainerStyle={styles.content}
-                showsVerticalScrollIndicator={false}
-            >
+            <View style={[styles.scrollView, styles.content]}>
                 <Header onSettingsClick={() => setCurrentScreen('SETTINGS')} />
                 <View style={{ flexDirection: isLandscape ? 'row' : 'column', gap: 16, marginBottom: theme.spacing.m }}>
                     <DateTimeCard />
+                    <SystemControlsCard />
                     <SystemStatsCard />
 
                 </View>
@@ -133,12 +130,19 @@ export const MainScreen = () => {
                     <View style={isLandscape ? styles.columnHalf : styles.column}>
                         <QuickActionsCard />
                         <ActivityFeed />
-                        <SystemControlsCard />
-                        <PomodoroCard />
+                        <View
+                            style={{ flexDirection: isLandscape ? 'row' : 'column', gap: theme.spacing.m, width: 'auto', marginBottom: theme.spacing.m }}
+
+                        >
+
+                            <View style={isLandscape ? { flex: 1 } : undefined}>
+                                <PomodoroCard />
+                            </View>
+                        </View>
                         {/* <SystemOutputCard /> */}
                     </View>
                 </View>
-            </ScrollView>
+            </View>
         </LinearGradient>
     );
 };
