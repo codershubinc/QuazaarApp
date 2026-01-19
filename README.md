@@ -8,6 +8,7 @@
   [![React Native](https://img.shields.io/badge/React_Native-0.81.5-blue.svg)](https://reactnative.dev/)
   [![Expo](https://img.shields.io/badge/Expo-~54.0-black.svg)](https://expo.dev/)
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-blue.svg)](https://www.typescriptlang.org/)
+[![wakatime](https://wakatime.com/badge/user/c8cd0c53-219b-4950-8025-0e666e97e8c8/project/97a5f5cf-c9bb-46e7-907a-61f9745a72fb.svg)](https://wakatime.com/badge/user/c8cd0c53-219b-4950-8025-0e666e97e8c8/project/97a5f5cf-c9bb-46e7-907a-61f9745a72fb)
 </div>
 
 ## 📖 Overview
