@@ -33,7 +33,6 @@ export const MainScreen = () => {
                 const token = await AsyncStorage.getItem('authToken');
                 if (token) {
                     setAuthToken(token);
-                    // If we have a token, we can proceed to connect
                 }
             } catch (e) {
                 console.error("Auth check failed", e);
