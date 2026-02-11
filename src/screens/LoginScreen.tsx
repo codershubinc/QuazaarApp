@@ -53,10 +53,6 @@ export const LoginScreen = () => {
                 await AsyncStorage.setItem('authToken', data.token);
                 await AsyncStorage.setItem('username', username);
 
-                if (data.deviceId) {
-                    await AsyncStorage.setItem('deviceId', data.deviceId);
-                }
-
                 setAuthToken(data.token);
                 setStoreUsername(username);
             } else {

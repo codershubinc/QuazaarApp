@@ -80,6 +80,7 @@ const SvgCircularProgress = ({
 };
 
 export const SystemStatsCard = () => {
+
     const [usage, setUsage] = useState({
         cpu: 0, ram: 0, ramUsed: 0, ramTotal: 0,
         gpu: 0, vram: 0, vramUsed: 0, vramTotal: 0,
@@ -92,7 +93,10 @@ export const SystemStatsCard = () => {
     useEffect(() => {
         const fetchUsage = async () => {
             try {
-                if (!authToken) return;
+                if (!authToken) {
+                    console.log("No authToken available");
+                    return;
+                }
 
                 const [usageData, storageData] = await Promise.all([
                     fetcher('/api/v0.1/system/usage'),
@@ -100,6 +104,7 @@ export const SystemStatsCard = () => {
                 ]);
 
                 let newUsage = { ...usage };
+
 
                 if (usageData && usageData.success && usageData.usage) {
                     newUsage = {
@@ -133,6 +138,8 @@ export const SystemStatsCard = () => {
                 setUsage(newUsage);
             } catch (error) {
                 // Fail silently
+                console.log("Got err  for  system cpu/gpu info", error);
+
             }
         };
 
