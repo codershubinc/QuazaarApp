@@ -164,7 +164,7 @@ export const SystemStatsCard = () => {
 
     return (
         <LinearGradient
-            colors={[theme.colors.surface, theme.colors.surfaceHighlight]}
+            colors={["rgba(49, 40, 40, 0.29)", "rgba(90, 79, 79, 0.28)"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.card}
@@ -178,7 +178,7 @@ export const SystemStatsCard = () => {
                             width={6}
                             fill={usage.cpu}
                             color={theme.colors.secondary}
-                            backgroundColor="rgba(255,255,255,0.05)"
+                            backgroundColor="rgba(78, 75, 75, 0.73)"
                         >
                             <View style={styles.statInner}>
                                 <Text style={[styles.statLabel, { color: theme.colors.secondary }]}>CPU</Text>
@@ -195,7 +195,7 @@ export const SystemStatsCard = () => {
                             width={6}
                             fill={usage.ram}
                             color={theme.colors.accent}
-                            backgroundColor="rgba(255,255,255,0.05)"
+                            backgroundColor="rgba(78, 75, 75, 0.73)"
                         >
                             <View style={styles.statInner}>
                                 <Text style={[styles.statLabel, { color: theme.colors.accent }]}>RAM</Text>
@@ -210,7 +210,7 @@ export const SystemStatsCard = () => {
                             width={6}
                             fill={usage.gpu}
                             color={theme.colors.primary}
-                            backgroundColor="rgba(255,255,255,0.05)"
+                            backgroundColor="rgba(78, 75, 75, 0.73)"
                         >
                             <View style={styles.statInner}>
                                 <Text style={[styles.statLabel, { color: theme.colors.primary }]}>GPU</Text>
@@ -265,11 +265,9 @@ const styles = StyleSheet.create({
     card: {
         borderRadius: theme.borderRadius.l,
         padding: theme.spacing.m,
-        ...theme.shadows.default,
         borderWidth: 1,
-        borderColor: theme.colors.border,
         flex: 1,
-        minHeight: 140, // Ensure height for centering
+        minHeight: 140,
         justifyContent: 'center',
     },
     content: {

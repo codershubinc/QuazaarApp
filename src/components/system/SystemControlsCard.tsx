@@ -12,6 +12,7 @@ import { webSocketService } from '../../services/WebSocketService';
 import { theme } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { fetcher } from '../helper/Fetcher';
+import { AudioOutputCapsule } from './AudioOutputCapsule';
 
 // --- Helpers ---
 
@@ -210,6 +211,9 @@ export const SystemControlsCard: React.FC = () => {
                     activeIconColor={theme.colors.background}
                     inactiveIconColor={theme.colors.textDim}
                 />
+
+                {/* Audio Output Capsule */}
+                <AudioOutputCapsule />
 
             </View>
         </View>

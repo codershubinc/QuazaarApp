@@ -6,14 +6,29 @@ import { useAppStore } from '../../store/useAppStore';
 import { BluetoothDevice } from '../../types';
 import { fetcher } from '../helper/Fetcher';
 
-const getIconName = (serverIcon?: string): keyof typeof Ionicons.glyphMap => {
+const getIconName = (deviceName?: string, serverIcon?: string): keyof typeof Ionicons.glyphMap => {
+    const lowerName = (deviceName || '').toLowerCase();
+
+    // Smart detection based on device name
+    // Earbuds/Buds
+    if (lowerName.includes('buds') || lowerName.includes('earbud')) return 'ear-outline';
+    // AirPods
+    if (lowerName.includes('airpod')) return 'ear-outline';
+    // Headphones/Headsets
+    if (lowerName.includes('headphone') || lowerName.includes('headset') || lowerName.includes('anc')) return 'headset-outline';
+    // Speakers
+    if (lowerName.includes('speaker') || lowerName.includes('jbl') || lowerName.includes('bose')) return 'radio-outline';
+    // Soundbar
+    if (lowerName.includes('soundbar')) return 'tv-outline';
+
+    // Fallback to server icon mapping
     switch (serverIcon) {
-        case 'audio-headset': return 'headset';
-        case 'audio-headphones': return 'headset';
+        case 'audio-headset': return 'headset-outline';
+        case 'audio-headphones': return 'headset-outline';
         case 'phone': return 'phone-portrait';
         case 'computer': return 'desktop';
         case 'input-keyboard': return 'keypad';
-        case 'input-mouse': return 'hardware-chip-outline'; // Close enough
+        case 'input-mouse': return 'hardware-chip-outline';
         default: return 'bluetooth';
     }
 };
@@ -64,16 +79,17 @@ export const BluetoothDisplay = () => {
                     return theme.colors.success;
                 };
 
-                const iconName = getIconName(device.icon);
+                const iconName = getIconName(device.name, device.icon);
+                const iconColor = device.connected ? theme.colors.secondary : theme.colors.textDim;
 
                 return (
                     <View key={device.macAddress || index} style={styles.container}>
-                        <Ionicons name={iconName} size={14} color={theme.colors.textSecondary} />
+                        <Ionicons name={iconName} size={16} color={"gray"} />
                         {hasBattery ? (
                             <View style={styles.row}>
                                 <Ionicons
                                     name={batteryLevel! > 20 ? "battery-full" : "battery-dead"}
-                                    size={14}
+                                    size={16}
                                     color={getColor()}
                                 />
                                 <Text style={[styles.text, { color: getColor() }]}>

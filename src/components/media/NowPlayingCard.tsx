@@ -50,7 +50,7 @@ export const NowPlayingCard = () => {
         if (name.includes('firefox')) return 'logo-firefox';
         if (name.includes('chrome')) return 'logo-chrome';
         if (name.includes('edge')) return 'logo-edge';
-        if (name.includes('spotify')) return 'spotify'; 
+        if (name.includes('spotify')) return 'spotify';
         if (name.includes('vlc')) return 'videocam';
         if (name.includes('youtube')) return 'logo-youtube';
         if (name.includes('safari')) return 'logo-safari';
@@ -105,12 +105,6 @@ export const NowPlayingCard = () => {
                         ) : (
                             <View style={styles.placeholderArtwork}>
                                 <Ionicons name="musical-notes" size={48} color={theme.colors.textDim} />
-                            </View>
-                        )}
-                        {/* Play Status Badge */}
-                        {isPlaying && (
-                            <View style={styles.playingBadge}>
-                                <Ionicons name="play" size={12} color="#fff" />
                             </View>
                         )}
                     </View>
@@ -354,6 +348,7 @@ const styles = StyleSheet.create({
         ...theme.shadows.glow,
     },
     progressContainer: {
+        marginTop: theme.spacing.s,
         marginBottom: theme.spacing.m,
     },
     progressBarBackground: {
