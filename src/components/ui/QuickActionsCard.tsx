@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
-import { webSocketService } from '../services/WebSocketService';
+import { webSocketService } from '../../services/WebSocketService';
 import * as DocumentPicker from 'expo-document-picker';
 import { LinearGradient } from 'expo-linear-gradient';
-import { theme } from '../constants/theme';
+import { theme } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import { useAppStore } from '../store/useAppStore';
+import { useAppStore } from '../../store/useAppStore';
 import { TopLangsCard } from '../developer/TopLangsCard';
 
 export const QuickActionsCard = () => {

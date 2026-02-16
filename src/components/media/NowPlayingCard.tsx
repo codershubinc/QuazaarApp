@@ -1,9 +1,9 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
-import { useAppStore } from '../store/useAppStore';
-import { webSocketService } from '../services/WebSocketService';
 import { LinearGradient } from 'expo-linear-gradient';
-import { theme } from '../constants/theme';
+import React from 'react';
+import { View, TouchableOpacity, Text, Image, StyleSheet } from 'react-native';
+import { theme } from '../../constants/theme';
+import { webSocketService } from '../../services/WebSocketService';
+import { useAppStore } from '../../store/useAppStore';
 import { Ionicons } from '@expo/vector-icons';
 
 export const NowPlayingCard = () => {

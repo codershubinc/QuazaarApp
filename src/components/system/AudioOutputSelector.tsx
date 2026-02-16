@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { useAppStore } from '../store/useAppStore';
-import { theme } from '../constants/theme';
+import { useAppStore } from '../../store/useAppStore';
+import { theme } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { fetcher } from '../helper/Fetcher';
 

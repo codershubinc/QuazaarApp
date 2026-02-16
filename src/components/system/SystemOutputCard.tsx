@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
-import { useAppStore } from '../store/useAppStore';
+import { useAppStore } from '../../store/useAppStore';
 import { LinearGradient } from 'expo-linear-gradient';
-import { theme } from '../constants/theme';
+import { theme } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { fetcher } from '../helper/Fetcher';
 

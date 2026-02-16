@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../constants/theme';
-import { useAppStore } from '../store/useAppStore';
-import { BluetoothDevice } from '../types';
+import { theme } from '../../constants/theme';
+import { useAppStore } from '../../store/useAppStore';
+import { BluetoothDevice } from '../../types';
 import { fetcher } from '../helper/Fetcher';
 
 const getIconName = (serverIcon?: string): keyof typeof Ionicons.glyphMap => {

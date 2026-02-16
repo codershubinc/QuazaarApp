@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useAppStore } from '../store/useAppStore';
-import { theme } from '../constants/theme';
+import { useAppStore } from '../../store/useAppStore';
+import { theme } from '../../constants/theme';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { BatteryDisplay } from '../system/BatteryDisplay';
 import { BluetoothDisplay } from '../system/BluetoothDisplay';

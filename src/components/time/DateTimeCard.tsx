@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, Easing, Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { theme } from '../constants/theme';
+import { theme } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 
 // --- 1. Ticker Digit Component (Vertical Slide Animation) ---

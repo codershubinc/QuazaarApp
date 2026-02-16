@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Animated, Platform } from 'react-native';
-import { theme } from '../constants/theme';
+import { theme } from '../../constants/theme';
 
 interface FlipDigitProps {
     value: string | number;

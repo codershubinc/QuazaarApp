@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity } from 'react-native';
-import { useAppStore } from '../store/useAppStore';
-import { theme } from '../constants/theme';
+import { useAppStore } from '../../store/useAppStore';
+import { theme } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 
 export const Toast = () => {

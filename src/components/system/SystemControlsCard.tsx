@@ -7,9 +7,9 @@ import {
     PanResponderGestureState,
     GestureResponderEvent
 } from 'react-native';
-import { useAppStore } from '../store/useAppStore';
-import { webSocketService } from '../services/WebSocketService';
-import { theme } from '../constants/theme';
+import { useAppStore } from '../../store/useAppStore';
+import { webSocketService } from '../../services/WebSocketService';
+import { theme } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { fetcher } from '../helper/Fetcher';
 

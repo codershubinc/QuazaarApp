@@ -1,9 +1,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { useAppStore } from '../store/useAppStore';
-import { webSocketService } from '../services/WebSocketService';
+import { useAppStore } from '../../store/useAppStore';
+import { webSocketService } from '../../services/WebSocketService';
 import { LinearGradient } from 'expo-linear-gradient';
-import { theme } from '../constants/theme';
+import { theme } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 
 export const BluetoothDevicesCard = () => {

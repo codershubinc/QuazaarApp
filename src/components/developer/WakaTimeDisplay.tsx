@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../constants/theme';
+import { theme } from '../../constants/theme';
 import { Image } from 'expo-image';
 import { getLangIcon } from '../helper/GetLanguageIcon';
 import { fetcher } from '../helper/Fetcher';

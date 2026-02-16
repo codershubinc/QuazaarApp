@@ -1,10 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity, Animated, Easing, Platform, Dimensions } from 'react-native';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
-import { theme } from '../constants/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAppStore } from '../store/useAppStore';
-
+import { useAppStore } from '../../store/useAppStore';
+import { theme } from '../../constants/theme';
 interface FactData {
     animal: string;
     fact: string;

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, FlatList, Modal, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { theme } from '../constants/theme';
+import { theme } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import { useAppStore } from '../store/useAppStore';
-import { Todo } from '../types';
+import { useAppStore } from '../../store/useAppStore';
+import { Todo } from '../../types';
 
 export const TodoCard = () => {
     const { todos, addTodo, toggleTodo, deleteTodo, showToast } = useAppStore();
