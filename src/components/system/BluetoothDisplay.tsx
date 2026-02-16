@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../constants/theme';
 import { useAppStore } from '../store/useAppStore';
 import { BluetoothDevice } from '../types';
-import { fetcher } from './helper/Fetcher';
+import { fetcher } from '../helper/Fetcher';
 
 const getIconName = (serverIcon?: string): keyof typeof Ionicons.glyphMap => {
     switch (serverIcon) {

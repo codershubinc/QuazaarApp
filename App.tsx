@@ -3,7 +3,7 @@ import { StyleSheet, View, Platform, Alert } from 'react-native'; // Added Alert
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { MainScreen } from './src/screens/MainScreen';
 import { SplashScreen } from './src/screens/SplashScreen';
-import FactPopup from './src/components/FactPopup';
+import FactPopup from './src/components/ui/FactPopup';
 import { useState, useEffect } from 'react';
 import * as NavigationBar from 'expo-navigation-bar';
 import { theme } from './src/constants/theme';

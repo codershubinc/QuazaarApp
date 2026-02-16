@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { useAppStore } from '../store/useAppStore';
 import { theme } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
-import { fetcher } from './helper/Fetcher';
+import { fetcher } from '../helper/Fetcher';
 
 interface SoundDevice {
     id: string;

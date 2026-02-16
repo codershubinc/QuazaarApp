@@ -6,18 +6,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../constants/theme';
 
-import { Header } from '../components/Header';
-import { DateTimeCard } from '../components/DateTimeCard';
-import { PomodoroCard } from '../components/PomodoroCard';
-import { NowPlayingCard } from '../components/NowPlayingCard';
-import { QuickActionsCard } from '../components/QuickActionsCard';
-import { SystemControlsCard } from '../components/SystemControlsCard';
-import { Toast } from '../components/Toast';
+import { Header } from '../components/ui/Header';
+import { DateTimeCard } from '../components/time/DateTimeCard';
+import { PomodoroCard } from '../components/time/PomodoroCard';
+import { NowPlayingCard } from '../components/media/NowPlayingCard';
+import { QuickActionsCard } from '../components/ui/QuickActionsCard';
+import { SystemControlsCard } from '../components/system/SystemControlsCard';
+import { Toast } from '../components/ui/Toast';
 import { SettingsScreen } from './SettingsScreen';
 import { LoginScreen } from './LoginScreen';
-import { ActivityFeed } from '../components/ActivityFeed';
-import { TodoCard } from '../components/TodoCard';
-import { SystemStatsCard } from '../components/SystemStatsCard';
+import { ActivityFeed } from '../components/productivity/ActivityFeed';
+import { TodoCard } from '../components/productivity/TodoCard';
+import { SystemStatsCard } from '../components/system/SystemStatsCard';
 
 export const MainScreen = () => {
     const { width, height } = useWindowDimensions();

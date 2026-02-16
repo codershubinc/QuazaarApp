@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { theme } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '../store/useAppStore';
-import { fetcher } from './helper/Fetcher';
+import { fetcher } from '../helper/Fetcher';
 
 interface SystemUsage {
     cpu_usage: number;

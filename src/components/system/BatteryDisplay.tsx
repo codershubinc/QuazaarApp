@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../constants/theme';
 import * as Battery from 'expo-battery';
 import { useAppStore } from '../store/useAppStore';
-import { fetcher } from './helper/Fetcher';
+import { fetcher } from '../helper/Fetcher';
 
 interface BatteryDisplayProps {
     type: 'remote' | 'local';

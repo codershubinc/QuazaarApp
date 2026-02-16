@@ -3,11 +3,11 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { useAppStore } from '../store/useAppStore';
 import { theme } from '../constants/theme';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { BatteryDisplay } from './BatteryDisplay';
-import { BluetoothDisplay } from './BluetoothDisplay';
-import { WakaTimeDisplay } from './WakaTimeDisplay';
-import { StreakDisplay } from './StreakDisplay';
-import { GithubStatsDisplay } from './GithubStatsDisplay';
+import { BatteryDisplay } from '../system/BatteryDisplay';
+import { BluetoothDisplay } from '../system/BluetoothDisplay';
+import { WakaTimeDisplay } from '../developer/WakaTimeDisplay';
+import { StreakDisplay } from '../productivity/StreakDisplay';
+import { GithubStatsDisplay } from '../developer/GithubStatsDisplay';
 
 export const Header = ({ onSettingsClick }: { onSettingsClick?: () => void }) => {
     const { isConnected, openFactPopup } = useAppStore();

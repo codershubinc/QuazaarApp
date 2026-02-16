@@ -5,7 +5,7 @@ import { theme } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '../store/useAppStore';
 import Svg, { Circle, G } from 'react-native-svg';
-import { fetcher } from './helper/Fetcher';
+import { fetcher } from '../helper/Fetcher';
 
 // Create animated wrapper for SVG Circle
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);

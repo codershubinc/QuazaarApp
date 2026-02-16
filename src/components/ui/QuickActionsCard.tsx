@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '../store/useAppStore';
-import { TopLangsCard } from './TopLangsCard';
+import { TopLangsCard } from '../developer/TopLangsCard';
 
 export const QuickActionsCard = () => {
     const { showToast, username } = useAppStore();
