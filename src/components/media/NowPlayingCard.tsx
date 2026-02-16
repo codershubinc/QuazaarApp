@@ -5,6 +5,7 @@ import { theme } from '../../constants/theme';
 import { webSocketService } from '../../services/WebSocketService';
 import { useAppStore } from '../../store/useAppStore';
 import { Ionicons } from '@expo/vector-icons';
+import { SpotifyIcon } from '../helper/SpotifyIcon';
 
 export const NowPlayingCard = () => {
     const { mediaInfo, artWork } = useAppStore();
@@ -39,6 +40,33 @@ export const NowPlayingCard = () => {
         // Capitalize first letter
         return name.charAt(0).toUpperCase() + name.slice(1);
     };
+
+    const getPlayerIcon = (playerString?: string): any => {
+        if (!playerString) return 'tv-outline';
+
+        const name = playerString.toLowerCase();
+
+        // Map player names to appropriate icons
+        if (name.includes('firefox')) return 'logo-firefox';
+        if (name.includes('chrome')) return 'logo-chrome';
+        if (name.includes('edge')) return 'logo-edge';
+        if (name.includes('spotify')) return 'spotify'; 
+        if (name.includes('vlc')) return 'videocam';
+        if (name.includes('youtube')) return 'logo-youtube';
+        if (name.includes('safari')) return 'logo-safari';
+        if (name.includes('opera')) return 'logo-opera';
+        if (name.includes('mpv')) return 'play-circle';
+        if (name.includes('rhythmbox')) return 'disc';
+        if (name.includes('clementine')) return 'musical-note';
+        if (name.includes('audacious')) return 'headset';
+        if (name.includes('banshee')) return 'radio';
+        if (name.includes('mpd')) return 'server';
+
+        // Default icon
+        return 'tv-outline';
+    };
+
+    const isSpotify = mediaInfo?.Player?.toLowerCase().includes('spotify');
 
     const remainingTime = duration - position;
 
@@ -161,7 +189,11 @@ export const NowPlayingCard = () => {
                 {/* Bottom Info Bar */}
                 <View style={styles.bottomBar}>
                     <View style={styles.infoItem}>
-                        <Ionicons name="tv-outline" size={12} color={theme.colors.textDim} />
+                        {isSpotify ? (
+                            <SpotifyIcon size={14} color="#1DB954" />
+                        ) : (
+                            <Ionicons name={getPlayerIcon(mediaInfo?.Player)} size={14} color={"white"} />
+                        )}
                         <Text style={styles.infoText}>
                             {extractPlayerName(mediaInfo?.Player)}
                         </Text>

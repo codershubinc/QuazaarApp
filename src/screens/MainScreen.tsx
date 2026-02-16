@@ -18,11 +18,12 @@ import { LoginScreen } from './LoginScreen';
 import { ActivityFeed } from '../components/productivity/ActivityFeed';
 import { TodoCard } from '../components/productivity/TodoCard';
 import { SystemStatsCard } from '../components/system/SystemStatsCard';
+import { TopLangsCard } from '../components/developer/TopLangsCard';
 
 export const MainScreen = () => {
     const { width, height } = useWindowDimensions();
     const isLandscape = width > 600;
-    const { isConnected, isConnecting, error, mediaInfo, bluetoothDevices, authToken, setAuthToken } = useAppStore();
+    const { isConnected, isConnecting, error, mediaInfo, bluetoothDevices, authToken, setAuthToken, username } = useAppStore();
     const [currentScreen, setCurrentScreen] = useState<'MAIN' | 'SETTINGS' | 'LOGIN'>('LOGIN');
     const [isLoading, setIsLoading] = useState(true);
 
@@ -119,7 +120,7 @@ export const MainScreen = () => {
                         {mediaInfo && (mediaInfo.Title || mediaInfo.Artist) && <NowPlayingCard />}
                     </View>
                     <View style={isLandscape ? styles.columnHalf : styles.column}>
-                        <QuickActionsCard />
+                        <TopLangsCard username={username || 'codershubinc'} />
                         <ActivityFeed />
                         <View
                             style={{ flexDirection: isLandscape ? 'row' : 'column', gap: theme.spacing.m, width: 'auto', marginBottom: theme.spacing.m }}

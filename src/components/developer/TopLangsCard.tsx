@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, Platform, LayoutAnimation } from 'react-native';
+import { View, Text, StyleSheet, Platform, LayoutAnimation, ScrollView } from 'react-native';
 import { theme } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -80,7 +80,8 @@ export const TopLangsCard = ({ username }: { username: string }) => {
     }
 
     // Limit to 5 for the best visual fit on mobile
-    const top5 = langs.slice(0, 7);
+    const top5 = langs.slice(0, 5);
+    const remaining = langs.slice(5);
     const totalSize = langs.reduce((acc, curr) => acc + curr.size, 0);
 
     return (
@@ -97,45 +98,72 @@ export const TopLangsCard = ({ username }: { username: string }) => {
                 </View>
             </View>
 
-            {/* Bars Grid */}
-            <View style={styles.chartContainer}>
-                {top5.map((lang, index) => {
-                    const percent = (lang.size / totalSize) * 100;
-                    // Ensure bar is at least 15% height so icon fits, max 100%
-                    const visualHeight = Math.min(Math.max(percent, 18), 100);
-                    const langColor = lang.color || theme.colors.primary;
+            {/* Main Content: Bars and Remaining Languages */}
+            <View style={styles.mainContent}>
+                {/* Bars Grid */}
+                <View style={styles.chartContainer}>
+                    {top5.map((lang, index) => {
+                        const percent = (lang.size / totalSize) * 100;
+                        // Ensure bar is at least 15% height so icon fits, max 100%
+                        const visualHeight = Math.min(Math.max(percent, 18), 100);
+                        const langColor = lang.color || theme.colors.primary;
 
-                    return (
-                        <View key={lang.name} style={styles.columnWrapper}>
-                            {/* Percentage Label Top */}
-                            <Text style={styles.percentText}>{percent.toFixed(0)}%</Text>
+                        return (
+                            <View key={lang.name} style={styles.columnWrapper}>
+                                {/* Percentage Label Top */}
+                                <Text style={styles.percentText}>{percent.toFixed(1)}%</Text>
 
-                            {/* The Pill Track */}
-                            <View style={styles.track}>
-                                {/* The Colorful Fill */}
-                                <LinearGradient
-                                    colors={[langColor, `${langColor}80`]}
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 0, y: 1 }}
-                                    style={[styles.fill, { height: `${visualHeight}%` }]}
-                                />
-
-                                {/* Icon at Bottom of Pill */}
-                                <View style={styles.iconContainer}>
-                                    <Image
-                                        source={{ uri: getLangIcon(lang.name) }}
-                                        style={styles.icon}
-                                        contentFit="contain"
+                                {/* The Pill Track */}
+                                <View style={styles.track}>
+                                    {/* The Colorful Fill */}
+                                    <LinearGradient
+                                        colors={[langColor, `${langColor}80`]}
+                                        start={{ x: 0, y: 0 }}
+                                        end={{ x: 0, y: 1 }}
+                                        style={[styles.fill, { height: `${visualHeight}%` }]}
                                     />
-                                </View>
-                            </View>
 
-                            {/* Language Name Footer */}
-                            <Text style={styles.langName}>{getShortName(lang.name)}</Text>
-                            <Text style={styles.langName}>#{index + 1}</Text>
-                        </View>
-                    );
-                })}
+                                    {/* Icon at Bottom of Pill */}
+                                    <View style={styles.iconContainer}>
+                                        <Image
+                                            source={{ uri: getLangIcon(lang.name) }}
+                                            style={styles.icon}
+                                            contentFit="contain"
+                                        />
+                                    </View>
+                                </View>
+
+                                {/* Language Name Footer */}
+                                <Text style={styles.langName}>{getShortName(lang.name)}</Text>
+                            </View>
+                        );
+                    })}
+                </View>
+
+                {/* Remaining Languages List */}
+                {remaining.length > 0 && (
+                    <View style={styles.remainingContainer}>
+                        <Text style={styles.remainingTitle}>Others</Text>
+                        <ScrollView
+                            style={styles.remainingScroll}
+                            showsVerticalScrollIndicator={false}
+                            nestedScrollEnabled={true}
+                        >
+                            {remaining.map((lang, index) => {
+                                const percent = (lang.size / totalSize) * 100;
+                                return (
+                                    <View key={lang.name} style={styles.remainingItem}>
+                                        <View style={[styles.colorDot, { backgroundColor: lang.color || theme.colors.primary }]} />
+                                        <Text style={styles.remainingLangName} numberOfLines={1}>
+                                            {lang.name}
+                                        </Text>
+                                        <Text style={styles.remainingPercent}>{percent.toFixed(1)}%</Text>
+                                    </View>
+                                );
+                            })}
+                        </ScrollView>
+                    </View>
+                )}
             </View>
         </View>
     );
@@ -143,17 +171,19 @@ export const TopLangsCard = ({ username }: { username: string }) => {
 
 const styles = StyleSheet.create({
     card: {
-        // Transparent/Dark theme background logic
+        borderRadius: theme.borderRadius.l,
+        padding: 16,
+        backgroundColor: '#1C1C1E',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.05)',
         marginBottom: theme.spacing.m,
-        paddingHorizontal: 4,
+        overflow: 'hidden',
     },
     centerContainer: {
         height: 150,
         justifyContent: 'center',
         alignItems: 'center',
         gap: 10,
-        backgroundColor: 'rgba(255,255,255,0.03)',
-        borderRadius: 20,
     },
     loadingText: {
         color: theme.colors.textDim,
@@ -165,7 +195,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 16,
-        paddingHorizontal: 4,
     },
     titleRow: {
         flexDirection: 'row',
@@ -179,22 +208,30 @@ const styles = StyleSheet.create({
         letterSpacing: 1,
     },
     badge: {
-        backgroundColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: 'rgba(255,255,255,0.05)',
         paddingHorizontal: 8,
         paddingVertical: 3,
         borderRadius: 12,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.05)',
     },
     badgeText: {
         color: theme.colors.textDim,
         fontSize: 9,
         fontWeight: '600',
     },
+    mainContent: {
+        flexDirection: 'row',
+        gap: 8,
+        overflow: 'hidden',
+    },
     chartContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-end',
         height: 140, // Fixed height for the chart area
-        paddingHorizontal: 4,
+        flex: 1,
+        overflow: 'hidden',
     },
     columnWrapper: {
         alignItems: 'center',
@@ -202,6 +239,8 @@ const styles = StyleSheet.create({
         height: '100%',
         flex: 1, // Distribute width evenly
         gap: 6,
+        minWidth: 0, // Allow flex shrinking
+        maxWidth: 60, // Prevent over-expansion
     },
     percentText: {
         color: theme.colors.text,
@@ -209,6 +248,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
         marginBottom: 2,
+        textAlign: 'center',
     },
     track: {
         width: 38, // Slim pill width
@@ -240,5 +280,57 @@ const styles = StyleSheet.create({
         fontSize: 10,
         fontWeight: '600',
         letterSpacing: 0.5,
+        textAlign: 'center',
+    },
+    remainingContainer: {
+        width: 110,
+        paddingLeft: 10,
+        paddingRight: 4,
+        borderLeftWidth: 1,
+        borderLeftColor: 'rgba(255, 255, 255, 0.08)',
+        backgroundColor: 'rgba(0, 0, 0, 0.2)',
+        borderRadius: 8,
+        paddingVertical: 8,
+        flexShrink: 0, // Don't shrink below 110px
+        overflow: 'hidden',
+    },
+    remainingTitle: {
+        color: theme.colors.textSecondary,
+        fontSize: 9,
+        fontWeight: '700',
+        letterSpacing: 1,
+        marginBottom: 8,
+        textTransform: 'uppercase',
+        opacity: 0.8,
+    },
+    remainingScroll: {
+        maxHeight: 120,
+    },
+    remainingItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 5,
+        gap: 6,
+        paddingVertical: 2,
+    },
+    colorDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        flexShrink: 0,
+    },
+    remainingLangName: {
+        color: 'rgba(255, 255, 255, 0.85)',
+        fontSize: 9,
+        fontWeight: '500',
+        flex: 1,
+    },
+    remainingPercent: {
+        color: 'rgba(255, 255, 255, 0.5)',
+        fontSize: 8,
+        fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+        fontWeight: '600',
+        minWidth: 30,
+        textAlign: 'right',
     },
 });
