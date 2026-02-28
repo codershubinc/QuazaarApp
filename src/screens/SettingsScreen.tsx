@@ -11,12 +11,12 @@ import { Video, ResizeMode } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 
 export const SettingsScreen = ({ onBack }: { onBack: () => void }) => {
-    const [activeTab, setActiveTab] = useState<'CONNECTION' | 'BACKGROUND'>('CONNECTION');
+    const [activeTab, setActiveTab] = useState<'CONNECTION' | 'BACKGROUND' | 'BUDDY'>('CONNECTION');
     const [ip, setIp] = useState('');
     const [port, setPort] = useState('');
     const [path, setPath] = useState('');
     const [youtubeInput, setYoutubeInput] = useState('');
-    const { backgroundImage, backgroundMediaType, youtubeUrl, setBackgroundImage, setYoutubeUrl } = useAppStore();
+    const { backgroundImage, backgroundMediaType, youtubeUrl, setBackgroundImage, setYoutubeUrl, buddyType, setBuddyType } = useAppStore();
 
     useEffect(() => {
         const loadSettings = async () => {
@@ -37,6 +37,10 @@ export const SettingsScreen = ({ onBack }: { onBack: () => void }) => {
                 setYoutubeUrl(savedYoutubeUrl);
                 setYoutubeInput(savedYoutubeUrl);
             }
+
+            // Load buddy type
+            const savedBuddy = await AsyncStorage.getItem('buddyType') as 'robo' | 'ironman' | null;
+            if (savedBuddy) setBuddyType(savedBuddy);
         };
         loadSettings();
     }, []);
@@ -151,6 +155,14 @@ export const SettingsScreen = ({ onBack }: { onBack: () => void }) => {
                         <Ionicons name="image-outline" size={20} color={activeTab === 'BACKGROUND' ? theme.colors.secondary : theme.colors.textDim} />
                         <Text style={[styles.tabText, activeTab === 'BACKGROUND' && styles.activeTabText]}>Background</Text>
                     </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[styles.tabItem, activeTab === 'BUDDY' && styles.activeTabItem]}
+                        onPress={() => setActiveTab('BUDDY')}
+                    >
+                        <Ionicons name="bonfire-outline" size={20} color={activeTab === 'BUDDY' ? theme.colors.secondary : theme.colors.textDim} />
+                        <Text style={[styles.tabText, activeTab === 'BUDDY' && styles.activeTabText]}>Buddy</Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Main Content */}
@@ -205,6 +217,66 @@ export const SettingsScreen = ({ onBack }: { onBack: () => void }) => {
                                     <Text style={styles.buttonText}>Connect</Text>
                                 </LinearGradient>
                             </TouchableOpacity>
+                        </LinearGradient>
+                    ) : activeTab === 'BUDDY' ? (
+                        <LinearGradient
+                            colors={[theme.colors.surface, theme.colors.surfaceHighlight]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.card}
+                        >
+                            <View style={styles.cardHeader}>
+                                <Ionicons name="bonfire-outline" size={24} color={theme.colors.secondary} />
+                                <Text style={styles.cardTitle}>Wandering Buddy</Text>
+                            </View>
+
+                            <Text style={styles.label}>Choose your screen companion</Text>
+
+                            <View style={styles.buddyGrid}>
+                                {/* Robo Buddy */}
+                                <TouchableOpacity
+                                    style={[styles.buddyCard, buddyType === 'robo' && styles.buddyCardActive]}
+                                    onPress={async () => {
+                                        setBuddyType('robo');
+                                        await AsyncStorage.setItem('buddyType', 'robo');
+                                    }}
+                                >
+                                    <View style={styles.buddyPreview}>
+                                        <Text style={styles.buddyEmoji}>🤖</Text>
+                                    </View>
+                                    <Text style={[styles.buddyName, buddyType === 'robo' && styles.buddyNameActive]}>RoboSkel</Text>
+                                    <Text style={styles.buddyDesc}>{'Colorful robot\nwith laser trail'}</Text>
+                                    {buddyType === 'robo' && (
+                                        <View style={styles.buddyBadge}>
+                                            <Ionicons name="checkmark" size={12} color="#000" />
+                                        </View>
+                                    )}
+                                </TouchableOpacity>
+
+                                {/* Iron Man Buddy */}
+                                <TouchableOpacity
+                                    style={[styles.buddyCard, buddyType === 'ironman' && styles.buddyCardActive, buddyType === 'ironman' && { borderColor: '#FFD700' }]}
+                                    onPress={async () => {
+                                        setBuddyType('ironman');
+                                        await AsyncStorage.setItem('buddyType', 'ironman');
+                                    }}
+                                >
+                                    <View style={[styles.buddyPreview, { backgroundColor: 'rgba(139,0,0,0.3)' }]}>
+                                        <Text style={styles.buddyEmoji}>🦾</Text>
+                                    </View>
+                                    <Text style={[styles.buddyName, buddyType === 'ironman' && { color: '#FFD700' }]}>Iron Man</Text>
+                                    <Text style={styles.buddyDesc}>{'Red & gold armor\nwith gold trail'}</Text>
+                                    {buddyType === 'ironman' && (
+                                        <View style={[styles.buddyBadge, { backgroundColor: '#FFD700' }]}>
+                                            <Ionicons name="checkmark" size={12} color="#000" />
+                                        </View>
+                                    )}
+                                </TouchableOpacity>
+                            </View>
+
+                            <Text style={styles.note}>
+                                💡 Your buddy wanders in the background, appears on touch, and occasionally says hello!
+                            </Text>
                         </LinearGradient>
                     ) : (
                         <View style={styles.backgroundTabContainer}>
@@ -547,5 +619,64 @@ const styles = StyleSheet.create({
         marginTop: theme.spacing.m,
         textAlign: 'center',
         fontStyle: 'italic',
+    },
+    buddyGrid: {
+        flexDirection: 'row',
+        gap: 12,
+        marginTop: 8,
+        marginBottom: 4,
+    },
+    buddyCard: {
+        flex: 1,
+        borderRadius: 16,
+        borderWidth: 2,
+        borderColor: theme.colors.border,
+        backgroundColor: 'rgba(255,255,255,0.04)',
+        alignItems: 'center',
+        padding: 14,
+        position: 'relative',
+    },
+    buddyCardActive: {
+        borderColor: theme.colors.secondary,
+        backgroundColor: 'rgba(255,255,255,0.08)',
+    },
+    buddyPreview: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        backgroundColor: 'rgba(66,133,244,0.15)',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 10,
+    },
+    buddyEmoji: {
+        fontSize: 30,
+    },
+    buddyName: {
+        color: theme.colors.text,
+        fontWeight: '700',
+        fontSize: 13,
+        letterSpacing: 0.5,
+        marginBottom: 4,
+    },
+    buddyNameActive: {
+        color: theme.colors.secondary,
+    },
+    buddyDesc: {
+        color: theme.colors.textDim,
+        fontSize: 11,
+        textAlign: 'center',
+        lineHeight: 16,
+    },
+    buddyBadge: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        width: 20,
+        height: 20,
+        borderRadius: 10,
+        backgroundColor: theme.colors.secondary,
+        alignItems: 'center',
+        justifyContent: 'center',
     },
 });

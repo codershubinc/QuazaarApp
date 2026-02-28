@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Animated, Easing, Platform } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../../constants/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppStore } from '../../store/useAppStore';
@@ -104,7 +105,12 @@ export const PomodoroCard = () => {
     };
 
     return (
-        <View style={styles.card}>
+        <LinearGradient
+            colors={["rgba(0, 0, 0, 0.8)", "rgba(30, 41, 59, 0.5)"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.card}
+        >
 
             {/* --- SETUP VIEW --- */
                 view === 'SETUP' ? (
@@ -203,7 +209,7 @@ export const PomodoroCard = () => {
                         </View>
                     </View>
                 )}
-        </View>
+        </LinearGradient>
     );
 };
 

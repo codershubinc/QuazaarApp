@@ -85,7 +85,12 @@ export const TopLangsCard = ({ username }: { username: string }) => {
     const totalSize = langs.reduce((acc, curr) => acc + curr.size, 0);
 
     return (
-        <View style={styles.card}>
+        <LinearGradient
+            colors={["rgba(0, 0, 0, 0.8)", "rgba(30, 41, 59, 0.5)"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.card}
+        >
             {/* Header */}
             <View style={styles.header}>
                 <View style={styles.titleRow}>
@@ -165,7 +170,7 @@ export const TopLangsCard = ({ username }: { username: string }) => {
                     </View>
                 )}
             </View>
-        </View>
+        </LinearGradient>
     );
 };
 

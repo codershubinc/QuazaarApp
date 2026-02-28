@@ -1,14 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, useWindowDimensions, DeviceEventEmitter } from 'react-native';
-import Svg, { G, Line, Circle, Rect, Defs, RadialGradient, Stop } from 'react-native-svg';
+import Svg, { Line, Circle, Defs, RadialGradient, Stop, Text as SvgText, Polygon, Rect, G } from 'react-native-svg';
+import { useAppStore } from '../../store/useAppStore';
 
-// Physics constants
-const TRAIL_LEN = 42;
-const SPINE_N = 12, SPINE_SEG = 13, ARM_N = 3, ARM_SEG = 9, LEG_N = 3, LEG_SEG = 11, SHOULDER = 2, HIP = SPINE_N - 3;
+// Import Buddies
+import { BotBuddy } from '../buddy/BotBuddy';
+import { IronManBuddy } from '../buddy/IronManBuddy';
+
+// Physics
+const TRAIL_LEN = 30; // Slightly shorter trails for 4 lasers to improve performance
+const SPINE_N = 12, SPINE_SEG = 13, ARM_N = 3, ARM_SEG = 16, LEG_N = 3, LEG_SEG = 20, SHOULDER = 2, HIP = SPINE_N - 3;
 const COLORS = ['#4285F4', '#EA4335', '#FBBC04', '#34A853'];
-const DARK = '#0a0a0f';
+const IRONMAN_COLORS = ['#B22222', '#CC2200', '#FFD700', '#FF4400'];
 
-// Helpers
+// --- Helpers ---
 function _mkChain(n: number) { return Array.from({ length: n }, () => ({ x: -600, y: -600 })); }
 function _lerp(j: any, tx: number, ty: number, f: number) { j.x += (tx - j.x) * f; j.y += (ty - j.y) * f; }
 function _pull(joint: any, anchor: any, len: number) {
@@ -20,19 +25,21 @@ function _pull(joint: any, anchor: any, len: number) {
 }
 function _branch(limb: any[], anchor: any, behind: any, side: number, seg: number) {
     const angle = Math.atan2(anchor.y - behind.y, anchor.x - behind.x) + (Math.PI / 2) * side;
-    _lerp(limb[0], anchor.x + Math.cos(angle) * seg * 0.65, anchor.y + Math.sin(angle) * seg * 0.65, 0.32);
+    const shoulderOffsetX = anchor.x + Math.cos(angle) * seg * 0.8;
+    const shoulderOffsetY = anchor.y + Math.sin(angle) * seg * 0.8;
+    _lerp(limb[0], shoulderOffsetX, shoulderOffsetY, 0.4);
     for (let i = 1; i < limb.length; i++) _pull(limb[i], limb[i - 1], seg);
 }
-function _a(v: number) { return Math.round(Math.max(0, Math.min(1, v)) * 255).toString(16).padStart(2, '0'); }
+
 function _nextBlinkWait() { return Math.round((300 + Math.random() * 200) / 1000 * 60); }
 function _pickBlinkSeq() {
     const CLOSE = 4, GAP = 5, roll = Math.random();
     if (roll < 0.40) return [CLOSE];
     if (roll < 0.65) return [CLOSE, GAP, CLOSE];
-    if (roll < 0.82) return [CLOSE, GAP, CLOSE, GAP, CLOSE];
-    return [3, 3, 3, 3, 3, 3, 3];
+    return [CLOSE, GAP, CLOSE, GAP, CLOSE];
 }
 
+// --- Classes ---
 class LaserTail {
     _pts: { x: number, y: number }[] = [];
     update(x: number, y: number) {
@@ -49,14 +56,32 @@ class RoboSkeleton {
     legR = _mkChain(LEG_N);
     _eyeOpen = true; _blinkTick = 0; _blinkSeq: number[] = []; _blinkSeqIdx = 0;
     _blinkWait = _nextBlinkWait();
+    waving = false;
+    waveAngle = 0;
 
     update(mx: number, my: number) {
         _lerp(this.spine[0], mx, my, 0.25);
         for (let i = 1; i < SPINE_N; i++) _pull(this.spine[i], this.spine[i - 1], SPINE_SEG);
+
         _branch(this.armL, this.spine[SHOULDER], this.spine[SHOULDER + 1], -1, ARM_SEG);
-        _branch(this.armR, this.spine[SHOULDER], this.spine[SHOULDER + 1], 1, ARM_SEG);
+
+        if (!this.waving) {
+            _branch(this.armR, this.spine[SHOULDER], this.spine[SHOULDER + 1], 1, ARM_SEG);
+        } else {
+            const sh = this.spine[SHOULDER];
+            const w = Math.sin(this.waveAngle);
+            this.armR[0].x += (sh.x + ARM_SEG * 0.9 - this.armR[0].x) * 0.18;
+            this.armR[0].y += (sh.y - ARM_SEG * 1.2 - this.armR[0].y) * 0.18;
+            this.armR[1].x += (sh.x + ARM_SEG * 1.4 - this.armR[1].x) * 0.15;
+            this.armR[1].y += (sh.y - ARM_SEG * 2.5 + w * 9 - this.armR[1].y) * 0.15;
+            this.armR[2].x += (sh.x + ARM_SEG * 0.9 - this.armR[2].x) * 0.12;
+            this.armR[2].y += (sh.y - ARM_SEG * 3.5 + w * 16 - this.armR[2].y) * 0.12;
+            this.waveAngle += 0.22;
+        }
+
         _branch(this.legL, this.spine[HIP], this.spine[HIP - 1], -1, LEG_SEG);
         _branch(this.legR, this.spine[HIP], this.spine[HIP - 1], 1, LEG_SEG);
+
         this._blinkTick++;
         if (this._blinkSeq.length === 0) {
             if (this._blinkTick >= this._blinkWait) {
@@ -74,117 +99,58 @@ class RoboSkeleton {
     }
 }
 
-/* Rendering Primitives */
-const Bone = ({ a, b, bw, color, alpha }: any) => {
-    const len = Math.hypot(b.x - a.x, b.y - a.y);
-    if (len < 1) return null;
-    const deg = Math.atan2(b.y - a.y, b.x - a.x) * (180 / Math.PI);
-    return (
-        <G x={a.x} y={a.y} rotation={deg} originX={0} originY={0}>
-            <Rect x={1} y={-bw * 0.5} width={len - 2} height={bw} rx={bw * 0.42} fill={color + _a(alpha * 0.18)} stroke={color + _a(alpha * 0.85)} strokeWidth={1.2} />
-            {len > bw * 2 && <Line x1={bw * 0.65} y1={0} x2={len - bw * 0.65} y2={0} stroke={color + _a(alpha * 0.38)} strokeWidth={0.7} />}
-            {len > 14 && (
-                <>
-                    <Circle cx={len * 0.3} cy={0} r={1.15} fill={color + _a(alpha * 0.65)} />
-                    <Circle cx={len * 0.7} cy={0} r={1.15} fill={color + _a(alpha * 0.65)} />
-                </>
-            )}
-        </G>
-    );
-};
-
-const JointDot = ({ p, r, color, alpha }: any) => (
-    <G x={p.x} y={p.y}>
-        <Circle cx={0} cy={0} r={r} fill={color + _a(alpha * 0.28)} stroke={color + _a(alpha)} strokeWidth={1.3} />
-        <Circle cx={0} cy={0} r={r * 0.35} fill={color + _a(alpha * 0.85)} />
-        <Circle cx={0} cy={0} r={r * 0.15} fill={DARK} />
-    </G>
-);
-
-const SkeletonChain = ({ joints, aBase, wBase, colorOffset }: any) => {
-    const n = joints.length;
-    const res: any[] = [];
-    for (let i = 0; i < n - 1; i++) {
-        const t = 1 - i / Math.max(n - 2, 1);
-        res.push(<Bone key={`cb_${colorOffset}_${i}`} a={joints[i]} b={joints[i + 1]} bw={wBase * (0.55 + t * 0.45)} color={COLORS[(i + colorOffset) % 4]} alpha={aBase * (0.45 + t * 0.55)} />);
-    }
-    for (let i = 0; i < n; i++) {
-        const t = 1 - i / (n - 1);
-        res.push(<JointDot key={`cj_${colorOffset}_${i}`} p={joints[i]} r={1.3 + t * 2.5} color={COLORS[(i + colorOffset) % 4]} alpha={aBase * (0.45 + t * 0.55)} />);
-    }
-    return <>{res}</>;
-};
-
-const SkeletonSpine = ({ s }: any) => {
-    const res: any[] = [];
-    for (let i = SPINE_N - 2; i >= 0; i--) {
-        const t = 1 - i / (SPINE_N - 2);
-        res.push(<Bone key={`sb_${i}`} a={s[i]} b={s[i + 1]} bw={2.5 + t * 6.5} color={COLORS[i % 4]} alpha={0.18 + t * 0.72} />);
-    }
-    for (let i = SPINE_N - 1; i >= 1; i--) {
-        const t = 1 - i / (SPINE_N - 1);
-        res.push(<JointDot key={`sj_${i}`} p={s[i]} r={1.4 + t * 3.5} color={COLORS[i % 4]} alpha={0.18 + t * 0.72} />);
-    }
-    return <>{res}</>;
-};
-
-const Head = ({ pos, eyeOpen }: { pos: any, eyeOpen: boolean }) => {
-    const W = 30, H = 24, R = 7;
-    const ty = -H / 2 - 16;
-    const ey = -1;
-    return (
-        <G x={pos.x} y={pos.y}>
-            <Rect x={-W / 2} y={-H / 2} width={W} height={H} rx={R} fill="rgba(18,18,28,0.93)" stroke={COLORS[0] + 'cc'} strokeWidth={2} />
-            <Line x1={0} y1={-H / 2} x2={0} y2={-H / 2 - 13} stroke={COLORS[0] + '88'} strokeWidth={1.5} />
-
-            <Circle cx={0} cy={ty} r={8} fill="url(#antennaGlow)" />
-            <Circle cx={0} cy={ty} r={3} fill={COLORS[1]} />
-
-            {[[-7.5, COLORS[0]], [7.5, COLORS[2]]].map(([ex, col], i) => (
-                <G x={ex as number} y={ey} key={`eye_${i}`}>
-                    <Circle cx={0} cy={0} r={5.5} fill="rgba(0,0,0,0.55)" />
-                    {eyeOpen ? (
-                        <>
-                            <Circle cx={0} cy={0} r={6.5} fill={col + '28'} />
-                            <Circle cx={0} cy={0} r={3.8} fill={col as string} />
-                            <Circle cx={0} cy={0} r={1.6} fill={DARK} />
-                            <Circle cx={-1.1} cy={-1.1} r={0.9} fill="rgba(255,255,255,0.85)" />
-                        </>
-                    ) : (
-                        <Line x1={-3.8} y1={0} x2={3.8} y2={0} stroke={col as string} strokeWidth={2.2} />
-                    )}
-                </G>
-            ))}
-
-            {[0, 1, 2].map(i => {
-                const gx = -4.5 + i * 4.5;
-                return <Line key={`grill_${i}`} x1={gx} y1={H / 2 - 8} x2={gx} y2={H / 2 - 3} stroke={COLORS[2] + '66'} strokeWidth={1.5} />
-            })}
-        </G>
-    );
-};
-
-const LaserLines = ({ pts }: { pts: { x: number, y: number }[] }) => {
+// Updated to accept custom colors (for Blue/White Iron Man beams)
+const LaserLines = ({ pts, colorR, colorG, colorB }: { pts: { x: number, y: number }[], colorR?: number, colorG?: number, colorB?: number }) => {
     if (pts.length < 2) return null;
     const res: any[] = [];
     const n = pts.length;
+
+    // Default to Blue if no color provided
+    const R = colorR ?? 66;
+    const G = colorG ?? 133;
+    const B = colorB ?? 244;
+
     for (let i = 1; i < n; i++) {
         const a = Math.pow(i / (n - 1), 2);
         const p0 = pts[i - 1], p1 = pts[i];
-        res.push(<Line key={`l1_${i}`} x1={p0.x} y1={p0.y} x2={p1.x} y2={p1.y} stroke={`rgba(66,133,244,${+(a * 0.12).toFixed(3)})`} strokeWidth={15} strokeLinecap="round" strokeLinejoin="round" />);
-        res.push(<Line key={`l2_${i}`} x1={p0.x} y1={p0.y} x2={p1.x} y2={p1.y} stroke={`rgba(100,180,255,${+(a * 0.36).toFixed(3)})`} strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" />);
-        res.push(<Line key={`l3_${i}`} x1={p0.x} y1={p0.y} x2={p1.x} y2={p1.y} stroke={`rgba(210,238,255,${+(a * 0.88).toFixed(3)})`} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />);
+
+        // Inner Core (Bright)
+        res.push(<Line key={`l1_${i}`} x1={p0.x} y1={p0.y} x2={p1.x} y2={p1.y} stroke={`rgba(${R},${G},${B},${+(a * 0.12).toFixed(3)})`} strokeWidth={15} strokeLinecap="round" strokeLinejoin="round" />);
+        // Mid Glow
+        res.push(<Line key={`l2_${i}`} x1={p0.x} y1={p0.y} x2={p1.x} y2={p1.y} stroke={`rgba(${Math.min(R + 40, 255)},${Math.min(G + 50, 255)},${Math.min(B + 10, 255)},${+(a * 0.36).toFixed(3)})`} strokeWidth={5} strokeLinecap="round" strokeLinejoin="round" />);
+        // White Hot Center
+        res.push(<Line key={`l3_${i}`} x1={p0.x} y1={p0.y} x2={p1.x} y2={p1.y} stroke={`rgba(230,245,255,${+(a * 0.88).toFixed(3)})`} strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />);
     }
     const tip = pts[n - 1];
     res.push(<Circle key="tip" cx={tip.x} cy={tip.y} r={10} fill="url(#laserTip)" />);
     return <>{res}</>;
 };
 
+const SpeechBubble = ({ pos, text }: { pos: { x: number; y: number }; text: string }) => {
+    const padX = 10, padY = 5;
+    const bubbleW = Math.max(text.length * 7.2 + padX * 2, 72);
+    const bubbleH = 28;
+    const bx = pos.x - bubbleW / 2;
+    const by = pos.y - 76 - bubbleH;
+    const tailBaseY = by + bubbleH;
+    const tailTipY = pos.y - 60;
+    return (
+        <G>
+            <Rect x={bx} y={by} width={bubbleW} height={bubbleH} rx={8}
+                fill="rgba(12,12,22,0.95)" stroke="#4285F4cc" strokeWidth={1.5} />
+            <Polygon points={`${pos.x - 5},${tailBaseY} ${pos.x + 5},${tailBaseY} ${pos.x},${tailTipY}`} fill="rgba(12,12,22,0.95)" />
+            <SvgText x={pos.x} y={by + padY + 14} textAnchor="middle" fill="#ffffff" fontSize={12} fontWeight="bold">{text}</SvgText>
+        </G>
+    );
+};
+
 export const WanderingCursor = () => {
     const { width, height } = useWindowDimensions();
+    const buddyType = useAppStore(s => s.buddyType);
+    const activeColors = buddyType === 'ironman' ? IRONMAN_COLORS : COLORS;
     const [, setTick] = useState(0);
-    const [zIndex, setZIndex] = useState(5);
     const [visible, setVisible] = useState(false);
+    const [showBubble, setShowBubble] = useState(false);
 
     const visibleRef = useRef(false);
     const rafRef = useRef<number>(0);
@@ -192,37 +158,27 @@ export const WanderingCursor = () => {
 
     const inst = useRef({
         skeleton: new RoboSkeleton(),
-        laser: new LaserTail(),
-        mx: -600,
-        my: -600,
-        targetX: width / 2,
-        targetY: height / 2,
+        // Multiple laser instances for Iron Man
+        laserMain: new LaserTail(),
+        laserHandL: new LaserTail(),
+        laserHandR: new LaserTail(),
+        laserFootL: new LaserTail(),
+        laserFootR: new LaserTail(),
+
+        mx: -600, my: -600,
+        targetX: width / 2, targetY: height / 2,
         speed: 0.03,
-        stayUntil: 0,
-        stayAnchorX: 0,
-        stayAnchorY: 0,
-        fidgetTime: 0,
-        hideAt: 0,
-        nextTargetTime: 0,
-        exiting: false,
-        exitTargetX: 0,
-        exitTargetY: 0,
+        stayUntil: 0, stayAnchorX: 0, stayAnchorY: 0,
+        fidgetTime: 0, hideAt: 0, nextTargetTime: 0,
+        exiting: false, exitTargetX: 0, exitTargetY: 0,
+        patternType: 'random' as 'random' | 'circle' | 'figure8' | 'patrol',
+        patternT: 0, patternCx: 0, patternCy: 0, patternR: 80,
+        greeting: false, greetEndTime: 0, bubbleText: 'Hello! 👋',
     }).current;
 
     const show = () => { visibleRef.current = true; setVisible(true); };
     const hide = () => { visibleRef.current = false; setVisible(false); };
 
-    // Pick a random off-screen exit point along one of the 4 edges
-    const pickExitTarget = React.useCallback(() => {
-        const MARGIN = 250;
-        const edge = Math.floor(Math.random() * 4);
-        if (edge === 0) return { x: Math.random() * width, y: -MARGIN };         // top
-        if (edge === 1) return { x: Math.random() * width, y: height + MARGIN };  // bottom
-        if (edge === 2) return { x: -MARGIN, y: Math.random() * height };         // left
-        return { x: width + MARGIN, y: Math.random() * height };          // right
-    }, [width, height]);
-
-    // Start the animation loop — runs until hideAt
     const startLoop = React.useCallback(() => {
         cancelAnimationFrame(rafRef.current);
         if (sleepTimerRef.current) clearTimeout(sleepTimerRef.current);
@@ -230,30 +186,46 @@ export const WanderingCursor = () => {
         const loop = () => {
             const now = Date.now();
 
-            // Trigger exit dash once hideAt is reached
             if (!inst.exiting && now >= inst.hideAt) {
                 inst.exiting = true;
-                const exit = pickExitTarget();
-                inst.exitTargetX = exit.x;
-                inst.exitTargetY = exit.y;
+                const edge = Math.floor(Math.random() * 4);
+                if (edge === 0) { inst.exitTargetX = Math.random() * width; inst.exitTargetY = -250; }
+                else if (edge === 1) { inst.exitTargetX = Math.random() * width; inst.exitTargetY = height + 250; }
+                else if (edge === 2) { inst.exitTargetX = -250; inst.exitTargetY = Math.random() * height; }
+                else { inst.exitTargetX = width + 250; inst.exitTargetY = Math.random() * height; }
                 inst.speed = 0.09;
             }
 
-            // While exiting: steer toward off-screen target; hide once fully gone
             if (inst.exiting) {
                 inst.targetX = inst.exitTargetX;
                 inst.targetY = inst.exitTargetY;
                 inst.mx += (inst.targetX - inst.mx) * inst.speed;
                 inst.my += (inst.targetY - inst.my) * inst.speed;
                 inst.skeleton.update(inst.mx, inst.my);
-                const tail = inst.skeleton.spine[inst.skeleton.spine.length - 1];
-                inst.laser.update(tail.x, tail.y);
+
+                // Update appropriate lasers based on type
+                if (buddyType === 'ironman') {
+                    const hL = inst.skeleton.armL[inst.skeleton.armL.length - 1];
+                    const hR = inst.skeleton.armR[inst.skeleton.armR.length - 1];
+                    const fL = inst.skeleton.legL[inst.skeleton.legL.length - 1];
+                    const fR = inst.skeleton.legR[inst.skeleton.legR.length - 1];
+                    inst.laserHandL.update(hL.x, hL.y);
+                    inst.laserHandR.update(hR.x, hR.y);
+                    inst.laserFootL.update(fL.x, fL.y);
+                    inst.laserFootR.update(fR.x, fR.y);
+                } else {
+                    const tail = inst.skeleton.spine[inst.skeleton.spine.length - 1];
+                    inst.laserMain.update(tail.x, tail.y);
+                }
+
                 setTick(t => t + 1);
-                const MARGIN = 200;
-                if (inst.mx < -MARGIN || inst.mx > width + MARGIN || inst.my < -MARGIN || inst.my > height + MARGIN) {
+
+                if (inst.mx < -300 || inst.mx > width + 300 || inst.my < -300 || inst.my > height + 300) {
                     inst.exiting = false;
-                    // Clear laser trail so next appearance starts clean
-                    inst.laser._pts = [];
+                    // Reset all
+                    inst.laserMain._pts = [];
+                    inst.laserHandL._pts = []; inst.laserHandR._pts = [];
+                    inst.laserFootL._pts = []; inst.laserFootR._pts = [];
                     hide();
                     sleepTimerRef.current = setTimeout(randomWakeup, 30000 + Math.random() * 40000);
                 } else {
@@ -262,8 +234,8 @@ export const WanderingCursor = () => {
                 return;
             }
 
+            // Normal Movement
             if (now < inst.stayUntil) {
-                // Fidget around the touch anchor
                 if (now > inst.fidgetTime) {
                     const r = 25 + Math.random() * 40;
                     const angle = Math.random() * Math.PI * 2;
@@ -272,31 +244,62 @@ export const WanderingCursor = () => {
                     inst.speed = 0.025;
                     inst.fidgetTime = now + 600 + Math.random() * 700;
                 }
+            } else if (inst.patternType !== 'random') {
+                const dt = inst.patternType === 'patrol' ? 0.011 : inst.patternType === 'figure8' ? 0.013 : 0.016;
+                inst.patternT += dt;
+                const t = inst.patternT;
+                if (inst.patternType === 'circle') {
+                    inst.targetX = inst.patternCx + inst.patternR * Math.cos(t);
+                    inst.targetY = inst.patternCy + inst.patternR * 0.55 * Math.sin(t);
+                } else if (inst.patternType === 'figure8') {
+                    inst.targetX = inst.patternCx + inst.patternR * Math.sin(t);
+                    inst.targetY = inst.patternCy + inst.patternR * 0.4 * Math.sin(2 * t);
+                } else {
+                    inst.targetX = inst.patternCx + inst.patternR * 1.6 * Math.cos(t);
+                    inst.targetY = inst.patternCy + 22 * Math.sin(t * 2.7);
+                }
+                inst.speed = 0.055;
             } else if (now > inst.nextTargetTime) {
-                // Wander slowly — small moves, long pauses
-                const range = Math.min(width, height) * 0.35;
+                const range = Math.min(width, height) * 0.32;
                 inst.targetX = inst.stayAnchorX + (Math.random() - 0.5) * range * 2;
                 inst.targetY = inst.stayAnchorY + (Math.random() - 0.5) * range * 2;
-                inst.speed = 0.008 + Math.random() * 0.02; // slower drift
-                inst.nextTargetTime = now + 2500 + Math.random() * 4000; // longer pauses
+                inst.speed = 0.008 + Math.random() * 0.018;
+                inst.nextTargetTime = now + 3000 + Math.random() * 4000;
+            }
+
+            if (inst.greeting && now > inst.greetEndTime) {
+                inst.greeting = false;
+                inst.skeleton.waving = false;
+                setShowBubble(false);
             }
 
             inst.mx += (inst.targetX - inst.mx) * inst.speed;
             inst.my += (inst.targetY - inst.my) * inst.speed;
 
             inst.skeleton.update(inst.mx, inst.my);
-            const tail = inst.skeleton.spine[inst.skeleton.spine.length - 1];
-            inst.laser.update(tail.x, tail.y);
+
+            // Update Lasers
+            if (buddyType === 'ironman') {
+                const hL = inst.skeleton.armL[inst.skeleton.armL.length - 1];
+                const hR = inst.skeleton.armR[inst.skeleton.armR.length - 1];
+                const fL = inst.skeleton.legL[inst.skeleton.legL.length - 1];
+                const fR = inst.skeleton.legR[inst.skeleton.legR.length - 1];
+                inst.laserHandL.update(hL.x, hL.y);
+                inst.laserHandR.update(hR.x, hR.y);
+                inst.laserFootL.update(fL.x, fL.y);
+                inst.laserFootR.update(fR.x, fR.y);
+            } else {
+                const tail = inst.skeleton.spine[inst.skeleton.spine.length - 1];
+                inst.laserMain.update(tail.x, tail.y);
+            }
 
             setTick(t => t + 1);
             rafRef.current = requestAnimationFrame(loop);
         };
         rafRef.current = requestAnimationFrame(loop);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [width, height, pickExitTarget]);
+    }, [width, height, buddyType]);
 
     const randomWakeup = React.useCallback(() => {
-        // Appear at a random on-screen location
         inst.mx = width * 0.15 + Math.random() * width * 0.7;
         inst.my = height * 0.15 + Math.random() * height * 0.7;
         inst.targetX = inst.mx;
@@ -304,45 +307,54 @@ export const WanderingCursor = () => {
         inst.stayAnchorX = inst.mx;
         inst.stayAnchorY = inst.my;
         inst.stayUntil = 0;
+
+        const patterns = ['random', 'circle', 'figure8', 'patrol'] as const;
+        inst.patternType = patterns[Math.floor(Math.random() * patterns.length)];
+        inst.patternT = Math.random() * Math.PI * 2;
+        inst.patternCx = inst.mx;
+        inst.patternCy = inst.my;
+        inst.patternR = 55 + Math.random() * 80;
         inst.nextTargetTime = Date.now();
-        inst.hideAt = Date.now() + 4000 + Math.random() * 4000; // visible 4–8s
+
+        if (Math.random() < 0.35) {
+            const greetings = ['Hello! 👋', 'Hi there! 👋', 'Hey! 👋', 'Boo! 👻', 'Sup? 🤖'];
+            inst.bubbleText = greetings[Math.floor(Math.random() * greetings.length)];
+            inst.greeting = true;
+            inst.greetEndTime = Date.now() + 3200;
+            inst.skeleton.waving = true;
+            setShowBubble(true);
+        }
+
+        inst.exiting = false;
+        inst.hideAt = Date.now() + 8000 + Math.random() * 7000;
         show();
         startLoop();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [width, height, startLoop]);
 
     useEffect(() => {
         const touchSub = DeviceEventEmitter.addListener('WANDERING_CURSOR_TOUCH', (data) => {
-            // Teleport skeleton head to touch point instantly
-            inst.mx = data.x;
-            inst.my = data.y;
-            inst.targetX = data.x;
-            inst.targetY = data.y;
-            inst.stayAnchorX = data.x;
-            inst.stayAnchorY = data.y;
+            inst.mx = data.x; inst.my = data.y;
+            inst.targetX = data.x; inst.targetY = data.y;
+            inst.stayAnchorX = data.x; inst.stayAnchorY = data.y;
             inst.speed = 0.12;
-            inst.stayUntil = Date.now() + 3000;
+            inst.exiting = false;                        // cancel any exit dash
+            inst.stayUntil = Date.now() + 5000;          // stay near touch for 5s
             inst.fidgetTime = Date.now() + 600;
             inst.nextTargetTime = inst.stayUntil;
-            inst.hideAt = Date.now() + 7000; // visible ~7s after touch
+            inst.hideAt = Date.now() + 18000;            // stay visible ~18s after tap
+            inst.skeleton.waving = false;
+            inst.greeting = false;
+            inst.patternType = 'random';
+            setShowBubble(false);
             show();
             startLoop();
         });
 
-        const zInterval = setInterval(() => {
-            if (visibleRef.current) {
-                const options = [1, 10];
-                setZIndex(options[Math.floor(Math.random() * options.length)]);
-            }
-        }, 4500);
-
-        // First random wakeup after 15–30s so it doesn't pop up immediately on launch
         sleepTimerRef.current = setTimeout(randomWakeup, 15000 + Math.random() * 15000);
 
         return () => {
             touchSub.remove();
             cancelAnimationFrame(rafRef.current);
-            clearInterval(zInterval);
             if (sleepTimerRef.current) clearTimeout(sleepTimerRef.current);
         };
     }, [width, height, startLoop, randomWakeup]);
@@ -350,26 +362,40 @@ export const WanderingCursor = () => {
     if (!visible) return null;
 
     return (
-        <View style={[styles.container, { zIndex, elevation: zIndex }]} pointerEvents="none">
+        <View style={[styles.container, { zIndex: 100, elevation: 100 }]} pointerEvents="none">
             <Svg style={StyleSheet.absoluteFill}>
                 <Defs>
                     <RadialGradient id="laserTip" cx="50%" cy="50%" rx="50%" ry="50%" fx="50%" fy="50%">
-                        <Stop offset="0%" stopColor="rgba(200,228,255,0.72)" />
-                        <Stop offset="100%" stopColor="rgba(66,133,244,0)" />
+                        <Stop offset="0%" stopColor={buddyType === 'ironman' ? 'rgba(0,240,255,0.72)' : 'rgba(200,228,255,0.72)'} />
+                        <Stop offset="100%" stopColor={buddyType === 'ironman' ? 'rgba(0,240,255,0)' : 'rgba(66,133,244,0)'} />
                     </RadialGradient>
                     <RadialGradient id="antennaGlow" cx="50%" cy="50%" rx="50%" ry="50%" fx="50%" fy="50%">
-                        <Stop offset="0%" stopColor={COLORS[1] + 'bb'} />
-                        <Stop offset="100%" stopColor={COLORS[1] + '00'} />
+                        <Stop offset="0%" stopColor={activeColors[1] + 'bb'} />
+                        <Stop offset="100%" stopColor={activeColors[1] + '00'} />
+                    </RadialGradient>
+                    <RadialGradient id="eyeGlow" cx="50%" cy="50%" rx="50%" ry="50%" fx="50%" fy="50%">
+                        <Stop offset="0%" stopColor="rgba(255,255,180,0.95)" />
+                        <Stop offset="100%" stopColor="rgba(255,200,0,0.4)" />
                     </RadialGradient>
                 </Defs>
 
-                <LaserLines pts={inst.laser._pts} />
-                <SkeletonChain joints={inst.skeleton.legL} aBase={0.42} wBase={4.0} colorOffset={1} />
-                <SkeletonChain joints={inst.skeleton.legR} aBase={0.42} wBase={4.0} colorOffset={2} />
-                <SkeletonSpine s={inst.skeleton.spine} />
-                <SkeletonChain joints={inst.skeleton.armL} aBase={0.60} wBase={5.0} colorOffset={0} />
-                <SkeletonChain joints={inst.skeleton.armR} aBase={0.60} wBase={5.0} colorOffset={1} />
-                <Head pos={inst.skeleton.spine[0]} eyeOpen={inst.skeleton._eyeOpen} />
+                {buddyType === 'ironman' ? (
+                    <>
+                        {/* 4 Lasers for Iron Man - Cyan/White color scheme */}
+                        <LaserLines pts={inst.laserHandL._pts} colorR={0} colorG={220} colorB={255} />
+                        <LaserLines pts={inst.laserHandR._pts} colorR={0} colorG={220} colorB={255} />
+                        <LaserLines pts={inst.laserFootL._pts} colorR={0} colorG={220} colorB={255} />
+                        <LaserLines pts={inst.laserFootR._pts} colorR={0} colorG={220} colorB={255} />
+                        <IronManBuddy skeleton={inst.skeleton} />
+                    </>
+                ) : (
+                    <>
+                        <LaserLines pts={inst.laserMain._pts} />
+                        <BotBuddy skeleton={inst.skeleton} />
+                    </>
+                )}
+
+                {showBubble && <SpeechBubble pos={inst.skeleton.spine[0]} text={inst.bubbleText} />}
             </Svg>
         </View>
     );

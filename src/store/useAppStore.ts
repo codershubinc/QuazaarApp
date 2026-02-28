@@ -52,6 +52,8 @@ interface AppState {
     closeFactPopup: () => void;
     setBackgroundImage: (uri: string | null, mediaType?: 'image' | 'video' | null) => void;
     setYoutubeUrl: (url: string | null) => void;
+    buddyType: 'robo' | 'ironman';
+    setBuddyType: (type: 'robo' | 'ironman') => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -77,6 +79,7 @@ export const useAppStore = create<AppState>((set) => ({
     backgroundImage: null,
     backgroundMediaType: null,
     youtubeUrl: null,
+    buddyType: 'robo' as 'robo' | 'ironman',
 
     setConnected: (isConnected) => set({ isConnected }),
     setConnecting: (isConnecting) => set({ isConnecting }),
@@ -121,4 +124,5 @@ export const useAppStore = create<AppState>((set) => ({
     closeFactPopup: () => set({ isFactPopupOpen: false }),
     setBackgroundImage: (backgroundImage, mediaType = null) => set({ backgroundImage, backgroundMediaType: mediaType }),
     setYoutubeUrl: (youtubeUrl) => set({ youtubeUrl }),
+    setBuddyType: (buddyType) => set({ buddyType }),
 }));

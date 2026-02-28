@@ -70,7 +70,7 @@ export const NowPlayingCard = () => {
     return (
         <View style={styles.cardContainer}>
             {/* Blurred Background - use artwork or fallback to main background */}
-            {(artWork?.url || backgroundImage) && (
+            {(artWork?.url || backgroundImage) ? (
                 <ImageBackground
                     source={{ uri: artWork?.url || backgroundImage || '' }}
                     style={styles.backgroundImage}
@@ -81,6 +81,13 @@ export const NowPlayingCard = () => {
                         style={styles.overlay}
                     />
                 </ImageBackground>
+            ) : (
+                <LinearGradient
+                    colors={["rgba(0, 0, 0, 0.8)", "rgba(30, 41, 59, 0.5)"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.backgroundImage}
+                />
             )}
 
             <View style={styles.card}>
