@@ -52,7 +52,7 @@ export const TodoCard = () => {
     return (
         <>
             <LinearGradient
-                colors={[theme.colors.surface, theme.colors.surfaceHighlight]}
+                colors={["rgba(0, 0, 0, 0.8)", "rgba(30, 41, 59, 0.5)"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.card}
@@ -115,7 +115,7 @@ export const TodoCard = () => {
                     <View style={styles.modalOverlay}>
                         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                             <LinearGradient
-                                colors={[theme.colors.surface, '#1a1f3c']}
+                                colors={['rgba(0, 0, 0, 0.95)', 'rgba(30, 41, 59, 0.8)']}
                                 style={styles.modalContent}
                             >
                                 <View style={styles.modalHeader}>
@@ -159,7 +159,8 @@ const styles = StyleSheet.create({
         padding: theme.spacing.m,
         ...theme.shadows.default,
         borderWidth: 1,
-        borderColor: theme.colors.border,
+        borderColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
         flex: 1,
         minHeight: 150, // Reduced from 250
         justifyContent: 'space-between',

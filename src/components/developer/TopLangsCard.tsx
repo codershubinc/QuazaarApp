@@ -173,9 +173,8 @@ const styles = StyleSheet.create({
     card: {
         borderRadius: theme.borderRadius.l,
         padding: 16,
-        backgroundColor: '#1C1C1E',
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.05)',
+        borderColor: 'rgba(255,255,255,0.1)',
         marginBottom: theme.spacing.m,
         overflow: 'hidden',
     },

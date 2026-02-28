@@ -8,7 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { SpotifyIcon } from '../helper/SpotifyIcon';
 
 export const NowPlayingCard = () => {
-    const { mediaInfo, artWork } = useAppStore();
+    const { mediaInfo, artWork, backgroundImage } = useAppStore();
     const isPlaying = mediaInfo?.Status === 'Playing';
     const rawDuration = mediaInfo?.Length || 0;
     const rawPosition = mediaInfo?.Position || 0;
@@ -69,24 +69,6 @@ export const NowPlayingCard = () => {
 
     return (
         <View style={styles.cardContainer}>
-            {/* Blurred Background */}
-            {artWork?.url ? (
-                <ImageBackground
-                    source={{ uri: artWork.url }}
-                    style={styles.backgroundImage}
-                    blurRadius={50}
-                >
-                    <LinearGradient
-                        colors={['rgba(0,0,0,0.7)', 'rgba(0,0,0,0.85)', 'rgba(0,0,0,0.95)']}
-                        style={styles.overlay}
-                    />
-                </ImageBackground>
-            ) : (
-                <LinearGradient
-                    colors={['#1a1a2e', '#16213e', '#0f172a']}
-                    style={styles.overlay}
-                />
-            )}
 
             <View style={styles.card}>
                 {/* Main Content with Artwork and Info */}
@@ -165,7 +147,7 @@ export const NowPlayingCard = () => {
                 <View style={styles.progressContainer}>
                     <View style={styles.progressBarBackground}>
                         <LinearGradient
-                            colors={['#dce0e2', '#dce0e2', '#dce0e2', '#dce0e2', '#dce0e2', '#63aeeb']}
+                            colors={['rgba(51, 65, 85, 0.4)', 'rgba(71, 85, 105, 0.5)', 'rgba(100, 116, 139, 0.6)']}
                             start={{ x: 0, y: 0 }}
                             end={{ x: 1, y: 0 }}
                             style={[styles.progressBarFill, { width: `${progress * 100}%` }]}
@@ -207,6 +189,8 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         ...theme.shadows.default,
         position: 'relative',
+        borderWidth: 1.5,
+        borderColor: 'rgba(255,255,255,0.2)',
     },
     backgroundImage: {
         position: 'absolute',
@@ -251,11 +235,11 @@ const styles = StyleSheet.create({
     placeholderArtwork: {
         width: '100%',
         height: '100%',
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
+        backgroundColor: 'rgba(0, 0, 0, 0.9)',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.05)',
+        borderColor: 'rgba(255, 255, 255, 0.1)',
     },
     playingBadge: {
         position: 'absolute',
@@ -271,6 +255,7 @@ const styles = StyleSheet.create({
     infoContainer: {
         flex: 1,
         paddingLeft: 48,
+        marginLeft: 12,
         paddingRight: theme.spacing.m,
         paddingVertical: theme.spacing.s,
         justifyContent: 'space-between',
@@ -278,6 +263,9 @@ const styles = StyleSheet.create({
         borderRadius: theme.borderRadius.m,
         overflow: 'hidden',
         zIndex: 2,
+        backgroundColor: 'rgba(0, 0, 0, 0.3)',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.15)',
     },
     infoBlur: {
         position: 'absolute',
@@ -286,6 +274,7 @@ const styles = StyleSheet.create({
         right: 0,
         bottom: 0,
         borderRadius: theme.borderRadius.m,
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
     },
     textContent: {
         position: 'relative',
@@ -330,18 +319,19 @@ const styles = StyleSheet.create({
         width: 36,
         height: 36,
         borderRadius: 18,
-        backgroundColor: 'rgba(255, 152, 0, 0.2)',
+        backgroundColor: 'rgba(255, 255, 255, 0.15)',
         justifyContent: 'center',
         alignItems: 'center',
         borderWidth: 1,
-        borderColor: 'rgba(255, 152, 0, 0.4)',
+        borderColor: 'rgba(255, 255, 255, 0.3)',
     },
     playButton: {
         width: 44,
         height: 44,
         borderRadius: 22,
-        backgroundColor: '#393f44',
-        borderWidth: 0,
+        backgroundColor: 'rgba(255, 255, 255, 0.25)',
+        borderWidth: 1,
+        borderColor: 'rgba(255, 255, 255, 0.4)',
         ...theme.shadows.glow,
     },
     progressContainer: {
@@ -350,9 +340,11 @@ const styles = StyleSheet.create({
     },
     progressBarBackground: {
         height: 4,
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
         borderRadius: 2,
         overflow: 'hidden',
+        borderWidth: 0.5,
+        borderColor: 'rgba(255, 255, 255, 0.3)',
     },
     progressBarFill: {
         height: '100%',

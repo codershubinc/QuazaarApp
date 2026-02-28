@@ -128,7 +128,12 @@ export const DateTimeCard = () => {
     }).toUpperCase();
 
     return (
-        <View style={styles.card}>
+        <LinearGradient
+            colors={["rgba(0, 0, 0, 0.8)", "rgba(30, 41, 59, 0.5)"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.card}
+        >
             {/* Header: Date Pill */}
             <View style={styles.header}>
                 <View style={styles.datePill}>
@@ -139,7 +144,7 @@ export const DateTimeCard = () => {
 
             {/* Content: The Clock */}
             <DigitalClock />
-        </View>
+        </LinearGradient>
     );
 };
 
@@ -147,9 +152,6 @@ const styles = StyleSheet.create({
     card: {
         borderRadius: theme.borderRadius.l, // Matches your other cards (28/32)
         padding: 16,
-        backgroundColor: '#1C1C1E', // Fallback
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.05)',
         marginBottom: theme.spacing.m,
         justifyContent: 'center',
         minWidth: 300,
@@ -163,12 +165,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 6,
-        backgroundColor: 'rgba(255,255,255,0.05)',
         paddingHorizontal: 10,
         paddingVertical: 4,
         borderRadius: 12,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.05)',
+        borderColor: 'rgba(255,255,255,0.1)',
     },
     dateText: {
         color: theme.colors.textSecondary,

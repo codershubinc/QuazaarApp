@@ -58,7 +58,7 @@ export const SystemOutputCard = () => {
 
     return (
         <LinearGradient
-            colors={[theme.colors.surface, theme.colors.surfaceHighlight]}
+            colors={["rgba(0, 0, 0, 0.8)", "rgba(30, 41, 59, 0.5)"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.card}

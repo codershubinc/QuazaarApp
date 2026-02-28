@@ -211,9 +211,8 @@ const styles = StyleSheet.create({
     card: {
         height: 180, // Fixed comfortable height
         borderRadius: 28,
-        backgroundColor: '#1C1C1E',
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.05)',
+        borderColor: 'rgba(255,255,255,0.1)',
         marginBottom: theme.spacing.m,
         overflow: 'hidden',
         width: "auto"

@@ -106,11 +106,13 @@ const styles = StyleSheet.create({
     content: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#1E1E2E', // Solid dark background or use theme.colors.surface
+        backgroundColor: 'rgba(0, 0, 0, 0.95)',
         paddingVertical: 12,
         paddingHorizontal: 16,
         borderRadius: 8,
         borderLeftWidth: 4,
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
         shadowColor: "#000",
         shadowOffset: {
             width: 0,

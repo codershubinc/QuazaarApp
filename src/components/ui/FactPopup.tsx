@@ -223,11 +223,11 @@ const styles = StyleSheet.create({
     card: {
         width: width * 0.85,
         maxWidth: 380,
-        backgroundColor: '#1C1C1E', // Matching dashboard dark
+        backgroundColor: 'rgba(0, 0, 0, 0.95)',
         borderRadius: 32,
         padding: 24,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.08)',
+        borderColor: 'rgba(255,255,255,0.1)',
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 10 },
         shadowOpacity: 0.5,

@@ -71,12 +71,12 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'rgba(0,0,0,0.2)',
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: theme.borderRadius.l,
         borderWidth: 1,
-        borderColor: theme.colors.border,
+        borderColor: 'rgba(255,255,255,0.1)',
         gap: 6,
     },
     text: {

@@ -164,7 +164,7 @@ export const SystemStatsCard = () => {
 
     return (
         <LinearGradient
-            colors={["rgba(49, 40, 40, 0.29)", "rgba(90, 79, 79, 0.28)"]}
+            colors={["rgba(0, 0, 0, 0.8)", "rgba(30, 41, 59, 0.5)"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.card}
@@ -266,6 +266,7 @@ const styles = StyleSheet.create({
         borderRadius: theme.borderRadius.l,
         padding: theme.spacing.m,
         borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.1)',
         flex: 1,
         minHeight: 140,
         justifyContent: 'center',

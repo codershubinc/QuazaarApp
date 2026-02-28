@@ -235,14 +235,14 @@ const styles = StyleSheet.create({
     sliderContainer: {
         width: 70, // Fixed small width
         borderRadius: 35,
-        backgroundColor: theme.colors.surfaceHighlight,
+        backgroundColor: 'rgba(51, 65, 85, 0.6)',
         overflow: 'hidden',
         justifyContent: 'flex-end',
         position: 'relative',
     },
     sliderTrack: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: theme.colors.surface,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
     },
     sliderFill: {
         backgroundColor: "#3a3434",

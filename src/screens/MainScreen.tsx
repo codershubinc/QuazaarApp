@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, useWindowDimensions } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, useWindowDimensions, ImageBackground } from 'react-native';
 import { useAppStore } from '../store/useAppStore';
 import { webSocketService } from '../services/WebSocketService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -23,17 +23,22 @@ import { TopLangsCard } from '../components/developer/TopLangsCard';
 export const MainScreen = () => {
     const { width, height } = useWindowDimensions();
     const isLandscape = width > 600;
-    const { isConnected, isConnecting, error, mediaInfo, bluetoothDevices, authToken, setAuthToken, username } = useAppStore();
+    const { isConnected, isConnecting, error, mediaInfo, bluetoothDevices, authToken, setAuthToken, username, backgroundImage, setBackgroundImage } = useAppStore();
     const [currentScreen, setCurrentScreen] = useState<'MAIN' | 'SETTINGS' | 'LOGIN'>('LOGIN');
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        // Check for existing token
+        // Check for existing token and background image
         const checkAuth = async () => {
             try {
                 const token = await AsyncStorage.getItem('authToken');
                 if (token) {
                     setAuthToken(token);
+                }
+
+                const savedBg = await AsyncStorage.getItem('backgroundImage');
+                if (savedBg) {
+                    setBackgroundImage(savedBg);
                 }
             } catch (e) {
                 console.error("Auth check failed", e);
@@ -88,15 +93,14 @@ export const MainScreen = () => {
         return <SettingsScreen onBack={() => setCurrentScreen('MAIN')} />;
     }
 
-    return (
-        <LinearGradient
-            colors={[theme.colors.background, '#000000', theme.colors.background]}
-            style={[styles.container, { width, height }]}
-        >
+    const mainContent = (
+        <>
             <Toast />
             <View style={[styles.scrollView, styles.content]}>
                 <Header onSettingsClick={() => setCurrentScreen('SETTINGS')} />
-                <View style={{ flexDirection: isLandscape ? 'row' : 'column', gap: 16, marginBottom: theme.spacing.m }}>
+                <View style={{
+                    flexDirection: isLandscape ? 'row' : 'column', gap: 16, marginBottom: theme.spacing.m, alignItems: 'center', height: 'auto', maxHeight: isLandscape ? 220 : 'auto',
+                }}>
                     <DateTimeCard />
                     <SystemControlsCard />
                     <SystemStatsCard />
@@ -135,6 +139,24 @@ export const MainScreen = () => {
                     </View>
                 </View>
             </View>
+        </>
+    );
+
+    return backgroundImage ? (
+        <ImageBackground
+            source={{ uri: backgroundImage }}
+            style={[styles.container, { width, height }]}
+            blurRadius={2}
+        >
+            <View style={styles.overlay} />
+            {mainContent}
+        </ImageBackground>
+    ) : (
+        <LinearGradient
+            colors={[theme.colors.background, '#000000', theme.colors.background]}
+            style={[styles.container, { width, height }]}
+        >
+            {mainContent}
         </LinearGradient>
     );
 };
@@ -142,6 +164,10 @@ export const MainScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+    },
+    overlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
     },
     scrollView: {
         flex: 1,
@@ -160,7 +186,7 @@ const styles = StyleSheet.create({
     },
     errorCard: {
         borderColor: theme.colors.error,
-        backgroundColor: 'rgba(255, 107, 107, 0.1)',
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
     },
     statusText: {
         color: theme.colors.textSecondary,

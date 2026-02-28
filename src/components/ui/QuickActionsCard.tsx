@@ -36,7 +36,7 @@ export const QuickActionsCard = () => {
     return (
         <View style={styles.container}>
             <LinearGradient
-                colors={[theme.colors.surface, theme.colors.surfaceHighlight]}
+                colors={["rgba(0, 0, 0, 0.8)", "rgba(30, 41, 59, 0.5)"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.card}
@@ -56,7 +56,7 @@ export const QuickActionsCard = () => {
                             }}
                         >
                             <LinearGradient
-                                colors={[theme.colors.surfaceHighlight, 'rgba(255,255,255,0.05)']}
+                                colors={['rgba(51, 65, 85, 0.6)', 'rgba(71, 85, 105, 0.4)']}
                                 style={styles.buttonGradient}
                             >
                                 <Ionicons name={action.icon} size={20} color={theme.colors.secondary} />
@@ -79,7 +79,8 @@ const styles = StyleSheet.create({
         padding: theme.spacing.m,
         ...theme.shadows.default,
         borderWidth: 1,
-        borderColor: theme.colors.border,
+        borderColor: 'rgba(255,255,255,0.1)',
+        backgroundColor: 'rgba(0, 0, 0, 0.85)',
         height: 160,
         justifyContent: 'center',
     },

@@ -22,6 +22,7 @@ interface AppState {
     toast: { message: string; type: 'success' | 'error' | 'info' } | null;
     todos: Todo[];
     isFactPopupOpen: boolean;
+    backgroundImage: string | null;
 
     setConnected: (isConnected: boolean) => void;
     setConnecting: (isConnecting: boolean) => void;
@@ -47,6 +48,7 @@ interface AppState {
     setTodos: (todos: Todo[]) => void;
     openFactPopup: () => void;
     closeFactPopup: () => void;
+    setBackgroundImage: (uri: string | null) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -69,6 +71,7 @@ export const useAppStore = create<AppState>((set) => ({
     username: null,
     todos: [],
     isFactPopupOpen: false,
+    backgroundImage: null,
 
     setConnected: (isConnected) => set({ isConnected }),
     setConnecting: (isConnecting) => set({ isConnecting }),
@@ -111,4 +114,5 @@ export const useAppStore = create<AppState>((set) => ({
     setTodos: (todos) => set({ todos }),
     openFactPopup: () => set({ isFactPopupOpen: true }),
     closeFactPopup: () => set({ isFactPopupOpen: false }),
+    setBackgroundImage: (backgroundImage) => set({ backgroundImage }),
 }));
