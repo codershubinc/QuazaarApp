@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, Platform, Alert } from 'react-native'; // Added Alert
+import { StyleSheet, View, Platform, Alert, DeviceEventEmitter } from 'react-native'; // Added Alert
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { MainScreen } from './src/screens/MainScreen';
 import { SplashScreen } from './src/screens/SplashScreen';
@@ -31,7 +31,10 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <View style={styles.container}>
+      <View style={styles.container} onStartShouldSetResponderCapture={(e) => {
+        DeviceEventEmitter.emit('WANDERING_CURSOR_TOUCH', { x: e.nativeEvent.pageX, y: e.nativeEvent.pageY });
+        return false;
+      }}>
         <StatusBar hidden={true} />
         <MainScreen />
         <FactPopup />

@@ -23,6 +23,7 @@ import { ActivityFeed } from '../components/productivity/ActivityFeed';
 import { TodoCard } from '../components/productivity/TodoCard';
 import { SystemStatsCard } from '../components/system/SystemStatsCard';
 import { TopLangsCard } from '../components/developer/TopLangsCard';
+import { WanderingCursor } from '../components/ui/WanderingCursor';
 
 // Helper function to extract YouTube video ID from various URL formats
 const getYoutubeVideoId = (url: string): string | null => {
@@ -249,6 +250,7 @@ export const MainScreen = () => {
                     <View style={styles.contentContainer}>
                         {mainContent}
                     </View>
+                    <WanderingCursor />
                 </View>
             );
         }
@@ -344,6 +346,7 @@ export const MainScreen = () => {
                     <View style={styles.contentContainer}>
                         {mainContent}
                     </View>
+                    <WanderingCursor />
                 </View>
             );
         }
@@ -376,6 +379,7 @@ export const MainScreen = () => {
                 <View style={styles.contentContainer}>
                     {mainContent}
                 </View>
+                <WanderingCursor />
             </View>
         ) : (
             <View style={styles.container}>
@@ -388,6 +392,7 @@ export const MainScreen = () => {
                 <View style={styles.contentContainer}>
                     {mainContent}
                 </View>
+                <WanderingCursor />
             </View>
         )
     ) : (
@@ -396,6 +401,7 @@ export const MainScreen = () => {
             style={styles.container}
         >
             {mainContent}
+            <WanderingCursor />
         </LinearGradient>
     );
 };
