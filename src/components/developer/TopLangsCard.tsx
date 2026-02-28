@@ -47,7 +47,7 @@ export const TopLangsCard = ({ username }: { username: string }) => {
     useEffect(() => {
         if (!username) return;
 
-        fetch(`${baseUrl}/api/json-top-langs?username=${username}`)
+        fetch(`${baseUrl}/api/json-top-langs?username=${username}&_t=${Date.now()}`, { cache: 'no-cache' })
             .then((res) => res.json())
             .then((data: LangsResponse) => {
                 const langArray = Object.values(data);

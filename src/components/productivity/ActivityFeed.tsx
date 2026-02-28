@@ -36,7 +36,7 @@ export const ActivityFeed = () => {
         try {
             // Using a timestamp to bypass potential caching
             const url = `https://api.github.com/users/${user}/events?per_page=1&_t=${Date.now()}`;
-            const res = await fetch(url);
+            const res = await fetch(url, { cache: 'no-cache' });
 
             if (res.ok) {
                 const data: Event[] = await res.json();

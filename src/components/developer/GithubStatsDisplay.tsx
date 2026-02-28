@@ -13,7 +13,7 @@ export const GithubStatsDisplay = () => {
 
     const fetchStats = useCallback(() => {
         // Fetch Total Contributions (from streak stats API as it's reliable for this)
-        fetch(`https://github-readme-streak-stats-chi-three.vercel.app?user=${user}&type=json`)
+        fetch(`https://github-readme-streak-stats-chi-three.vercel.app?user=${user}&type=json&_t=${Date.now()}`, { cache: 'no-cache' })
             .then(res => res.json())
             .then(data => {
                 if (data.totalContributions !== undefined) {
@@ -23,7 +23,7 @@ export const GithubStatsDisplay = () => {
             .catch(err => console.error("Github total contribs fetch failed", err));
 
         // Fetch Stats (Stars & Rank)
-        fetch(`https://github-readme-states-repo-self-inst.vercel.app/api/json-stats?username=${user}`)
+        fetch(`https://github-readme-states-repo-self-inst.vercel.app/api/json-stats?username=${user}&_t=${Date.now()}`, { cache: 'no-cache' })
             .then(res => res.json())
             .then(data => {
                 setGhStats(data);

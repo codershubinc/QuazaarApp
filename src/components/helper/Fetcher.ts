@@ -21,6 +21,7 @@ export const fetcher = async (url: string, options?: RequestInit) => {
         const res = await fetch(fullUrl, {
             ...options,
             headers: headers,
+            cache: 'no-cache',
         });
         return res.json();
     } catch (error) {

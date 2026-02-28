@@ -52,7 +52,7 @@ export const StreakDisplay = () => {
 
     const fetchGithub = useCallback(() => {
         // Fetch Streak
-        fetch(`https://github-readme-streak-stats-chi-three.vercel.app?user=${user}&type=json`)
+        fetch(`https://github-readme-streak-stats-chi-three.vercel.app?user=${user}&type=json&_t=${Date.now()}`, { cache: 'no-cache' })
             .then(res => res.json())
             .then(data => {
                 if (data.currentStreak && data.currentStreak.length !== undefined) {
@@ -67,7 +67,7 @@ export const StreakDisplay = () => {
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
         const todaysDate = `${year}-${month}-${day}`;
-        fetch(`https://github-contributions-api.deno.dev/${user}.json?flat=true&to=${todaysDate}&no-cache=true`, { cache: 'no-cache' })
+        fetch(`https://github-contributions-api.deno.dev/${user}.json?flat=true&to=${todaysDate}&no-cache=true&_t=${Date.now()}`, { cache: 'no-cache' })
             .then(res => res.json())
             .then(data => {
                 if (data.contributions && data.contributions.length > 0) {
@@ -95,6 +95,7 @@ export const StreakDisplay = () => {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ query, variables: { username: user } }),
+                cache: 'no-cache',
             });
 
             if (response.ok) {

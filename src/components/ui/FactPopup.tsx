@@ -50,7 +50,7 @@ const FactPopup: React.FC = () => {
     const fetchFact = async () => {
         try {
             setFactNumber(Math.floor(Math.random() * 90000) + 10000);
-            const response = await fetch(API_URL);
+            const response = await fetch(`${API_URL}?_t=${Date.now()}`, { cache: 'no-cache' });
             const result = await response.json();
             if (result && result.fact) {
                 setData(result);

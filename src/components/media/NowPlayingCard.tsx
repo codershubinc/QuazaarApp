@@ -13,23 +13,20 @@ export const NowPlayingCard = () => {
     const rawDuration = mediaInfo?.Length || 0;
     const rawPosition = mediaInfo?.Position || 0;
 
-
-    // Detect time unit based on duration magnitude
-    let timeDivisor = 1;
-    if (rawDuration > 10000000) {
-        timeDivisor = 1000000; // Microseconds
-    } else if (rawDuration > 10000) {
-        timeDivisor = 1000; // Milliseconds
-    }
-
-    const duration = rawDuration / timeDivisor;
-    const position = rawPosition / timeDivisor;
+    // Data is in microseconds, convert to seconds
+    const duration = rawDuration / 1000000;
+    const position = rawPosition / 1000000;
     const progress = duration > 0 ? Math.min(Math.max(position / duration, 0), 1) : 0;
 
     const formatTime = (seconds: number) => {
         if (!seconds && seconds !== 0) return '0:00';
-        const mins = Math.floor(seconds / 60);
+        const hrs = Math.floor(seconds / 3600);
+        const mins = Math.floor((seconds % 3600) / 60);
         const secs = Math.floor(seconds % 60);
+
+        if (hrs > 0) {
+            return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
