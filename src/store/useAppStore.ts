@@ -23,6 +23,8 @@ interface AppState {
     todos: Todo[];
     isFactPopupOpen: boolean;
     backgroundImage: string | null;
+    backgroundMediaType: 'image' | 'video' | null;
+    youtubeUrl: string | null;
 
     setConnected: (isConnected: boolean) => void;
     setConnecting: (isConnecting: boolean) => void;
@@ -48,7 +50,8 @@ interface AppState {
     setTodos: (todos: Todo[]) => void;
     openFactPopup: () => void;
     closeFactPopup: () => void;
-    setBackgroundImage: (uri: string | null) => void;
+    setBackgroundImage: (uri: string | null, mediaType?: 'image' | 'video' | null) => void;
+    setYoutubeUrl: (url: string | null) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -72,6 +75,8 @@ export const useAppStore = create<AppState>((set) => ({
     todos: [],
     isFactPopupOpen: false,
     backgroundImage: null,
+    backgroundMediaType: null,
+    youtubeUrl: null,
 
     setConnected: (isConnected) => set({ isConnected }),
     setConnecting: (isConnecting) => set({ isConnecting }),
@@ -114,5 +119,6 @@ export const useAppStore = create<AppState>((set) => ({
     setTodos: (todos) => set({ todos }),
     openFactPopup: () => set({ isFactPopupOpen: true }),
     closeFactPopup: () => set({ isFactPopupOpen: false }),
-    setBackgroundImage: (backgroundImage) => set({ backgroundImage }),
+    setBackgroundImage: (backgroundImage, mediaType = null) => set({ backgroundImage, backgroundMediaType: mediaType }),
+    setYoutubeUrl: (youtubeUrl) => set({ youtubeUrl }),
 }));
