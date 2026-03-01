@@ -167,7 +167,7 @@ export const NowPlayingCard = () => {
                 <View style={styles.progressContainer}>
                     <View style={styles.progressBarBackground}>
                         <LinearGradient
-                            colors={['rgba(51, 65, 85, 0.4)', 'rgba(71, 85, 105, 0.5)', 'rgba(100, 116, 139, 0.6)']}
+                            colors={['rgba(51, 65, 85, 0.4)', 'rgba(71, 85, 105, 0.5)', 'rgba(0, 0, 0, 0.6)']}
                             start={{ x: 0, y: 0 }}
                             end={{ x: 1, y: 0 }}
                             style={[styles.progressBarFill, { width: `${progress * 100}%` }]}

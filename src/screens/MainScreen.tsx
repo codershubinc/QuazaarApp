@@ -7,23 +7,21 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { theme } from '../constants/theme';
 import { Video, ResizeMode } from 'expo-av';
 import { WebView } from 'react-native-webview';
-import * as FileSystem from 'expo-file-system';
 import { Paths, File } from 'expo-file-system';
 
 import { Header } from '../components/ui/Header';
 import { DateTimeCard } from '../components/time/DateTimeCard';
 import { PomodoroCard } from '../components/time/PomodoroCard';
 import { NowPlayingCard } from '../components/media/NowPlayingCard';
-import { QuickActionsCard } from '../components/ui/QuickActionsCard';
 import { SystemControlsCard } from '../components/system/SystemControlsCard';
 import { Toast } from '../components/ui/Toast';
 import { SettingsScreen } from './SettingsScreen';
 import { LoginScreen } from './LoginScreen';
 import { ActivityFeed } from '../components/productivity/ActivityFeed';
-import { TodoCard } from '../components/productivity/TodoCard';
 import { SystemStatsCard } from '../components/system/SystemStatsCard';
 import { TopLangsCard } from '../components/developer/TopLangsCard';
 import { WanderingCursor } from '../components/ui/WanderingCursor';
+import { CreatorInfo } from '../components/developer/CreatorInfo';
 
 // Helper function to extract YouTube video ID from various URL formats
 const getYoutubeVideoId = (url: string): string | null => {
@@ -53,7 +51,7 @@ const isDirectVideoUrl = (url: string): boolean => {
 };
 
 export const MainScreen = () => {
-    const { width, height } = useWindowDimensions();
+    const { width } = useWindowDimensions();
     const isLandscape = width > 600;
     const { isConnected, isConnecting, error, mediaInfo, bluetoothDevices, authToken, setAuthToken, username, backgroundImage, backgroundMediaType, youtubeUrl, setBackgroundImage, setYoutubeUrl } = useAppStore();
     const [currentScreen, setCurrentScreen] = useState<'MAIN' | 'SETTINGS' | 'LOGIN'>('LOGIN');
@@ -200,6 +198,7 @@ export const MainScreen = () => {
                 <View style={isLandscape ? styles.row : styles.column}>
                     <View style={isLandscape ? styles.columnHalf : styles.column}>
                         {mediaInfo && (mediaInfo.Title || mediaInfo.Artist) && <NowPlayingCard />}
+                        <CreatorInfo />
                     </View>
                     <View style={isLandscape ? styles.columnHalf : styles.column}>
                         <TopLangsCard username={username || 'codershubinc'} />
