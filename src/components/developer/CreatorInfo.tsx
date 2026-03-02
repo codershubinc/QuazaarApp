@@ -9,9 +9,17 @@ const CREATOR = {
     name: 'Swapnil Ingle',
     login: 'codershubinc',
     avatar: 'https://github.com/codershubinc.png',
-    github: 'https://github.com/codershubinc',
     role: 'Creator & Developer',
 };
+
+const SOCIALS: { icon: any; color: string; label: string; url: string }[] = [
+    { icon: 'logo-github', color: '#e2e8f0', label: 'GitHub', url: 'https://github.com/codershubinc' },
+    { icon: 'logo-twitter', color: '#1DA1F2', label: 'Twitter', url: 'https://twitter.com/codershubinc' },
+    { icon: 'logo-linkedin', color: '#0A66C2', label: 'LinkedIn', url: 'https://linkedin.com/in/codershubinc' },
+    { icon: 'logo-instagram', color: '#E1306C', label: 'Instagram', url: 'https://instagram.com/codershubinc' },
+    { icon: 'logo-youtube', color: '#FF0000', label: 'YouTube', url: 'https://youtube.com/@codershubinc' },
+    { icon: 'logo-discord', color: '#5865F2', label: 'Discord', url: 'https://discord.com/users/codershubinc' },
+];
 
 export const CreatorInfo = () => (
     <View style={styles.container}>
@@ -21,10 +29,12 @@ export const CreatorInfo = () => (
             end={{ x: 1, y: 1 }}
             style={StyleSheet.absoluteFill}
         />
+
+        {/* Profile row */}
         <TouchableOpacity
             style={styles.row}
             activeOpacity={0.75}
-            onPress={() => Linking.openURL(CREATOR.github).catch(() => { })}
+            onPress={() => Linking.openURL(SOCIALS[0].url).catch(() => { })}
         >
             <Image source={{ uri: CREATOR.avatar }} style={styles.avatar} contentFit="cover" />
             <View style={styles.info}>
@@ -39,6 +49,24 @@ export const CreatorInfo = () => (
                 <Ionicons name="code-slash-outline" size={14} color={theme.colors.primary} />
             </View>
         </TouchableOpacity>
+
+        {/* Divider */}
+        <View style={styles.divider} />
+
+        {/* Social links */}
+        <View style={styles.socialsRow}>
+            {SOCIALS.map((s) => (
+                <TouchableOpacity
+                    key={s.label}
+                    style={styles.socialBtn}
+                    activeOpacity={0.7}
+                    onPress={() => Linking.openURL(s.url).catch(() => { })}
+                >
+                    <Ionicons name={s.icon} size={18} color={s.color} />
+                    <Text style={[styles.socialLabel, { color: s.color }]}>{s.label}</Text>
+                </TouchableOpacity>
+            ))}
+        </View>
     </View>
 );
 
@@ -100,5 +128,32 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         borderWidth: 1,
         borderColor: 'rgba(99,102,241,0.3)',
+    },
+    divider: {
+        height: 1,
+        backgroundColor: 'rgba(255,255,255,0.07)',
+        marginHorizontal: theme.spacing.m,
+    },
+    socialsRow: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        paddingHorizontal: theme.spacing.m,
+        paddingVertical: theme.spacing.s,
+        gap: 6,
+    },
+    socialBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 5,
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        borderRadius: 20,
+        backgroundColor: 'rgba(255,255,255,0.05)',
+        borderWidth: 1,
+        borderColor: 'rgba(255,255,255,0.08)',
+    },
+    socialLabel: {
+        fontSize: 11,
+        fontWeight: '600',
     },
 });
