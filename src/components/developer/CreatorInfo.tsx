@@ -18,7 +18,6 @@ const SOCIALS: { icon: any; color: string; label: string; url: string }[] = [
     { icon: 'logo-linkedin', color: '#0A66C2', label: 'LinkedIn', url: 'https://linkedin.com/in/codershubinc' },
     { icon: 'logo-instagram', color: '#E1306C', label: 'Instagram', url: 'https://instagram.com/codershubinc' },
     { icon: 'logo-youtube', color: '#FF0000', label: 'YouTube', url: 'https://youtube.com/@codershubinc' },
-    { icon: 'logo-discord', color: '#5865F2', label: 'Discord', url: 'https://discord.com/users/codershubinc' },
 ];
 
 export const CreatorInfo = () => (
