@@ -54,6 +54,8 @@ interface AppState {
     setYoutubeUrl: (url: string | null) => void;
     buddyType: 'robo' | 'ironman';
     setBuddyType: (type: 'robo' | 'ironman') => void;
+    buddyEnabled: boolean;
+    setBuddyEnabled: (enabled: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -80,6 +82,7 @@ export const useAppStore = create<AppState>((set) => ({
     backgroundMediaType: null,
     youtubeUrl: null,
     buddyType: 'robo' as 'robo' | 'ironman',
+    buddyEnabled: true,
 
     setConnected: (isConnected) => set({ isConnected }),
     setConnecting: (isConnecting) => set({ isConnecting }),
@@ -125,4 +128,5 @@ export const useAppStore = create<AppState>((set) => ({
     setBackgroundImage: (backgroundImage, mediaType = null) => set({ backgroundImage, backgroundMediaType: mediaType }),
     setYoutubeUrl: (youtubeUrl) => set({ youtubeUrl }),
     setBuddyType: (buddyType) => set({ buddyType }),
+    setBuddyEnabled: (buddyEnabled) => set({ buddyEnabled }),
 }));

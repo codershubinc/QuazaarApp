@@ -147,6 +147,7 @@ const SpeechBubble = ({ pos, text }: { pos: { x: number; y: number }; text: stri
 export const WanderingCursor = () => {
     const { width, height } = useWindowDimensions();
     const buddyType = useAppStore(s => s.buddyType);
+    const buddyEnabled = useAppStore(s => s.buddyEnabled);
     const activeColors = buddyType === 'ironman' ? IRONMAN_COLORS : COLORS;
     const [, setTick] = useState(0);
     const [visible, setVisible] = useState(false);
@@ -359,6 +360,7 @@ export const WanderingCursor = () => {
         };
     }, [width, height, startLoop, randomWakeup]);
 
+    if (!buddyEnabled) return null;
     if (!visible) return null;
 
     return (

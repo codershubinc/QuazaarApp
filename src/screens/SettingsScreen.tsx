@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, Image, Alert, Switch } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { webSocketService } from '../services/WebSocketService';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -16,7 +16,7 @@ export const SettingsScreen = ({ onBack }: { onBack: () => void }) => {
     const [port, setPort] = useState('');
     const [path, setPath] = useState('');
     const [youtubeInput, setYoutubeInput] = useState('');
-    const { backgroundImage, backgroundMediaType, youtubeUrl, setBackgroundImage, setYoutubeUrl, buddyType, setBuddyType } = useAppStore();
+    const { backgroundImage, backgroundMediaType, youtubeUrl, setBackgroundImage, setYoutubeUrl, buddyType, setBuddyType, buddyEnabled, setBuddyEnabled } = useAppStore();
 
     useEffect(() => {
         const loadSettings = async () => {
@@ -41,6 +41,10 @@ export const SettingsScreen = ({ onBack }: { onBack: () => void }) => {
             // Load buddy type
             const savedBuddy = await AsyncStorage.getItem('buddyType') as 'robo' | 'ironman' | null;
             if (savedBuddy) setBuddyType(savedBuddy);
+
+            // Load buddy enabled
+            const savedBuddyEnabled = await AsyncStorage.getItem('buddyEnabled');
+            if (savedBuddyEnabled !== null) setBuddyEnabled(savedBuddyEnabled === 'true');
         };
         loadSettings();
     }, []);
@@ -230,9 +234,25 @@ export const SettingsScreen = ({ onBack }: { onBack: () => void }) => {
                                 <Text style={styles.cardTitle}>Wandering Buddy</Text>
                             </View>
 
-                            <Text style={styles.label}>Choose your screen companion</Text>
+                            <View style={styles.buddyToggleRow}>
+                                <View>
+                                    <Text style={styles.buddyToggleLabel}>Enable Buddy</Text>
+                                    <Text style={styles.buddyToggleDesc}>Show wandering buddy on screen</Text>
+                                </View>
+                                <Switch
+                                    value={buddyEnabled}
+                                    onValueChange={async (val) => {
+                                        setBuddyEnabled(val);
+                                        await AsyncStorage.setItem('buddyEnabled', val.toString());
+                                    }}
+                                    trackColor={{ false: '#333', true: theme.colors.secondary }}
+                                    thumbColor={buddyEnabled ? theme.colors.primary : '#888'}
+                                />
+                            </View>
 
-                            <View style={styles.buddyGrid}>
+                            <Text style={[styles.label, !buddyEnabled && { opacity: 0.4 }]}>Choose your screen companion</Text>
+
+                            <View style={[styles.buddyGrid, !buddyEnabled && { opacity: 0.4 }]} pointerEvents={buddyEnabled ? 'auto' : 'none'}>
                                 {/* Robo Buddy */}
                                 <TouchableOpacity
                                     style={[styles.buddyCard, buddyType === 'robo' && styles.buddyCardActive]}
@@ -274,7 +294,7 @@ export const SettingsScreen = ({ onBack }: { onBack: () => void }) => {
                                 </TouchableOpacity>
                             </View>
 
-                            <Text style={styles.note}>
+                            <Text style={[styles.note, !buddyEnabled && { opacity: 0.4 }]}>
                                 💡 Your buddy wanders in the background, appears on touch, and occasionally says hello!
                             </Text>
                         </LinearGradient>
@@ -619,6 +639,28 @@ const styles = StyleSheet.create({
         marginTop: theme.spacing.m,
         textAlign: 'center',
         fontStyle: 'italic',
+    },
+    buddyToggleRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingVertical: 12,
+        paddingHorizontal: 4,
+        marginBottom: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: 'rgba(255,255,255,0.08)',
+    },
+    buddyToggleLabel: {
+        color: theme.colors.text,
+        fontSize: 15,
+        fontFamily: 'monospace',
+        fontWeight: '600',
+    },
+    buddyToggleDesc: {
+        color: theme.colors.textDim,
+        fontSize: 12,
+        fontFamily: 'monospace',
+        marginTop: 2,
     },
     buddyGrid: {
         flexDirection: 'row',
