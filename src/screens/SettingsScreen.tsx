@@ -11,12 +11,12 @@ import { Video, ResizeMode } from 'expo-av';
 import * as FileSystem from 'expo-file-system';
 
 export const SettingsScreen = ({ onBack }: { onBack: () => void }) => {
-    const [activeTab, setActiveTab] = useState<'CONNECTION' | 'BACKGROUND' | 'BUDDY'>('CONNECTION');
+    const [activeTab, setActiveTab] = useState<'CONNECTION' | 'BACKGROUND' | 'BUDDY' | 'WIDGETS'>('CONNECTION');
     const [ip, setIp] = useState('');
     const [port, setPort] = useState('');
     const [path, setPath] = useState('');
     const [youtubeInput, setYoutubeInput] = useState('');
-    const { backgroundImage, backgroundMediaType, youtubeUrl, setBackgroundImage, setYoutubeUrl, buddyType, setBuddyType, buddyEnabled, setBuddyEnabled } = useAppStore();
+    const { backgroundImage, backgroundMediaType, youtubeUrl, setBackgroundImage, setYoutubeUrl, buddyType, setBuddyType, buddyEnabled, setBuddyEnabled, nowPlayingEnabled, pomodoroEnabled, activityFeedEnabled, topLangsEnabled, creatorInfoEnabled, systemStatsEnabled, setWidgetEnabled } = useAppStore();
 
     useEffect(() => {
         const loadSettings = async () => {
@@ -45,6 +45,13 @@ export const SettingsScreen = ({ onBack }: { onBack: () => void }) => {
             // Load buddy enabled
             const savedBuddyEnabled = await AsyncStorage.getItem('buddyEnabled');
             if (savedBuddyEnabled !== null) setBuddyEnabled(savedBuddyEnabled === 'true');
+
+            // Load widget visibility
+            const widgetKeys = ['nowPlayingEnabled', 'pomodoroEnabled', 'activityFeedEnabled', 'topLangsEnabled', 'creatorInfoEnabled', 'systemStatsEnabled'];
+            for (const key of widgetKeys) {
+                const val = await AsyncStorage.getItem(key);
+                if (val !== null) setWidgetEnabled(key, val === 'true');
+            }
         };
         loadSettings();
     }, []);
@@ -167,11 +174,61 @@ export const SettingsScreen = ({ onBack }: { onBack: () => void }) => {
                         <Ionicons name="bonfire-outline" size={20} color={activeTab === 'BUDDY' ? theme.colors.secondary : theme.colors.textDim} />
                         <Text style={[styles.tabText, activeTab === 'BUDDY' && styles.activeTabText]}>Buddy</Text>
                     </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={[styles.tabItem, activeTab === 'WIDGETS' && styles.activeTabItem]}
+                        onPress={() => setActiveTab('WIDGETS')}
+                    >
+                        <Ionicons name="grid-outline" size={20} color={activeTab === 'WIDGETS' ? theme.colors.secondary : theme.colors.textDim} />
+                        <Text style={[styles.tabText, activeTab === 'WIDGETS' && styles.activeTabText]}>Widgets</Text>
+                    </TouchableOpacity>
                 </View>
 
                 {/* Main Content */}
                 <ScrollView style={styles.mainContent} contentContainerStyle={styles.mainContentInner}>
-                    {activeTab === 'CONNECTION' ? (
+                    {activeTab === 'WIDGETS' ? (
+                        <LinearGradient
+                            colors={[theme.colors.surface, theme.colors.surfaceHighlight]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.card}
+                        >
+                            <View style={styles.cardHeader}>
+                                <Ionicons name="grid-outline" size={24} color={theme.colors.secondary} />
+                                <Text style={styles.cardTitle}>Visible Widgets</Text>
+                            </View>
+
+                            {([
+                                { key: 'nowPlayingEnabled', label: 'Now Playing', desc: 'Music / media player card', icon: 'musical-notes-outline', value: nowPlayingEnabled },
+                                { key: 'pomodoroEnabled', label: 'Pomodoro Timer', desc: 'Focus & break timer', icon: 'timer-outline', value: pomodoroEnabled },
+                                { key: 'activityFeedEnabled', label: 'Activity Feed', desc: 'Recent developer activity', icon: 'pulse-outline', value: activityFeedEnabled },
+                                { key: 'topLangsEnabled', label: 'Top Languages', desc: 'GitHub language stats', icon: 'code-slash-outline', value: topLangsEnabled },
+                                { key: 'creatorInfoEnabled', label: 'Creator Info', desc: 'Profile & GitHub stats', icon: 'person-outline', value: creatorInfoEnabled },
+                                { key: 'systemStatsEnabled', label: 'System Stats', desc: 'CPU, RAM & system info', icon: 'hardware-chip-outline', value: systemStatsEnabled },
+                            ] as const).map(({ key, label, desc, icon, value }) => (
+                                <View key={key} style={styles.buddyToggleRow}>
+                                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10, flex: 1 }}>
+                                        <Ionicons name={icon as any} size={20} color={value ? theme.colors.secondary : theme.colors.textDim} />
+                                        <View>
+                                            <Text style={styles.buddyToggleLabel}>{label}</Text>
+                                            <Text style={styles.buddyToggleDesc}>{desc}</Text>
+                                        </View>
+                                    </View>
+                                    <Switch
+                                        value={value}
+                                        onValueChange={async (val) => {
+                                            setWidgetEnabled(key, val);
+                                            await AsyncStorage.setItem(key, val.toString());
+                                        }}
+                                        trackColor={{ false: '#333', true: theme.colors.secondary }}
+                                        thumbColor={value ? theme.colors.primary : '#888'}
+                                    />
+                                </View>
+                            ))}
+
+                            <Text style={styles.note}>💡 Toggle widgets on/off to customise your home screen.</Text>
+                        </LinearGradient>
+                    ) : activeTab === 'CONNECTION' ? (
                         <LinearGradient
                             colors={[theme.colors.surface, theme.colors.surfaceHighlight]}
                             start={{ x: 0, y: 0 }}

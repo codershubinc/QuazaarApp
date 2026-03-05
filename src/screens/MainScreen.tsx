@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, useWindowDimensions, ImageBackground } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, useWindowDimensions, ImageBackground, Platform } from 'react-native';
 import * as NavigationBar from 'expo-navigation-bar';
 import { useAppStore } from '../store/useAppStore';
 import { webSocketService } from '../services/WebSocketService';
@@ -9,6 +9,7 @@ import { theme } from '../constants/theme';
 import { Video, ResizeMode } from 'expo-av';
 import { WebView } from 'react-native-webview';
 import { Paths, File } from 'expo-file-system';
+import { requestWidgetUpdate } from 'react-native-android-widget';
 
 import { Header } from '../components/ui/Header';
 import { DateTimeCard } from '../components/time/DateTimeCard';
@@ -54,10 +55,38 @@ const isDirectVideoUrl = (url: string): boolean => {
 export const MainScreen = () => {
     const { width } = useWindowDimensions();
     const isLandscape = width > 600;
-    const { isConnected, isConnecting, error, mediaInfo, bluetoothDevices, authToken, setAuthToken, username, backgroundImage, backgroundMediaType, youtubeUrl, setBackgroundImage, setYoutubeUrl } = useAppStore();
+    const { isConnected, isConnecting, error, mediaInfo, artWork, bluetoothDevices, authToken, setAuthToken, username, backgroundImage, backgroundMediaType, youtubeUrl, setBackgroundImage, setYoutubeUrl, nowPlayingEnabled, pomodoroEnabled, activityFeedEnabled, topLangsEnabled, creatorInfoEnabled, systemStatsEnabled } = useAppStore();
     const [currentScreen, setCurrentScreen] = useState<'MAIN' | 'SETTINGS' | 'LOGIN'>('LOGIN');
     const [isLoading, setIsLoading] = useState(true);
     const [cachedVideoUri, setCachedVideoUri] = useState<string | null>(null);
+
+    // Sync mediaInfo to AsyncStorage and push updates to the home screen widget
+    useEffect(() => {
+        if (Platform.OS !== 'android') return;
+        const sync = async () => {
+            await AsyncStorage.setItem('widget_nowplaying_title', mediaInfo?.Title ?? '');
+            await AsyncStorage.setItem('widget_nowplaying_artist', mediaInfo?.Artist ?? '');
+            await AsyncStorage.setItem('widget_nowplaying_isplaying', (mediaInfo?.Status === 'Playing').toString());
+            await AsyncStorage.setItem('widget_nowplaying_player', mediaInfo?.Player ?? '');
+            // artWork is a separate store value; resolved via useAppStore in a separate effect below
+
+            try {
+                await requestWidgetUpdate({
+                    widgetName: 'NowPlaying',
+                    renderWidget: () => null as any,
+                });
+            } catch (_) {
+                // Widget may not be pinned — silently ignore
+            }
+        };
+        sync();
+    }, [mediaInfo]);
+
+    // Sync artwork URL to AsyncStorage for the widget
+    useEffect(() => {
+        if (Platform.OS !== 'android') return;
+        AsyncStorage.setItem('widget_nowplaying_artwork', artWork?.url ?? '');
+    }, [artWork]);
 
     useEffect(() => {
         NavigationBar.setVisibilityAsync('hidden');
@@ -186,7 +215,7 @@ export const MainScreen = () => {
                 }}>
                     <DateTimeCard />
                     <SystemControlsCard />
-                    <SystemStatsCard />
+                    {systemStatsEnabled && <SystemStatsCard />}
 
                 </View>
 
@@ -204,20 +233,20 @@ export const MainScreen = () => {
 
                 <View style={isLandscape ? styles.row : styles.column}>
                     <View style={isLandscape ? styles.columnHalf : styles.column}>
-                        {mediaInfo && (mediaInfo.Title || mediaInfo.Artist) && <NowPlayingCard />}
-                        <CreatorInfo />
+                        {nowPlayingEnabled && mediaInfo && (mediaInfo.Title || mediaInfo.Artist) && <NowPlayingCard />}
+                        {creatorInfoEnabled && <CreatorInfo />}
                     </View>
                     <View style={isLandscape ? styles.columnHalf : styles.column}>
-                        <TopLangsCard username={username || 'codershubinc'} />
-                        <ActivityFeed />
+                        {topLangsEnabled && <TopLangsCard username={username || 'codershubinc'} />}
+                        {activityFeedEnabled && <ActivityFeed />}
                         <View
                             style={{ flexDirection: isLandscape ? 'row' : 'column', gap: theme.spacing.m, width: 'auto', marginBottom: theme.spacing.m }}
-
                         >
-
-                            <View style={isLandscape ? { flex: 1 } : undefined}>
-                                <PomodoroCard />
-                            </View>
+                            {pomodoroEnabled && (
+                                <View style={isLandscape ? { flex: 1 } : undefined}>
+                                    <PomodoroCard />
+                                </View>
+                            )}
                         </View>
                         {/* <SystemOutputCard /> */}
                     </View>

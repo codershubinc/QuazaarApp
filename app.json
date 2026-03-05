@@ -37,6 +37,23 @@
     },
     "plugins": [
       [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "NowPlaying",
+              "label": "Now Playing",
+              "minWidth": "180dp",
+              "minHeight": "110dp",
+              "description": "Shows the currently playing track",
+              "previewImage": "./assets/icon.png",
+              "updatePeriodMillis": 1800000,
+              "resizeMode": "horizontal|vertical"
+            }
+          ]
+        }
+      ],
+      [
         "expo-build-properties",
         {
           "android": {

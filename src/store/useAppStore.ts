@@ -56,6 +56,15 @@ interface AppState {
     setBuddyType: (type: 'robo' | 'ironman') => void;
     buddyEnabled: boolean;
     setBuddyEnabled: (enabled: boolean) => void;
+
+    // Widget visibility
+    nowPlayingEnabled: boolean;
+    pomodoroEnabled: boolean;
+    activityFeedEnabled: boolean;
+    topLangsEnabled: boolean;
+    creatorInfoEnabled: boolean;
+    systemStatsEnabled: boolean;
+    setWidgetEnabled: (widget: string, enabled: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -83,6 +92,14 @@ export const useAppStore = create<AppState>((set) => ({
     youtubeUrl: null,
     buddyType: 'robo' as 'robo' | 'ironman',
     buddyEnabled: true,
+
+    // Widget visibility defaults
+    nowPlayingEnabled: true,
+    pomodoroEnabled: true,
+    activityFeedEnabled: true,
+    topLangsEnabled: true,
+    creatorInfoEnabled: true,
+    systemStatsEnabled: true,
 
     setConnected: (isConnected) => set({ isConnected }),
     setConnecting: (isConnecting) => set({ isConnecting }),
@@ -129,4 +146,5 @@ export const useAppStore = create<AppState>((set) => ({
     setYoutubeUrl: (youtubeUrl) => set({ youtubeUrl }),
     setBuddyType: (buddyType) => set({ buddyType }),
     setBuddyEnabled: (buddyEnabled) => set({ buddyEnabled }),
+    setWidgetEnabled: (widget, enabled) => set({ [widget]: enabled }),
 }));
