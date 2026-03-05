@@ -10,31 +10,26 @@ const CREATOR = {
     login: 'codershubinc',
     avatar: 'https://github.com/codershubinc.png',
     role: 'Creator & Developer',
+    url: 'https://github.com/codershubinc',
 };
 
 const SOCIALS: { icon: any; color: string; label: string; url: string }[] = [
-    { icon: 'logo-github', color: '#e2e8f0', label: 'GitHub', url: 'https://github.com/codershubinc' },
-    { icon: 'logo-twitter', color: '#1DA1F2', label: 'Twitter', url: 'https://twitter.com/codershubinc' },
-    { icon: 'logo-linkedin', color: '#0A66C2', label: 'LinkedIn', url: 'https://linkedin.com/in/codershubinc' },
-    { icon: 'logo-instagram', color: '#E1306C', label: 'Instagram', url: 'https://instagram.com/codershubinc' },
-    { icon: 'logo-youtube', color: '#FF0000', label: 'YouTube', url: 'https://youtube.com/@codershubinc' },
+    { icon: 'logo-github', color: '#e2e8f0', label: 'github.com/codershubinc', url: 'https://github.com/codershubinc' },
+    { icon: 'logo-twitter', color: '#1DA1F2', label: 'x.com/codershubinc', url: 'https://twitter.com/codershubinc' },
+    { icon: 'logo-linkedin', color: '#0A66C2', label: 'linkedin.com/in/codershubinc', url: 'https://linkedin.com/in/codershubinc' },
+    { icon: 'logo-instagram', color: '#E1306C', label: 'instagram.com/codershubinc', url: 'https://instagram.com/codershubinc' },
+    { icon: 'logo-youtube', color: '#FF0000', label: 'youtube.com/@codershubinc', url: 'https://youtube.com/@codershubinc' },
 ];
 
 export const CreatorInfo = () => (
-    <View style={styles.container}>
-        <LinearGradient
-            colors={['rgba(99,102,241,0.10)', 'rgba(0,0,0,0.0)']}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={StyleSheet.absoluteFill}
-        />
-
-        {/* Profile row */}
-        <TouchableOpacity
-            style={styles.row}
-            activeOpacity={0.75}
-            onPress={() => Linking.openURL(SOCIALS[0].url).catch(() => { })}
-        >
+    <LinearGradient
+        colors={['rgba(99,102,241,0.10)', 'rgba(0,0,0,0.0)']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.container}
+    >
+        {/* Left: Avatar + name */}
+        <TouchableOpacity style={styles.profile} activeOpacity={0.75} onPress={() => Linking.openURL(CREATOR.url).catch(() => { })}>
             <Image source={{ uri: CREATOR.avatar }} style={styles.avatar} contentFit="cover" />
             <View style={styles.info}>
                 <Text style={styles.name}>{CREATOR.name}</Text>
@@ -44,46 +39,46 @@ export const CreatorInfo = () => (
                 </View>
                 <Text style={styles.role}>{CREATOR.role}</Text>
             </View>
-            <View style={styles.badge}>
-                <Ionicons name="code-slash-outline" size={14} color={theme.colors.primary} />
-            </View>
         </TouchableOpacity>
 
         {/* Divider */}
         <View style={styles.divider} />
 
-        {/* Social links */}
-        <View style={styles.socialsRow}>
+        {/* Right: Social links */}
+        <View style={styles.socials}>
             {SOCIALS.map((s) => (
                 <TouchableOpacity
                     key={s.label}
-                    style={styles.socialBtn}
+                    style={styles.socialRow}
                     activeOpacity={0.7}
                     onPress={() => Linking.openURL(s.url).catch(() => { })}
                 >
-                    <Ionicons name={s.icon} size={18} color={s.color} />
-                    <Text style={[styles.socialLabel, { color: s.color }]}>{s.label}</Text>
+                    <Ionicons name={s.icon} size={14} color={s.color} />
+                    <Text style={[styles.socialLink, { color: s.color }]}>{s.label}</Text>
                 </TouchableOpacity>
             ))}
         </View>
-    </View>
+    </LinearGradient>
 );
 
 const styles = StyleSheet.create({
     container: {
+        flexDirection: 'row',
         borderRadius: theme.borderRadius.m,
         overflow: 'hidden',
         borderWidth: 1,
         borderColor: 'rgba(255,255,255,0.08)',
         backgroundColor: theme.colors.surface,
-        marginBottom: theme.spacing.m,
+        padding: theme.spacing.m,
+        gap: theme.spacing.m,
+        alignItems: 'flex-start',
     },
-    row: {
+    profile: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: theme.spacing.m,
-        paddingVertical: theme.spacing.s + 2,
         gap: theme.spacing.s,
+        flex: 0,
+        minWidth: 140,
     },
     avatar: {
         width: 38,
@@ -93,8 +88,7 @@ const styles = StyleSheet.create({
         borderColor: theme.colors.primary,
     },
     info: {
-        flex: 1,
-        gap: 1,
+        gap: 2,
     },
     name: {
         color: theme.colors.text,
@@ -116,43 +110,24 @@ const styles = StyleSheet.create({
         fontSize: 10,
         letterSpacing: 0.5,
         textTransform: 'uppercase',
-        marginTop: 1,
-    },
-    badge: {
-        width: 28,
-        height: 28,
-        borderRadius: 14,
-        backgroundColor: 'rgba(99,102,241,0.15)',
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderWidth: 1,
-        borderColor: 'rgba(99,102,241,0.3)',
     },
     divider: {
-        height: 1,
+        width: 1,
+        alignSelf: 'stretch',
         backgroundColor: 'rgba(255,255,255,0.07)',
-        marginHorizontal: theme.spacing.m,
     },
-    socialsRow: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        paddingHorizontal: theme.spacing.m,
-        paddingVertical: theme.spacing.s,
+    socials: {
+        flex: 1,
         gap: 6,
     },
-    socialBtn: {
+    socialRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 5,
-        paddingHorizontal: 10,
-        paddingVertical: 5,
-        borderRadius: 20,
-        backgroundColor: 'rgba(255,255,255,0.05)',
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.08)',
+        gap: 7,
     },
-    socialLabel: {
+    socialLink: {
         fontSize: 11,
-        fontWeight: '600',
+        fontFamily: 'monospace',
     },
 });
+

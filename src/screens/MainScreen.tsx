@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, useWindowDimensions, ImageBackground } from 'react-native';
+import * as NavigationBar from 'expo-navigation-bar';
 import { useAppStore } from '../store/useAppStore';
 import { webSocketService } from '../services/WebSocketService';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -57,6 +58,12 @@ export const MainScreen = () => {
     const [currentScreen, setCurrentScreen] = useState<'MAIN' | 'SETTINGS' | 'LOGIN'>('LOGIN');
     const [isLoading, setIsLoading] = useState(true);
     const [cachedVideoUri, setCachedVideoUri] = useState<string | null>(null);
+
+    useEffect(() => {
+        NavigationBar.setVisibilityAsync('hidden');
+        NavigationBar.setBehaviorAsync('overlay-swipe');
+        return () => { NavigationBar.setVisibilityAsync('visible'); };
+    }, []);
 
     useEffect(() => {
         // Check for existing token and background image
@@ -166,7 +173,7 @@ export const MainScreen = () => {
     }
 
     const mainContent = (
-        <>
+        <View style={{ flex: 1 }}>
             <Toast />
             <ScrollView
                 style={styles.scrollView}
@@ -216,7 +223,7 @@ export const MainScreen = () => {
                     </View>
                 </View>
             </ScrollView>
-        </>
+        </View>
     );
 
     // Video URL background takes priority (YouTube or Direct Video)
