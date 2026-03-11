@@ -149,13 +149,15 @@ export const WanderingCursor = () => {
     const buddyType = useAppStore(s => s.buddyType);
     const buddyEnabled = useAppStore(s => s.buddyEnabled);
     const activeColors = buddyType === 'ironman' ? IRONMAN_COLORS : COLORS;
-    const [, setTick] = useState(0);
+    const [_, setTick] = useState(0);
     const [visible, setVisible] = useState(false);
     const [showBubble, setShowBubble] = useState(false);
 
     const visibleRef = useRef(false);
     const rafRef = useRef<number>(0);
     const sleepTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+
 
     const inst = useRef({
         skeleton: new RoboSkeleton(),
