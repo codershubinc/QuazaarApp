@@ -35,7 +35,8 @@ export default function App() {
         DeviceEventEmitter.emit('WANDERING_CURSOR_TOUCH', { x: e.nativeEvent.pageX, y: e.nativeEvent.pageY });
         return false;
       }}>
-        <StatusBar hidden={true} />
+        <StatusBar hidden={true} hideTransitionAnimation='slide' />
+
         <MainScreen />
         <FactPopup />
       </View>

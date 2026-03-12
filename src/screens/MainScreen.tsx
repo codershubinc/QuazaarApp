@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, useWindowDimensions, ImageBackground, Platform } from 'react-native';
+import { View, Text, ScrollView, StyleSheet, useWindowDimensions, ImageBackground, Platform, StatusBar } from 'react-native';
 import * as NavigationBar from 'expo-navigation-bar';
 import { useAppStore } from '../store/useAppStore';
 import { webSocketService } from '../services/WebSocketService';
@@ -90,6 +90,9 @@ export const MainScreen = () => {
     useEffect(() => {
         NavigationBar.setVisibilityAsync('hidden');
         NavigationBar.setBehaviorAsync('overlay-swipe');
+        StatusBar.setHidden(true, 'slide');
+        StatusBar.setBarStyle('light-content', true);
+
         return () => { NavigationBar.setVisibilityAsync('visible'); };
     }, []);
 
@@ -284,7 +287,6 @@ export const MainScreen = () => {
                     <View style={styles.contentContainer}>
                         {mainContent}
                     </View>
-                    <WanderingCursor />
                 </View>
             );
         }
