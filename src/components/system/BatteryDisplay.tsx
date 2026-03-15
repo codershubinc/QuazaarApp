@@ -33,8 +33,8 @@ export const BatteryDisplay = ({ type, iconName }: BatteryDisplayProps) => {
                         Battery.getBatteryLevelAsync(),
                         Battery.getBatteryStateAsync(),
                     ]);
-                    // Ensure we capture charging state correctly, including FULL
-                    let isCharging = state === Battery.BatteryState.CHARGING || state === Battery.BatteryState.FULL;
+
+                    let isCharging = state === Battery.BatteryState.CHARGING || !(state === Battery.BatteryState.FULL);
 
                     setBatteryInfo({
                         level: Math.round(level * 100),
@@ -45,7 +45,7 @@ export const BatteryDisplay = ({ type, iconName }: BatteryDisplayProps) => {
                 }
             };
 
-            fetchBattery(); // Initial fetch
+            fetchBattery();
 
             const levelSub = Battery.addBatteryLevelListener(({ batteryLevel }) => {
                 setBatteryInfo(prev => ({ ...prev, level: Math.round(batteryLevel * 100) }));
@@ -55,10 +55,12 @@ export const BatteryDisplay = ({ type, iconName }: BatteryDisplayProps) => {
                 setBatteryInfo(prev => ({ ...prev, charging: batteryState === Battery.BatteryState.CHARGING }));
             });
 
+            const interval = setInterval(fetchBattery, 5000);
 
             cleanup = () => {
                 levelSub.remove();
                 stateSub.remove();
+                clearInterval(interval);
             };
         };
 
