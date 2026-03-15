@@ -19,7 +19,6 @@ export const QuickActionsCard = () => {
 
             if (result.canceled) return;
             console.log('File picked:', result.assets[0].uri);
-            // TODO: Implement file upload logic in WebSocketService
         } catch (err) {
             console.error('Error picking file:', err);
         }

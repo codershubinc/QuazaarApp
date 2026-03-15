@@ -148,7 +148,7 @@ export const NowPlayingCard = () => {
                   style={styles.controlButton}
                   onPress={() => webSocketService.sendCommand("prev")}
                 >
-                  <Ionicons name="play-skip-back" size={20} color="#746e65" />
+                  <Ionicons name="play-skip-back" size={20} color="#000000" />
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -170,7 +170,7 @@ export const NowPlayingCard = () => {
                   <Ionicons
                     name="play-skip-forward"
                     size={20}
-                    color="#77726b"
+                    color="#000000"
                   />
                 </TouchableOpacity>
               </View>

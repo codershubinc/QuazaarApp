@@ -69,8 +69,6 @@ const VerticalSlider: React.FC<VerticalSliderProps> = ({
                 startValueRef.current = localValueRef.current;
             },
             onPanResponderMove: (_: GestureResponderEvent, gestureState: PanResponderGestureState) => {
-                // Dragging UP is negative dy. We invert it.
-                // Divide by 2.5 to control sensitivity (pixels to percentage).
                 const sensitivity = 2.5;
                 const change = -gestureState.dy / sensitivity;
 
@@ -86,12 +84,8 @@ const VerticalSlider: React.FC<VerticalSliderProps> = ({
         })
     ).current;
 
-    // Calculate height percentage
-    const fillHeight = (localValue / 100) * CONTAINER_HEIGHT;
 
-    // Determine icon color based on fill level. 
-    // If fill is very low (< 15%), the icon sits on the dark background -> use light gray.
-    // If fill is high, the icon sits on the white background -> use the active color.
+    const fillHeight = (localValue / 100) * CONTAINER_HEIGHT;
     const currentIconColor = localValue > 18 ? activeIconColor : inactiveIconColor;
 
     return (
@@ -109,7 +103,7 @@ const VerticalSlider: React.FC<VerticalSliderProps> = ({
             <View style={styles.textWrapper}>
                 <Text style={[
                     styles.percentageText,
-                    { color: "white", fontFamily: 'safe', fontWeight: '600' }
+                    { color: localValue > 100 ? 'red' : 'white', fontFamily: 'safe', fontWeight: '600' }
                 ]}>
                     {Math.round(localValue)}%
                 </Text>
