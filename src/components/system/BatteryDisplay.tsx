@@ -55,13 +55,10 @@ export const BatteryDisplay = ({ type, iconName }: BatteryDisplayProps) => {
                 setBatteryInfo(prev => ({ ...prev, charging: batteryState === Battery.BatteryState.CHARGING }));
             });
 
-            // Poll every 1 second to ensure live updates on Android where listeners might be lazy
-            const interval = setInterval(fetchBattery, 5000);
 
             cleanup = () => {
                 levelSub.remove();
                 stateSub.remove();
-                clearInterval(interval);
             };
         };
 
@@ -83,7 +80,7 @@ export const BatteryDisplay = ({ type, iconName }: BatteryDisplayProps) => {
             };
 
             fetchBattery(); // Initial fetch
-            const interval = setInterval(fetchBattery, 1000);
+            const interval = setInterval(fetchBattery, 5000);
             cleanup = () => clearInterval(interval);
         };
 
